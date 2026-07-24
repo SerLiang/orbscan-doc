@@ -1,0 +1,57 @@
+---
+title: "Trader Profiles and Wallet Analytics in Orbscan"
+sidebarTitle: "Traders"
+description: "Learn how Orbscan represents traders — wallet addresses, usernames, PnL, win rate, active positions, and copy trading metrics."
+---
+
+Orbscan identifies every participant on Polymarket by their Polygon wallet address. Each wallet becomes a trader profile that aggregates on-chain activity — open positions, resolved market history, and performance metrics — into a single, browsable view. Whether a trader uses a custom display name or remains anonymous, their on-chain record is always the source of truth.
+
+## Trader Identity
+
+Every trader profile in Orbscan is anchored to a **Polygon wallet address** — the `0x`-prefixed hexadecimal string that uniquely identifies an account on the blockchain. Because Polymarket is a decentralized protocol, there is no sign-up or account creation; your wallet _is_ your identity.
+
+Traders may optionally set a **display name or username** through Polymarket's profile system. When a username is available, Orbscan surfaces it alongside the wallet address for readability. When no username exists, the wallet address is shown in full. Either way, all lookups and API calls use the wallet address as the canonical identifier — usernames are cosmetic only.
+
+Profiles are **pseudonymous by default**. Anyone can view a trader's on-chain activity, but no personally identifiable information is linked to a wallet address unless the trader voluntarily associates it.
+
+<Note>
+  Wallet addresses are case-insensitive in the Orbscan API. You can pass an address in any casing (all lowercase, all uppercase, or mixed) and Orbscan will normalize it to EIP-55 checksummed format before processing.
+</Note>
+
+## Trader Data Fields
+
+The following fields are available on every trader profile returned by Orbscan:
+
+| Field | Type | Description |
+|---|---|---|
+| `address` | `string` | The trader's `0x`-prefixed Polygon wallet address — the primary identifier for all API calls. |
+| `username` | `string \| null` | Optional display name set through Polymarket. `null` when no username has been configured. |
+| `pnl_30d` | `number` | Rolling 30-day profit and loss, denominated in USD (USDC). Positive values indicate profit; negative values indicate loss. |
+| `pnl_total` | `number` | Lifetime cumulative PnL across all resolved and open positions, in USD. |
+| `win_rate` | `number` | Percentage of resolved markets in which the trader held the winning outcome at resolution (0–100). |
+| `sharpe_ratio` | `number` | Risk-adjusted return metric. Higher values indicate better returns relative to volatility. |
+| `position_value` | `number` | Total current market value of all open positions, in USD. |
+| `active_markets` | `integer` | Count of prediction markets in which the trader currently holds an open position. |
+| `resolved_count` | `integer` | Total number of prediction markets the trader has participated in that have since resolved. |
+
+## Copy Trading
+
+Copy trading lets you track an experienced trader's positions and simulate — or replicate — their strategy with your own capital. Instead of researching every market yourself, you identify a trader whose judgment you trust and mirror the markets and sides they bet on.
+
+Orbscan exposes a **7-day copy PnL** metric for each trader. This figure represents the hypothetical profit or loss you _would have_ earned over the past seven days if you had entered the exact same positions as that trader, at the same prices, at the same time. It gives you a concrete, recent signal of how valuable copying a given trader would have been — without requiring you to commit any capital to find out.
+
+<Tip>
+  Use copy PnL alongside win rate and Sharpe ratio when evaluating traders to copy. A high win rate with a low copy PnL may indicate that a trader wins often but stakes very little, while a high copy PnL reflects actual dollar-value performance you could have captured.
+</Tip>
+
+## How Win Rate Is Calculated
+
+Win rate measures consistency across resolved markets, not raw profit. Orbscan calculates it as:
+
+```
+win_rate = (resolved_wins / resolved_count) * 100
+```
+
+A **win** is counted when a trader held shares of the outcome that was ultimately selected as correct at the time a market resolves. For example, if a market asks "Will X happen?" and resolves Yes, any trader who held Yes shares at resolution is credited with a win.
+
+Win rate does not account for position size or entry price — a trader who barely bought into a winning market counts the same as one who went all-in. For a size-adjusted view of performance, combine win rate with `pnl_total` and `sharpe_ratio`.

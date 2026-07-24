@@ -1,0 +1,57 @@
+---
+title: "Orbscan: Real-Time Polymarket Explorer & Analytics API"
+sidebarTitle: "Introduction"
+description: "Orbscan provides a REST API for Polymarket data — trader PnL, positions, leaderboards, copy trading, market activity, and deposits."
+---
+
+Orbscan is a REST API and explorer platform built on top of Polymarket, the world's largest prediction market. It indexes every wallet, trade, market, and position on Polymarket and exposes that data through a clean, queryable API — so you can answer questions like "Who are the top performers this month?", "What positions does this wallet hold right now?", and "Which markets are seeing the most activity?" without manually scraping the blockchain.
+
+## Why Orbscan exists
+
+Polymarket generates a continuous stream of on-chain trading data, but that raw data is difficult to work with directly. Orbscan solves three core problems:
+
+- **Aggregation** — raw contract events are normalized into structured records for wallets, trades, positions, and markets.
+- **Analytics** — metrics like PnL, win rate, Sharpe ratio, and drawdown are computed and kept current in real time.
+- **Accessibility** — everything is available over standard REST endpoints that any HTTP client can query.
+
+Whether you're a trader who wants to benchmark your own performance, a developer building a portfolio tracker, or a researcher studying prediction market dynamics, Orbscan gives you the data layer you need.
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Trader Analytics" icon="chart-line">
+    Query any Polymarket wallet for full performance metrics — PnL (daily, 30-day, all-time), win rate, Sharpe ratio, max drawdown, and open position count.
+  </Card>
+  <Card title="Leaderboards" icon="trophy">
+    Fetch ranked lists of top traders filtered by time window, PnL, volume, or win rate. Ideal for surfacing the best performers at any given moment.
+  </Card>
+  <Card title="Market Explorer" icon="magnifying-glass">
+    Search and filter Polymarket markets by keyword, category, status, and liquidity. Retrieve full market details including current odds, volume, and closing date.
+  </Card>
+  <Card title="Copy Trading Simulations" icon="copy">
+    Simulate what your returns would have been if you had mirrored a given wallet's trades over any historical time range — without risking real capital.
+  </Card>
+  <Card title="Live Activity Feed" icon="bolt">
+    Stream or poll real-time trade events across all Polymarket markets, filtered by wallet, market, or category. Stay on top of large orders and market movements as they happen.
+  </Card>
+  <Card title="Deposits & Withdrawals" icon="money-bill-transfer">
+    Inspect the full deposit and withdrawal history for any wallet, including timestamps, amounts, and cumulative capital deployed on the platform.
+  </Card>
+</CardGroup>
+
+## What data Orbscan surfaces
+
+Orbscan organizes Polymarket data into six primary data domains. Each domain is queryable through its own set of API endpoints.
+
+| Domain | Description |
+|---|---|
+| **Wallets** | On-chain addresses linked to Polymarket accounts, including optional usernames and profile metadata. |
+| **PnL** | Realized and unrealized profit and loss, computed per trade and aggregated over configurable time windows. |
+| **Positions** | Current and historical holdings — which outcome tokens a wallet holds, at what average cost, and at what current mark-to-market value. |
+| **Trades** | Every buy and sell event tied to a wallet or market, with full price, size, and timestamp detail. |
+| **Markets** | All active and resolved Polymarket markets, including title, category, closing date, current probabilities, and total volume. |
+| **Categories** | Thematic groupings of markets (e.g. Politics, Sports, Crypto) that let you filter and explore by topic. |
+
+<Note>
+  Orbscan data is updated in near real time, with most endpoints reflecting on-chain state within seconds of a new trade settling.
+</Note>

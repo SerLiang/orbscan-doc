@@ -1,0 +1,102 @@
+---
+title: "Authenticate Requests to the Orbscan API"
+sidebarTitle: "Authentication"
+description: "Learn how to obtain an Orbscan API key, pass it in request headers, and handle authentication errors like 401 Unauthorized."
+---
+
+Orbscan uses API key authentication to secure every request. All calls to the Orbscan API must include your personal API key in the `Authorization` header using the Bearer scheme. There are no cookies, OAuth flows, or session tokens — just a single header that identifies your account and enforces your plan's rate limits.
+
+## Get your API key
+
+<Steps>
+  <Step title="Create an Orbscan account">
+    Visit [orbscan.com](https://orbscan.com) and sign up for a free account using your email address. Verify your email to activate the account.
+  </Step>
+  <Step title="Open API Keys settings">
+    After logging in, click your avatar in the top-right corner and select **Settings**. From the left-hand menu, choose **API Keys**.
+  </Step>
+  <Step title="Generate and copy your key">
+    Click **Generate New Key**, give it a descriptive label (e.g. `dev-local` or `production-app`), and confirm. Your key appears once — copy it immediately and store it somewhere safe. If you lose it, you'll need to revoke the old key and generate a new one.
+  </Step>
+</Steps>
+
+<Warning>
+  Your API key grants full access to your Orbscan account and counts against your plan's rate limits. Never commit it to source control, paste it into public forums, or include it in client-side code that ships to end users.
+</Warning>
+
+## Pass your key in requests
+
+Include your API key as a Bearer token in the `Authorization` header of every request:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+The following examples show how to add this header in common HTTP clients:
+
+<CodeGroup>
+  ```bash curl
+  curl -X GET "https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
+    -H "Accept: application/json"
+  ```
+
+  ```python Python
+  import os
+  import requests
+
+  response = requests.get(
+      "https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile",
+      headers={
+          "Authorization": f"Bearer {os.environ['ORBSCAN_API_KEY']}",
+          "Accept": "application/json",
+      },
+  )
+
+  data = response.json()
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch(
+    "https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile",
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.ORBSCAN_API_KEY}`,
+        Accept: "application/json",
+      },
+    }
+  );
+
+  const data = await response.json();
+  ```
+</CodeGroup>
+
+<Tip>
+  Store your API key in an environment variable (e.g. `ORBSCAN_API_KEY`) rather than hard-coding it in your source files. This keeps the key out of version control and makes it easy to rotate without touching your code.
+</Tip>
+
+## Authentication error codes
+
+When something goes wrong with authentication, the API returns a standard HTTP error status alongside a JSON body that describes the problem.
+
+| Status code | Meaning | How to resolve |
+|---|---|---|
+| `401 Unauthorized` | Your API key is missing, malformed, or has been revoked. | Check that the `Authorization` header is present and that the key value is correct. Regenerate the key in Settings if needed. |
+| `403 Forbidden` | Your key is valid but does not have permission to access this endpoint. | Verify that your current plan includes access to the endpoint you're calling. Upgrade your plan if necessary. |
+| `429 Too Many Requests` | Your key has exceeded its rate limit for the current window. | Wait for the window to reset (check the `Retry-After` response header) or reduce your request frequency. |
+
+### Example error response
+
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "API key is missing or invalid. Provide a valid key in the Authorization header.",
+    "status": 401
+  }
+}
+```
+
+<Note>
+  Rate limits vary by plan. The response headers `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` are included on every response so you can monitor your usage programmatically.
+</Note>

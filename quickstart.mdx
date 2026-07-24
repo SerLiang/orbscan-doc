@@ -1,47 +1,110 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Get Started with the Orbscan API in Minutes"
+sidebarTitle: "Quickstart"
+description: "Make your first Orbscan API call in under 5 minutes. Fetch a trader profile and leaderboard data with a single HTTP request."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
-
-## Prerequisites
-
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+This guide gets you from zero to a live API response in under five minutes. You'll obtain an API key, call the trader profile endpoint with a real wallet address, and inspect the JSON response — giving you a working template you can adapt for any other Orbscan endpoint.
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Get your API key">
+    Every request to the Orbscan API requires a valid API key in the `Authorization` header. If you don't have one yet, follow the steps in the [Authentication](/authentication) guide to create an account and generate a key.
+
+    Once you have your key, store it in an environment variable so you can reference it easily:
 
     ```bash
-    npm install your-package
+    export ORBSCAN_API_KEY="your_api_key_here"
     ```
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
 
-    ```bash
-    your-cli init
-    ```
+  <Step title="Fetch a trader profile">
+    The trader profile endpoint returns performance metrics and account details for any Polymarket wallet address. Make the following request, replacing the example address with any wallet you want to inspect.
+
+    <CodeGroup>
+      ```bash curl
+      curl -X GET "https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile" \
+        -H "Authorization: Bearer $ORBSCAN_API_KEY" \
+        -H "Accept: application/json"
+      ```
+
+      ```python Python
+      import os
+      import requests
+
+      api_key = os.environ["ORBSCAN_API_KEY"]
+      address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+
+      response = requests.get(
+          f"https://api.orbscan.com/v1/traders/{address}/profile",
+          headers={
+              "Authorization": f"Bearer {api_key}",
+              "Accept": "application/json",
+          },
+      )
+
+      profile = response.json()
+      print(profile)
+      ```
+    </CodeGroup>
+
+    <Tip>
+      You can use any valid Polymarket wallet address. To find interesting wallets to explore, check the [leaderboard endpoint](/api-reference/leaderboard/get-leaderboard) or browse the top traders on [orbscan.com](https://orbscan.com).
+    </Tip>
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
 
-    ```bash
-    your-cli start
+  <Step title="Inspect the response">
+    A successful request returns a JSON object with the trader's account details and computed performance metrics. Here's an example response for the wallet used above:
+
+    ```json
+    {
+      "address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+      "username": "sharpbetter",
+      "pnl_30d": 18420.55,
+      "positions_count": 12,
+      "win_rate": 0.67,
+      "sharpe_ratio": 2.14,
+      "active_markets": [
+        {
+          "market_id": "0xabc123",
+          "title": "Will the Fed cut rates in September 2025?",
+          "side": "YES",
+          "current_value_usd": 3200.00,
+          "unrealized_pnl": 540.00
+        },
+        {
+          "market_id": "0xdef456",
+          "title": "Will Bitcoin exceed $120k before July 2025?",
+          "side": "NO",
+          "current_value_usd": 1750.00,
+          "unrealized_pnl": -210.00
+        }
+      ]
+    }
     ```
+
+    Key fields to note:
+
+    | Field | Description |
+    |---|---|
+    | `address` | The on-chain wallet address queried. |
+    | `username` | Display name associated with the wallet, if set. |
+    | `pnl_30d` | Realized + unrealized profit and loss over the last 30 days, in USD. |
+    | `positions_count` | Number of open positions currently held by this wallet. |
+    | `win_rate` | Fraction of resolved trades where the trader selected the correct outcome. |
+    | `sharpe_ratio` | Risk-adjusted return metric computed over the trailing 30 days. |
+    | `active_markets` | List of markets the wallet currently holds positions in, with mark-to-market values. |
+  </Step>
+
+  <Step title="Next steps">
+    You've made your first successful Orbscan API call. Here's where to go next:
+
+    <CardGroup cols={2}>
+      <Card title="API Reference" icon="code" href="/api-reference/overview">
+        Browse every available endpoint — leaderboards, market search, trade history, copy-trading simulations, and live activity feeds.
+      </Card>
+      <Card title="Guides" icon="map" href="/guides/fetch-trader-profile">
+        Follow step-by-step recipes for common tasks like building a leaderboard widget or simulating copy-trading returns.
+      </Card>
+    </CardGroup>
   </Step>
 </Steps>
-
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
-
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>

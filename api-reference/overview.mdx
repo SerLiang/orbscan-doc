@@ -1,0 +1,77 @@
+---
+title: "Orbscan REST API Overview and Base URL Reference"
+sidebarTitle: "Overview"
+description: "The Orbscan API provides REST endpoints for Polymarket trader analytics, market data, leaderboards, and live activity. Base URL and format details."
+---
+
+The Orbscan API is a REST API that returns JSON responses, giving you programmatic access to Polymarket data across trader analytics, market information, leaderboards, and live trade activity. Whether you're building a trading dashboard, running analytics, or tracking on-chain activity, the API provides the data you need in a consistent, predictable format.
+
+## Base URL
+
+All API requests are made to the following base URL:
+
+```
+https://api.orbscan.com/v1
+```
+
+## Request Format
+
+Every request to the Orbscan API must meet the following requirements:
+
+- **HTTPS only.** Plain HTTP requests are not accepted.
+- **Authentication header.** Pass your API key using the `Authorization` header on every request:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+- **Query parameters.** Use query parameters to filter results, paginate through large datasets, and sort responses. Each endpoint documents its own supported parameters.
+
+## Response Format
+
+All responses return JSON. A successful response always contains a top-level `data` field wrapping the requested resource or collection.
+
+**Success envelope:**
+
+```json
+{
+  "data": {
+    "address": "0xabc123...",
+    "volume": 142500.00,
+    "pnl": 8320.50
+  }
+}
+```
+
+**Error envelope:**
+
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "No trader found for the given address.",
+    "status": 404
+  }
+}
+```
+
+See the [Errors](/api-reference/errors) page for the full list of error codes and how to handle them.
+
+## Versioning
+
+The current API version is **v1**, reflected in the base URL path (`/v1/`). Orbscan will not introduce breaking changes within a version. When breaking changes are necessary, they will be released under a new version path (for example, `/v2/`), and the previous version will continue to work during a documented deprecation window.
+
+## Available Resources
+
+The following resource groups are available under the v1 API:
+
+| Resource | Base Path | Description |
+|---|---|---|
+| Traders | `/v1/traders/{address}/...` | Per-address analytics, positions, P&L, and trade history |
+| Markets | `/v1/markets/...` | Market metadata, pricing, volume, and outcome data |
+| Leaderboard | `/v1/leaderboard` | Ranked list of top traders by volume or profit |
+| Activities | `/v1/activities` | Live and historical trade activity feed |
+
+<Tip>
+  You'll need an API key to authenticate your requests. See the [Authentication](/authentication) page for instructions on generating and using your key.
+</Tip>

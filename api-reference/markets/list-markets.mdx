@@ -1,0 +1,154 @@
+---
+title: "GET /v1/markets — List Polymarket Prediction Markets"
+sidebarTitle: "List Markets"
+description: "List active and resolved Polymarket prediction markets. Filter by category, status, and sort by 24h volume or liquidity using query parameters."
+---
+
+The `/v1/markets` endpoint returns a paginated list of Polymarket prediction markets available on Orbscan. You can narrow results by category or status, control the sort order, and page through large result sets using `limit` and `offset`. Each market object includes pricing, volume, and metadata sufficient for display and analysis.
+
+## Endpoint
+
+```
+GET https://api.orbscan.com/v1/markets
+```
+
+## Query Parameters
+
+<ParamField query="category" type="string">
+  Filter markets by category. Accepted values: `politics`, `sports`, `crypto`, `culture`, `mentions`, `weather`, `economics`, `tech`, `finance`.
+</ParamField>
+
+<ParamField query="status" type="string" default="active">
+  Filter by market status. Accepted values: `active`, `resolved`, `all`.
+</ParamField>
+
+<ParamField query="sort" type="string" default="volume_24h">
+  Sort order for results. Accepted values: `volume_24h`, `liquidity`, `end_date`.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  Number of results to return per page. Maximum value is `100`.
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Number of results to skip before returning the page. Use with `limit` to paginate through results.
+</ParamField>
+
+## Request Example
+
+<CodeGroup>
+
+```bash curl
+curl --request GET \
+  --url "https://api.orbscan.com/v1/markets?category=crypto&status=active&sort=volume_24h&limit=20&offset=0" \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+url = "https://api.orbscan.com/v1/markets"
+headers = {"Authorization": "Bearer YOUR_API_KEY"}
+params = {
+    "category": "crypto",
+    "status": "active",
+    "sort": "volume_24h",
+    "limit": 20,
+    "offset": 0,
+}
+
+response = requests.get(url, headers=headers, params=params)
+print(response.json())
+```
+
+</CodeGroup>
+
+## Response Fields
+
+<ResponseField name="total" type="integer">
+  Total number of markets matching your query filters.
+</ResponseField>
+
+<ResponseField name="page" type="integer">
+  Current page number, derived from the `offset` and `limit` values.
+</ResponseField>
+
+<ResponseField name="limit" type="integer">
+  Number of results returned in this response.
+</ResponseField>
+
+<ResponseField name="markets" type="array">
+  Array of market objects matching the query.
+
+  <Expandable title="Market object fields">
+    <ResponseField name="slug" type="string">
+      URL-safe unique identifier for the market. Use this value to fetch individual market details.
+    </ResponseField>
+
+    <ResponseField name="question" type="string">
+      The full question text of the prediction market.
+    </ResponseField>
+
+    <ResponseField name="category" type="string">
+      The category this market belongs to (e.g. `crypto`, `politics`).
+    </ResponseField>
+
+    <ResponseField name="status" type="string">
+      Current market status. One of `active`, `resolved`, or `closed`.
+    </ResponseField>
+
+    <ResponseField name="outcomes" type="array of strings">
+      List of available outcomes traders can bet on (e.g. `["Yes", "No"]` or team names).
+    </ResponseField>
+
+    <ResponseField name="end_date" type="string">
+      ISO 8601 date on which the market is scheduled to resolve.
+    </ResponseField>
+
+    <ResponseField name="volume_24h" type="number">
+      Total trading volume over the last 24 hours, denominated in USD.
+    </ResponseField>
+
+    <ResponseField name="liquidity" type="number">
+      Current liquidity available in the market, denominated in USD.
+    </ResponseField>
+
+    <ResponseField name="image_url" type="string">
+      URL of the market's thumbnail image.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Response
+
+```json
+{
+  "total": 842,
+  "page": 1,
+  "limit": 20,
+  "markets": [
+    {
+      "slug": "will-bitcoin-hit-100k",
+      "question": "Will Bitcoin reach $100,000 before the end of 2025?",
+      "category": "crypto",
+      "status": "active",
+      "outcomes": ["Yes", "No"],
+      "end_date": "2025-12-31",
+      "volume_24h": 1284900.50,
+      "liquidity": 430200.00,
+      "image_url": "https://assets.orbscan.com/markets/will-bitcoin-hit-100k.png"
+    },
+    {
+      "slug": "eth-etf-approved-q3-2025",
+      "question": "Will a spot Ethereum ETF be approved in Q3 2025?",
+      "category": "crypto",
+      "status": "active",
+      "outcomes": ["Yes", "No"],
+      "end_date": "2025-09-30",
+      "volume_24h": 875340.00,
+      "liquidity": 210800.75,
+      "image_url": "https://assets.orbscan.com/markets/eth-etf-approved-q3-2025.png"
+    }
+  ]
+}
+```

@@ -1,25 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "name": "Orbscan",
+  "projectType": "api-service",
+  "projectName": "Orbscan",
+  "projectDescription": "Orbscan is a Polymarket prediction market explorer and analytics API that provides real-time trader PnL, positions, leaderboards, trade history, market activity, and copy-trading data.",
   "theme": "luma",
-  "colors": {
-    "primary": "#ef7025",
-    "light": "#eec9bc",
-    "dark": "#4fa1ab"
-  },
-  "favicon": "/favicon.svg",
-  "navbar": {
-    "primary": {
-      "type": "button",
-      "label": "Visit Orbscan",
-      "href": "https://orbscan.com"
-    }
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/OrbscanHQ"
-    }
-  },
+  "primaryColor": "#ef7025",
+  "lightColor": "#eec9bc",
+  "darkColor": "#4fa1ab",
   "navigation": {
     "tabs": [
       {
@@ -96,5 +82,28 @@
         ]
       }
     ]
-  }
+  },
+  "keyFeatures": [
+    "Real-time trader PnL and performance analytics",
+    "Polymarket prediction market explorer",
+    "Global and category leaderboards",
+    "Copy trading — simulate and track top trader strategies",
+    "Live market activity feed (trades, combo legs)",
+    "USDC deposit and withdrawal history",
+    "Sharpe ratio and win rate calculations",
+    "Multi-category market filtering (Politics, Sports, Crypto, Finance, etc.)"
+  ],
+  "publicApiSurface": [
+    "GET /api/v1/traders/{address}/profile",
+    "GET /api/v1/traders/{address}/positions",
+    "GET /api/v1/traders/{address}/trades",
+    "GET /api/v1/traders/{address}/pnl",
+    "GET /api/v1/traders/{address}/deposits",
+    "GET /api/v1/traders/{address}/withdrawals",
+    "GET /api/v1/markets",
+    "GET /api/v1/markets/{slug}",
+    "GET /api/v1/markets/{slug}/activity",
+    "GET /api/v1/leaderboard",
+    "GET /api/v1/activities"
+  ]
 }

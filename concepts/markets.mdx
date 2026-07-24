@@ -1,0 +1,85 @@
+---
+title: "Prediction Markets and Categories in Orbscan"
+sidebarTitle: "Markets"
+description: "Understand how Orbscan organizes Polymarket prediction markets by category, slug, and outcome — and how to filter and search them."
+---
+
+A prediction market on Polymarket is a question about a future event with a finite set of possible outcomes. Most markets are **binary** — they resolve to either Yes or No — though multi-outcome markets exist for events with several possible results (for example, "Who will win the election?" with one share per candidate). Traders buy shares in the outcome they believe will occur; if they're right, each share pays out $1 at resolution. Orbscan lets you browse, filter, and analyze every market on Polymarket in one place.
+
+## Market Fields
+
+Each market in Orbscan carries the following fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `slug` | `string` | A URL-safe, human-readable identifier for the market (e.g., `will-btc-hit-100k`). Use this as a stable reference in API requests. |
+| `question` | `string` | The full market title as it appears on Polymarket (e.g., "Will Bitcoin reach $100,000 before 2026?"). |
+| `category` | `string` | The topic category the market belongs to. See [Categories](#categories) below. |
+| `outcomes` | `string[]` | An array of possible outcome labels. Binary markets have `["Yes", "No"]`; multi-outcome markets list each candidate or option. |
+| `end_date` | `string` | ISO 8601 datetime at which the market closes for new trading. |
+| `status` | `string` | Current lifecycle state of the market: `active`, `resolved`, or `closed`. |
+| `volume_24h` | `number` | Total USDC trading volume across all outcomes in the past 24 hours. |
+| `liquidity` | `number` | Current depth of liquidity available in the market's order book, in USDC. |
+
+## Categories
+
+Orbscan organizes markets into the following topic categories to help you find relevant questions quickly:
+
+<CardGroup cols={3}>
+  <Card title="Politics" icon="landmark">
+    Elections, legislation, geopolitics, and government policy.
+  </Card>
+  <Card title="Sports" icon="trophy">
+    Match outcomes, championships, player awards, and tournament brackets.
+  </Card>
+  <Card title="Crypto" icon="bitcoin">
+    Prices, protocol upgrades, token launches, and on-chain metrics.
+  </Card>
+  <Card title="Culture" icon="star">
+    Entertainment, awards, viral events, and social trends.
+  </Card>
+  <Card title="Mentions" icon="megaphone">
+    Whether a specific topic, person, or phrase will be mentioned in a defined context.
+  </Card>
+  <Card title="Weather" icon="cloud">
+    Temperature records, storm events, and climate benchmarks.
+  </Card>
+  <Card title="Economics" icon="chart-line">
+    GDP, inflation, unemployment, and macroeconomic indicators.
+  </Card>
+  <Card title="Tech" icon="microchip">
+    Product launches, AI milestones, regulatory decisions, and company events.
+  </Card>
+  <Card title="Finance" icon="building-columns">
+    Stock prices, ETF approvals, earnings results, and market indices.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Use the `category` filter on the markets endpoint to narrow results to a single topic — for example, `?category=crypto` returns only cryptocurrency-related markets. You can combine it with `status=active` to see only live, tradeable markets in that category.
+</Tip>
+
+## Market Status
+
+Every market in Orbscan is in one of three lifecycle states:
+
+**Active** — The market is open for trading. Traders can buy and sell outcome shares at any time, and prices move continuously as new information and orders arrive.
+
+**Resolved** — The event has occurred and an outcome has been officially determined. Winning shares have paid out $1 USDC each; losing shares are worth $0. No further trading is possible, but the full history remains queryable.
+
+**Closed** — The market's `end_date` has passed and trading is no longer accepted, but the market has not yet been officially resolved. This is a transitional state while the resolution process is underway.
+
+## Outcome Prices
+
+Outcome share prices on Polymarket are expressed in **cents (¢)**, ranging from 0¢ to 100¢. Because each winning share pays out exactly $1 at resolution, the current price of an outcome share directly represents the market's **implied probability** of that outcome occurring.
+
+| Price | Implied Probability |
+|---|---|
+| 10¢ | 10% chance |
+| 50¢ | 50% chance (true coin flip) |
+| 72¢ | 72% chance |
+| 95¢ | 95% chance |
+
+For example, if you see "Yes at 72¢", the market is implying a **72% probability** that the event will happen. If you buy Yes shares at 72¢ and the market resolves Yes, you receive $1 per share — a profit of 28¢ per share. If it resolves No, you lose your 72¢ stake.
+
+In multi-outcome markets, the prices of all outcomes should sum to approximately 100¢, reflecting a complete probability distribution across all possible results.

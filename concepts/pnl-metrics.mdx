@@ -1,0 +1,106 @@
+---
+title: "PnL Metrics and Performance Calculations in Orbscan"
+sidebarTitle: "PnL Metrics"
+description: "Understand how Orbscan calculates PnL, win rate, Sharpe ratio, and copy PnL — the key performance metrics for Polymarket traders."
+---
+
+Orbscan computes several performance metrics to help you evaluate traders, compare strategies, and make informed decisions about which markets or participants to follow. All metrics are derived from on-chain data recorded on the Polygon network — every trade, resolution, and payout is auditable on-chain, making the calculations transparent and tamper-proof.
+
+## PnL (Profit and Loss)
+
+PnL is the core measure of whether a trader is making or losing money. Orbscan denominates all PnL figures in **USD (USDC)**, since Polymarket settles entirely in USDC on Polygon.
+
+PnL is split into two components:
+
+**Realized PnL** covers positions that have already been closed — either by selling shares before resolution or by collecting a payout after a market resolves. This is money that has definitively been made or lost.
+
+```
+realized_pnl = sale_proceeds - cost_basis
+```
+
+**Unrealized PnL** covers positions that are still open. It reflects the gain or loss you _would_ lock in if you sold your current shares at today's market price.
+
+```
+unrealized_pnl = current_market_value - cost_basis
+```
+
+The **total PnL** for a trader combines both:
+
+```
+total_pnl = realized_pnl + unrealized_pnl
+```
+
+<Note>
+  All PnL figures in Orbscan exclude gas fees on Polygon. Because Polygon gas costs are typically a fraction of a cent per transaction, they have a negligible effect on prediction market returns and are omitted to keep the numbers clean and comparable.
+</Note>
+
+## Time-Windowed PnL
+
+Orbscan surfaces two PnL time windows on every trader profile:
+
+- **`pnl_30d`** — Rolling 30-day PnL. This captures only trades opened or closed within the past 30 days and is the best signal of a trader's _current_ form and activity level.
+- **`pnl_total`** — Lifetime cumulative PnL across all activity since the wallet first appeared on Polymarket.
+
+The Orbscan UI also shows a **"vs prior 30D" percentage** next to the 30-day figure. This compares the current 30-day PnL against the preceding 30-day window, giving you a quick read on whether a trader's recent performance is improving or deteriorating.
+
+For example, a trader with `pnl_30d = +$840` and a `+34% vs prior 30D` indicator earned meaningfully more this month than last month — a positive momentum signal.
+
+## Win Rate
+
+Win rate measures how consistently a trader picks the correct outcome across all the markets they've participated in:
+
+```
+win_rate = (resolved_wins / total_resolved_markets) * 100
+```
+
+A **win** is defined as holding shares of the outcome that was declared correct at the time a market resolves. If a market resolves Yes and you held Yes shares, that counts as a win — regardless of how many shares you held or what price you paid.
+
+Win rate is a useful consistency signal, but it does not capture position sizing or return magnitude. A trader who always bets small on high-probability markets can have a 90% win rate while generating modest dollar PnL. For a fuller picture, always read win rate alongside `pnl_total` and `sharpe_ratio`.
+
+## Sharpe Ratio
+
+The Sharpe ratio is a **risk-adjusted return** metric. It measures how much return a trader generates per unit of volatility in their performance — rewarding consistent gains and penalizing wild swings, even if those swings are ultimately profitable.
+
+```
+sharpe_ratio = mean_return / standard_deviation_of_returns
+```
+
+A higher Sharpe ratio is better. As a general benchmark:
+
+| Sharpe Ratio | Interpretation |
+|---|---|
+| Below 0 | Returns are negative on a risk-adjusted basis |
+| 0 – 0.5 | Marginal risk-adjusted performance |
+| 0.5 – 1.0 | Good — generally considered solid in prediction markets |
+| Above 1.0 | Excellent — consistent outperformance relative to risk taken |
+
+In prediction market contexts, a Sharpe ratio of **0.5 or above** is generally considered good, given the inherently binary, high-variance nature of individual market outcomes.
+
+## Copy PnL
+
+Copy PnL is the **hypothetical profit or loss** you would have earned over the past **7 days** if you had exactly mirrored a trader's positions — entering the same markets, on the same side, at the same prices, at the same time they did.
+
+No capital is actually deployed to calculate this number. It is a simulation run against historical on-chain data, giving you a concrete, recent benchmark for a trader's signal quality before you decide to follow them.
+
+Copy PnL is most useful when evaluated alongside win rate and total PnL:
+- A high copy PnL with a short track record may reflect a lucky streak.
+- A consistently high copy PnL over multiple rolling 7-day windows, combined with strong `pnl_total`, is a more reliable indicator of repeatable edge.
+
+## Frequently Asked Questions
+
+<Accordion title="Why is my PnL negative even though I won markets?">
+  Winning a market means the outcome you held shares in resolved correctly — but it does not automatically mean you made money. PnL depends on **position sizing and cost basis**. If you paid 85¢ per share on a Yes outcome that resolved Yes, you collect $1 per share but only profit 15¢ per share. If you held a large position in a different market that resolved against you in the same period, the losses there can outweigh the wins elsewhere. PnL measures actual dollar profit, not binary outcome correctness.
+</Accordion>
+
+<Accordion title="How often are metrics updated?">
+  Orbscan pulls data from the Polygon blockchain in **near real-time**. PnL, position values, and market prices are refreshed continuously as new blocks are confirmed. Resolved market outcomes and win rate updates are applied as soon as the resolution transaction is indexed on-chain. There may be a short propagation delay of a few seconds to a minute during periods of high network activity, but figures are never stale by more than a few minutes under normal conditions.
+</Accordion>
+
+<Accordion title="What counts as a resolved market win?">
+  A win is recorded when **both** of the following are true at the time of resolution:
+
+  1. The market has been officially resolved with a declared winning outcome.
+  2. The trader held at least some shares of that winning outcome at the moment of resolution.
+
+  It does not matter whether the trader bought those shares at a high or low price, or how many shares they held — any non-zero position in the winning outcome qualifies. Traders who sold all their winning shares before resolution do **not** receive a win credit for that market, since they were no longer holding those shares when the outcome was determined.
+</Accordion>

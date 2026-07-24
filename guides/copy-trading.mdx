@@ -1,0 +1,176 @@
+---
+title: "Track and Simulate Copy Trading Strategies with Orbscan"
+sidebarTitle: "Copy Trading"
+description: "Use the Orbscan API to identify top traders, fetch their positions, and calculate hypothetical copy trading PnL over any time window."
+---
+
+Copy trading lets you mirror another trader's positions — entering the same markets, on the same side, at similar prices. Orbscan exposes 7-day copy PnL data alongside open positions so you can evaluate whether a trader's strategy is worth following before you commit any capital.
+
+<Warning>
+Copy trading carries the same risks as any prediction market trading. Markets can resolve against even the most experienced traders. Past performance does not guarantee future results — use these tools for research, not as financial advice.
+</Warning>
+
+## How copy trading works
+
+When you copy a trader, you allocate a fixed dollar amount to each market they enter, proportional to how they size their positions. If a target trader buys $500 of "Yes" shares in a given market, you would buy "Yes" shares in the same market with your chosen equivalent stake. Your returns then track theirs — if their position appreciates, so does yours; if it resolves against them, you take the same loss on your proportional stake.
+
+The key variables to calibrate are:
+
+- **Who to copy** — a trader with a high win rate and strong Sharpe ratio is more likely to produce consistent returns than someone who hit one lucky trade.
+- **Position sizing** — decide upfront how much of your bankroll to allocate per market. Smaller allocations per market reduce the risk of any single bad resolution wiping out your gains.
+- **When to stop copying** — monitor copy PnL regularly and set a threshold at which you would reassess the strategy.
+
+## Finding traders to copy
+
+Start with the leaderboard and use `sharpe_ratio` as your primary signal alongside win rate. A high 30-day PnL alone can reflect a single outsized bet. A high Sharpe ratio combined with a strong win rate indicates more consistent, risk-adjusted performance over time.
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://api.orbscan.com/v1/leaderboard",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    params={"period": "monthly", "limit": 100},
+)
+
+traders = response.json()["data"]
+
+# Filter for consistent performers with statistical depth
+candidates = [
+    t for t in traders
+    if t["sharpe_ratio"] >= 1.0
+    and t["win_rate"] >= 0.55
+]
+
+candidates.sort(key=lambda t: t["sharpe_ratio"], reverse=True)
+
+for t in candidates[:10]:
+    print(
+        f"#{t['rank']} {t['username']} "
+        f"| Sharpe: {t['sharpe_ratio']} "
+        f"| Win rate: {t['win_rate'] * 100:.0f}% "
+        f"| 30d PnL: ${t['pnl_30d']:,.0f}"
+    )
+```
+
+<Tip>
+Focus on traders with more than 50 resolved markets. Smaller sample sizes make win rate and Sharpe ratio unreliable — a trader who has resolved 10 markets and won 7 is far less predictive than one who has resolved 500 and won 280.
+</Tip>
+
+## Fetching copy PnL
+
+The trader profile endpoint returns a `copy_pnl_7d` field — the hypothetical PnL you would have earned if you had copied that trader dollar-for-dollar over the last 7 days.
+
+```bash curl
+curl --request GET \
+  --url https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```json
+{
+  "address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+  "username": "swisstony",
+  "pnl_30d": 10418044.50,
+  "pnl_total": 24500000.00,
+  "win_rate": 0.53,
+  "sharpe_ratio": 0.55,
+  "copy_pnl_7d": 3240.75,
+  "position_value": 48508.24,
+  "active_markets": 493,
+  "resolved_count": 258070
+}
+```
+
+The `copy_pnl_7d` value assumes a 1:1 dollar allocation. If you plan to copy at a fraction of the trader's size, multiply this figure by your scaling factor to estimate your expected return.
+
+## Viewing their open positions
+
+Before mirroring a trader, inspect the markets they are currently active in. This tells you exactly where to place your positions if you decide to copy them.
+
+```python Python
+import requests
+
+address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+
+response = requests.get(
+    f"https://api.orbscan.com/v1/traders/{address}/positions",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+)
+
+positions = response.json()["data"]
+
+for pos in positions:
+    print(
+        f"{pos['market_question']} — "
+        f"{pos['outcome']} @ {pos['price']} | "
+        f"Unrealized PnL: ${pos['unrealized_pnl']:.2f}"
+    )
+```
+
+**Example response**
+
+```json
+{
+  "data": [
+    {
+      "market_slug": "will-bitcoin-hit-100k",
+      "market_question": "Will Bitcoin hit $100k in 2025?",
+      "outcome": "Yes",
+      "shares": 250.5,
+      "cost_basis": 125.25,
+      "current_value": 200.40,
+      "unrealized_pnl": 75.15,
+      "price": 0.799
+    }
+  ]
+}
+```
+
+| Field | Description |
+|---|---|
+| `market_slug` | URL-safe identifier for the market — use this when querying market-specific activity |
+| `outcome` | The side the trader is on (`Yes` or `No`) |
+| `shares` | Number of outcome tokens held |
+| `cost_basis` | Total amount the trader paid to acquire this position, in USD |
+| `current_value` | Current market value of the position at the latest price, in USD |
+| `unrealized_pnl` | Profit or loss if the position were closed at the current price |
+| `price` | Current implied probability of the outcome (0–1) |
+
+## Building a copy trading watchlist
+
+A practical workflow is to run the leaderboard filter on a schedule, store candidates whose `copy_pnl_7d` meets your threshold, and poll their positions daily to stay in sync with their portfolio.
+
+```python Python
+import requests
+
+HEADERS = {"Authorization": "Bearer YOUR_API_KEY"}
+BASE_URL = "https://api.orbscan.com/v1"
+
+def get_copy_candidates(min_sharpe=1.0, min_win_rate=0.55, min_resolved=50):
+    resp = requests.get(
+        f"{BASE_URL}/leaderboard",
+        headers=HEADERS,
+        params={"period": "monthly", "limit": 100},
+    )
+    traders = resp.json()["data"]
+    return [
+        t for t in traders
+        if t["sharpe_ratio"] >= min_sharpe
+        and t["win_rate"] >= min_win_rate
+    ]
+
+def get_positions(address):
+    resp = requests.get(
+        f"{BASE_URL}/traders/{address}/positions",
+        headers=HEADERS,
+    )
+    return resp.json()["data"]
+
+candidates = get_copy_candidates()
+for trader in candidates[:5]:
+    positions = get_positions(trader["address"])
+    print(f"\n{trader['username']} ({len(positions)} open positions):")
+    for p in positions:
+        print(f"  {p['outcome']} on '{p['market_question']}' @ {p['price']}")
+```

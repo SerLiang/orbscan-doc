@@ -1,0 +1,105 @@
+---
+title: "GET /v1/traders/{address}/deposits — USDC Deposit History"
+sidebarTitle: "GET Deposits"
+description: "Fetch all USDC deposit transactions for a Polymarket wallet on Polygon — amount, timestamp, and on-chain transaction hash."
+---
+
+The `/v1/traders/{address}/deposits` endpoint returns the full USDC deposit history for a given Polymarket wallet address, sourced directly from on-chain Polygon transactions. Each record includes the deposited amount, the originating wallet, a timestamp, and the transaction hash you can use to independently verify the deposit on Polygonscan. Use the date range filters to scope results to a specific time window.
+
+## Endpoint
+
+```
+GET https://api.orbscan.com/v1/traders/{address}/deposits
+```
+
+## Path Parameters
+
+<ParamField path="address" type="string" required>
+  The Polygon wallet address of the trader whose deposit history you want to retrieve (e.g. `0xA1B2c3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0`).
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="limit" type="integer" default="50">
+  Number of deposit records to return per page. Maximum value is `200`.
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Number of records to skip before returning the page. Use with `limit` to paginate through results.
+</ParamField>
+
+<ParamField query="start_date" type="string">
+  ISO 8601 date (e.g. `2025-01-01`) to filter deposits on or after this date. Use together with `end_date` to define a range.
+</ParamField>
+
+<ParamField query="end_date" type="string">
+  ISO 8601 date (e.g. `2025-06-30`) to filter deposits on or before this date.
+</ParamField>
+
+## Request Example
+
+```bash curl
+curl --request GET \
+  --url "https://api.orbscan.com/v1/traders/0xA1B2c3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0/deposits?limit=50&start_date=2025-01-01&end_date=2025-06-30" \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+## Response Fields
+
+<ResponseField name="total" type="integer">
+  Total number of deposit records matching your query filters.
+</ResponseField>
+
+<ResponseField name="limit" type="integer">
+  Number of records returned in this response.
+</ResponseField>
+
+<ResponseField name="offset" type="integer">
+  Offset applied to this response.
+</ResponseField>
+
+<ResponseField name="deposits" type="array">
+  Array of deposit transaction objects.
+
+  <Expandable title="Deposit object fields">
+    <ResponseField name="amount" type="number">
+      The amount of USDC deposited, expressed as a decimal (e.g. `1500.00`).
+    </ResponseField>
+
+    <ResponseField name="tx_hash" type="string">
+      The on-chain Polygon transaction hash for this deposit. Use this to verify the transaction on Polygonscan.
+    </ResponseField>
+
+    <ResponseField name="timestamp" type="string">
+      ISO 8601 datetime at which the deposit transaction was confirmed on-chain.
+    </ResponseField>
+
+    <ResponseField name="from_address" type="string">
+      The Polygon wallet address that sent the USDC.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Response
+
+```json
+{
+  "total": 14,
+  "limit": 50,
+  "offset": 0,
+  "deposits": [
+    {
+      "amount": 5000.00,
+      "tx_hash": "0x9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8",
+      "timestamp": "2025-05-20T14:32:10Z",
+      "from_address": "0xF1E2d3C4b5A6f7E8d9C0b1A2f3E4d5C6b7A8f9E0"
+    },
+    {
+      "amount": 1500.00,
+      "tx_hash": "0x2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3",
+      "timestamp": "2025-04-11T09:05:48Z",
+      "from_address": "0xF1E2d3C4b5A6f7E8d9C0b1A2f3E4d5C6b7A8f9E0"
+    }
+  ]
+}
+```

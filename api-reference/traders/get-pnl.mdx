@@ -1,0 +1,117 @@
+---
+title: "GET /v1/traders/{address}/pnl — PnL Timeseries Data"
+sidebarTitle: "GET PnL"
+description: "Fetch daily PnL timeseries data for a Polymarket wallet, with realized and unrealized breakdowns and configurable time windows."
+---
+
+The PnL endpoint returns a day-by-day profit and loss timeseries for a Polymarket trader, making it straightforward to chart performance curves, calculate drawdowns, or compare returns across time windows. You can request a high-level daily total or enable the breakdown flag to receive separate realized and unrealized components for each day.
+
+`GET https://api.orbscan.com/v1/traders/{address}/pnl`
+
+## Path Parameters
+
+<ParamField path="address" type="string" required>
+  The 0x-prefixed, 42-character Ethereum wallet address of the trader whose PnL timeseries you want to retrieve. Case-insensitive.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="period" type="string">
+  The lookback window for the timeseries. Accepted values are `7d`, `30d`, `90d`, `1y`, and `all`. Defaults to `30d`. Using `all` returns data from the wallet's first-ever trade to the current day.
+</ParamField>
+
+<ParamField query="breakdown" type="boolean">
+  When set to `true`, each daily entry in the `data` array includes separate `realized_pnl` and `unrealized_pnl` fields in addition to the combined `pnl` value. Defaults to `false`.
+</ParamField>
+
+## Request Example
+
+<CodeGroup>
+
+```bash curl
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/traders/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/pnl?period=30d&breakdown=true' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</CodeGroup>
+
+## Response Fields
+
+<ResponseField name="address" type="string">
+  The checksummed Ethereum wallet address for which the timeseries was generated.
+</ResponseField>
+
+<ResponseField name="period" type="string">
+  The period value that was used to generate the response, echoing the `period` query parameter (e.g. `"30d"`).
+</ResponseField>
+
+<ResponseField name="total_pnl" type="number">
+  Aggregate PnL in USD across the entire requested period. This is the sum of all daily `pnl` values in the `data` array.
+</ResponseField>
+
+<ResponseField name="realized_pnl" type="number">
+  The realized component of `total_pnl` — gains and losses that have been locked in by selling shares or having positions resolve.
+</ResponseField>
+
+<ResponseField name="unrealized_pnl" type="number">
+  The unrealized component of `total_pnl` — the mark-to-market value of positions still open at the end of the period.
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  An ordered array of daily PnL entries covering each calendar day in the requested period, from oldest to newest.
+
+  <Expandable title="data[] entry fields">
+    <ResponseField name="date" type="string">
+      The calendar date for this entry in ISO 8601 format (`YYYY-MM-DD`).
+    </ResponseField>
+
+    <ResponseField name="pnl" type="number">
+      Combined realized and unrealized PnL for this day in USD. Negative values indicate a net loss on that day.
+    </ResponseField>
+
+    <ResponseField name="realized_pnl" type="number">
+      Realized PnL for this specific day in USD. Only present when `breakdown=true` is passed in the request.
+    </ResponseField>
+
+    <ResponseField name="unrealized_pnl" type="number">
+      Unrealized PnL for this specific day in USD. Only present when `breakdown=true` is passed in the request.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Response
+
+```json
+{
+  "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  "period": "30d",
+  "total_pnl": 1243.77,
+  "realized_pnl": 890.40,
+  "unrealized_pnl": 353.37,
+  "data": [
+    {
+      "date": "2024-02-12",
+      "pnl": 312.50,
+      "realized_pnl": 200.00,
+      "unrealized_pnl": 112.50
+    },
+    {
+      "date": "2024-02-13",
+      "pnl": -84.20,
+      "realized_pnl": 0.00,
+      "unrealized_pnl": -84.20
+    },
+    {
+      "date": "2024-02-14",
+      "pnl": 1015.47,
+      "realized_pnl": 690.40,
+      "unrealized_pnl": 325.07
+    }
+  ]
+}
+```
+
+<Tip>
+  Use `period=all` combined with `breakdown=true` to retrieve a trader's complete performance history with realized and unrealized components split out per day — ideal for building a full equity curve chart or calculating metrics like maximum drawdown and cumulative return.
+</Tip>

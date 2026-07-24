@@ -1,0 +1,159 @@
+---
+title: "GET /v1/leaderboard — Top Polymarket Traders Ranked"
+sidebarTitle: "Leaderboard"
+description: "Fetch the Orbscan leaderboard of top Polymarket traders by PnL. Filter by time period and category, paginate up to 100 results."
+---
+
+The `/v1/leaderboard` endpoint returns a ranked list of top Polymarket traders ordered by profit and loss (PnL) for your chosen time period. Each entry includes performance metrics such as win rate, Sharpe ratio, open position value, and 7-day copy trading PnL — giving you a rich view of trader quality beyond raw returns. You can scope results to a specific market category to identify specialists in a particular domain.
+
+## Endpoint
+
+```
+GET https://api.orbscan.com/v1/leaderboard
+```
+
+## Query Parameters
+
+<ParamField query="period" type="string" default="monthly">
+  Time window for PnL ranking. Accepted values: `today`, `weekly`, `monthly`, `all`.
+</ParamField>
+
+<ParamField query="category" type="string">
+  Filter the leaderboard to traders active in a specific market category (e.g. `crypto`, `politics`). When omitted, all categories are included.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="25">
+  Number of trader records to return per page. Maximum value is `100`.
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number for paginating through the leaderboard. Use with `limit` to navigate large result sets.
+</ParamField>
+
+## Request Example
+
+<CodeGroup>
+
+```bash curl
+curl --request GET \
+  --url "https://api.orbscan.com/v1/leaderboard?period=monthly&category=crypto&limit=25&page=1" \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+url = "https://api.orbscan.com/v1/leaderboard"
+headers = {"Authorization": "Bearer YOUR_API_KEY"}
+params = {
+    "period": "monthly",
+    "category": "crypto",
+    "limit": 25,
+    "page": 1,
+}
+
+response = requests.get(url, headers=headers, params=params)
+print(response.json())
+```
+
+</CodeGroup>
+
+## Response Fields
+
+<ResponseField name="total" type="integer">
+  Total number of traders matching the query filters.
+</ResponseField>
+
+<ResponseField name="page" type="integer">
+  Current page number.
+</ResponseField>
+
+<ResponseField name="limit" type="integer">
+  Number of trader records returned in this response.
+</ResponseField>
+
+<ResponseField name="traders" type="array">
+  Array of ranked trader objects.
+
+  <Expandable title="Trader object fields">
+    <ResponseField name="rank" type="integer">
+      The trader's position on the leaderboard for the selected period.
+    </ResponseField>
+
+    <ResponseField name="address" type="string">
+      The trader's Polygon wallet address.
+    </ResponseField>
+
+    <ResponseField name="username" type="string | null">
+      The trader's Polymarket display name. Returns `null` if no username is set.
+    </ResponseField>
+
+    <ResponseField name="pnl_30d" type="number">
+      Profit and loss for the selected period, denominated in USD. Positive values indicate a net gain.
+    </ResponseField>
+
+    <ResponseField name="pnl_change_pct" type="number">
+      Percentage change in PnL compared to the equivalent prior period. For example, a value of `12.5` means PnL increased 12.5% vs. the previous period.
+    </ResponseField>
+
+    <ResponseField name="win_rate" type="number">
+      Proportion of resolved market positions that were profitable, expressed as a decimal between `0` and `1`.
+    </ResponseField>
+
+    <ResponseField name="sharpe_ratio" type="number">
+      Risk-adjusted return metric. Higher values indicate better returns relative to volatility.
+    </ResponseField>
+
+    <ResponseField name="active_markets" type="integer">
+      Number of markets in which the trader currently holds an open position.
+    </ResponseField>
+
+    <ResponseField name="position_value" type="number">
+      Total USD value of all open positions held by the trader.
+    </ResponseField>
+
+    <ResponseField name="copy_pnl_7d" type="number">
+      Estimated 7-day PnL that copy traders following this trader have earned, denominated in USD.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Response
+
+```json
+{
+  "total": 5200,
+  "page": 1,
+  "limit": 25,
+  "traders": [
+    {
+      "rank": 1,
+      "address": "0xA1B2c3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0",
+      "username": "cryptowhale",
+      "pnl_30d": 284500.00,
+      "pnl_change_pct": 18.4,
+      "win_rate": 0.74,
+      "sharpe_ratio": 2.31,
+      "active_markets": 12,
+      "position_value": 93400.00,
+      "copy_pnl_7d": 4120.50
+    },
+    {
+      "rank": 2,
+      "address": "0xC3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0c1D2",
+      "username": "predictionpro",
+      "pnl_30d": 197200.00,
+      "pnl_change_pct": -3.2,
+      "win_rate": 0.68,
+      "sharpe_ratio": 1.87,
+      "active_markets": 7,
+      "position_value": 41200.75,
+      "copy_pnl_7d": 2305.00
+    }
+  ]
+}
+```
+
+<Note>
+  The leaderboard refreshes every 5 minutes. PnL figures and rankings reflect on-chain resolved positions and may lag very recent trades by up to one refresh cycle.
+</Note>

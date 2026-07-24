@@ -1,0 +1,187 @@
+---
+title: "Query the Orbscan Polymarket Trader Leaderboard"
+sidebarTitle: "Leaderboard"
+description: "Fetch top Polymarket traders ranked by 30-day PnL, filter by category, and paginate through the leaderboard using the Orbscan API."
+---
+
+The leaderboard endpoint returns the top Polymarket traders ranked by 30-day PnL, giving you a live view of who is performing best across the entire platform. You can narrow results by market category, switch between time periods, and page through hundreds of ranked traders — all from a single endpoint.
+
+<Note>
+Leaderboard data refreshes every 5 minutes. Ranks and PnL figures reflect the most recent snapshot at the time of your request.
+</Note>
+
+## Endpoint
+
+```
+GET /v1/leaderboard
+```
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `period` | string | `monthly` | Time window for PnL ranking. One of `today`, `weekly`, `monthly`, or `all`. |
+| `category` | string | — | Filter by market category (e.g. `Politics`, `Crypto`, `Sports`). Omit to include all categories. |
+| `limit` | integer | `25` | Number of traders to return per page. Maximum `100`. |
+| `page` | integer | `1` | Page number for pagination. Combine with `limit` to walk through the full ranking. |
+
+## Fetch the leaderboard
+
+<CodeGroup>
+
+```bash curl
+# Top 25 traders by 30-day PnL (default)
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/leaderboard?period=monthly&limit=25&page=1' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+
+# Top crypto traders this week
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/leaderboard?period=weekly&category=Crypto&limit=25' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```python Python
+import requests
+
+params = {
+    "period": "monthly",
+    "category": "Politics",
+    "limit": 25,
+    "page": 1,
+}
+
+response = requests.get(
+    "https://api.orbscan.com/v1/leaderboard",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    params=params,
+)
+
+data = response.json()
+
+for trader in data["data"]:
+    print(f"#{trader['rank']} {trader['username']} — ${trader['pnl_30d']:,.2f} PnL")
+```
+
+</CodeGroup>
+
+**Example response**
+
+```json
+{
+  "data": [
+    {
+      "rank": 1,
+      "address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+      "username": "swisstony",
+      "pnl_30d": 10418044.50,
+      "pnl_change_pct": 89.78,
+      "win_rate": 0.53,
+      "sharpe_ratio": 0.55,
+      "active_markets": 493,
+      "position_value": 48508.24
+    }
+  ],
+  "total": 1000,
+  "page": 1,
+  "limit": 25
+}
+```
+
+| Field | Description |
+|---|---|
+| `rank` | Trader's position in the leaderboard for the requested period |
+| `pnl_30d` | Net PnL over the last 30 days, in USD |
+| `pnl_change_pct` | Percentage change in PnL compared to the previous equivalent period |
+| `win_rate` | Share of resolved positions that finished in profit |
+| `sharpe_ratio` | Risk-adjusted return metric — higher values indicate more consistent performance |
+| `active_markets` | Number of markets the trader currently holds an open position in |
+| `position_value` | Total current market value of all open positions, in USD |
+
+## Use the `period` parameter
+
+Switch the ranking window to match what you're looking for — today's hottest traders, this week's movers, the best over the last month, or the all-time greatest.
+
+<Tabs>
+
+<Tab title="Today">
+
+Ranks traders by PnL earned in the current calendar day (UTC). Use this to spot who is winning right now.
+
+```bash curl
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/leaderboard?period=today' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</Tab>
+
+<Tab title="Weekly">
+
+Ranks traders by PnL earned over the last 7 days. A good balance between recency and statistical sample size.
+
+```bash curl
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/leaderboard?period=weekly' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</Tab>
+
+<Tab title="Monthly">
+
+The default period. Ranks traders by PnL over the last 30 days — broad enough to filter out noise and short-term variance.
+
+```bash curl
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/leaderboard?period=monthly' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</Tab>
+
+<Tab title="All Time">
+
+Ranks traders by total lifetime PnL. Use this to find consistently strong performers across the platform's full history.
+
+```bash curl
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/leaderboard?period=all' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</Tab>
+
+</Tabs>
+
+## Paginate through results
+
+The leaderboard supports up to 1,000 ranked traders. Use `limit` and `page` together to walk through them in batches.
+
+```python Python
+import requests
+
+all_traders = []
+page = 1
+
+while True:
+    response = requests.get(
+        "https://api.orbscan.com/v1/leaderboard",
+        headers={"Authorization": "Bearer YOUR_API_KEY"},
+        params={"period": "monthly", "limit": 100, "page": page},
+    )
+    data = response.json()
+    all_traders.extend(data["data"])
+
+    # Stop when we've collected all available traders
+    if len(all_traders) >= data["total"] or not data["data"]:
+        break
+
+    page += 1
+
+print(f"Fetched {len(all_traders)} traders total.")
+```
+
+<Tip>
+To build a copy-trading shortlist, fetch the leaderboard and filter client-side for traders with a `sharpe_ratio` above `1.0` and a `win_rate` above `0.55`. This surfaces consistent performers rather than one-trade wonders.
+</Tip>

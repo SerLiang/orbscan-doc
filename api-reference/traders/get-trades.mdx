@@ -1,0 +1,153 @@
+---
+title: "GET /v1/traders/{address}/trades — Trade History"
+sidebarTitle: "GET Trades"
+description: "Fetch the full trade history for a Polymarket wallet — buy/sell transactions, prices, sizes, and Polygon transaction hashes."
+---
+
+The trades endpoint returns the complete on-chain trade history for a Polymarket wallet, ordered from newest to oldest. Each record includes the market traded, the side and size of the transaction, the price at execution, and the Polygon transaction hash you can use for independent on-chain verification.
+
+`GET https://api.orbscan.com/v1/traders/{address}/trades`
+
+## Path Parameters
+
+<ParamField path="address" type="string" required>
+  The 0x-prefixed, 42-character Ethereum wallet address whose trade history you want to retrieve. Case-insensitive.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="limit" type="integer">
+  Number of trade records to return per page. Accepts values between `1` and `500`. Defaults to `50`.
+</ParamField>
+
+<ParamField query="offset" type="integer">
+  Zero-based index of the first trade to return. Use with `limit` to paginate through large histories. Defaults to `0`.
+</ParamField>
+
+<ParamField query="market_slug" type="string">
+  Filter results to trades in a single market. Pass the URL-safe market slug (e.g. `will-btc-hit-100k-by-eoy-2025`) to narrow the response to that market's activity only.
+</ParamField>
+
+<ParamField query="side" type="string">
+  Filter by trade direction. Accepted values are `BUY` and `SELL`. Omit to return trades on both sides.
+</ParamField>
+
+<ParamField query="start_date" type="string">
+  Beginning of the date range filter in ISO 8601 format (e.g. `2024-01-01`). Returns trades on or after this date. Must be used with `end_date` for a bounded window.
+</ParamField>
+
+<ParamField query="end_date" type="string">
+  End of the date range filter in ISO 8601 format (e.g. `2024-03-31`). Returns trades on or before this date. Must be used with `start_date` for a bounded window.
+</ParamField>
+
+## Request Example
+
+<CodeGroup>
+
+```bash curl
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/traders/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/trades?limit=50&side=BUY&start_date=2024-01-01&end_date=2024-03-31' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```python Python
+import requests
+
+address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+
+params = {
+    "limit": 50,
+    "side": "BUY",
+    "start_date": "2024-01-01",
+    "end_date": "2024-03-31",
+}
+
+response = requests.get(
+    f"https://api.orbscan.com/v1/traders/{address}/trades",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    params=params,
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## Response Fields
+
+The response is an array of trade objects. Each object contains the following fields:
+
+<ResponseField name="trade_id" type="string">
+  A unique identifier for this trade record within the Orbscan system.
+</ResponseField>
+
+<ResponseField name="market_slug" type="string">
+  URL-safe identifier for the market in which the trade was executed.
+</ResponseField>
+
+<ResponseField name="market_question" type="string">
+  The full question text of the prediction market at the time of the trade.
+</ResponseField>
+
+<ResponseField name="outcome" type="string">
+  The outcome shares that were bought or sold in this trade (e.g. `"Yes"` or `"No"`).
+</ResponseField>
+
+<ResponseField name="side" type="string">
+  Direction of the trade. Either `"BUY"` (shares purchased) or `"SELL"` (shares sold).
+</ResponseField>
+
+<ResponseField name="shares" type="number">
+  The number of outcome shares transacted in this trade.
+</ResponseField>
+
+<ResponseField name="price" type="number">
+  The per-share price at which the trade was executed, expressed as a decimal between `0` and `1`.
+</ResponseField>
+
+<ResponseField name="size_usd" type="number">
+  The total USD value of the trade, calculated as `shares × price`. For sells, this represents the proceeds received.
+</ResponseField>
+
+<ResponseField name="tx_hash" type="string">
+  The Polygon blockchain transaction hash for this trade. Use this to look up the raw transaction on Polygonscan or any Polygon-compatible explorer.
+</ResponseField>
+
+<ResponseField name="timestamp" type="string">
+  The date and time the trade was confirmed on-chain, in ISO 8601 format (e.g. `"2024-02-14T09:23:11Z"`).
+</ResponseField>
+
+## Example Response
+
+```json
+[
+  {
+    "trade_id": "trd_9f3a21bc4e7d",
+    "market_slug": "will-btc-hit-100k-by-eoy-2025",
+    "market_question": "Will Bitcoin exceed $100,000 by end of 2025?",
+    "outcome": "Yes",
+    "side": "BUY",
+    "shares": 500.00,
+    "price": 0.55,
+    "size_usd": 275.00,
+    "tx_hash": "0x4a3b2c1d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b",
+    "timestamp": "2024-02-14T09:23:11Z"
+  },
+  {
+    "trade_id": "trd_1c8e47fa902b",
+    "market_slug": "us-presidential-election-2024-winner",
+    "market_question": "Who will win the 2024 US Presidential Election?",
+    "outcome": "No",
+    "side": "SELL",
+    "shares": 200.00,
+    "price": 0.41,
+    "size_usd": 82.00,
+    "tx_hash": "0xb1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2",
+    "timestamp": "2024-02-13T17:04:55Z"
+  }
+]
+```
+
+<Note>
+  The `tx_hash` field can be pasted directly into [Polygonscan](https://polygonscan.com) to independently verify any trade on-chain. This is useful for auditing position history or confirming execution prices.
+</Note>

@@ -1,0 +1,125 @@
+---
+title: "GET /v1/markets/{slug} — Single Market Details"
+sidebarTitle: "Get Market"
+description: "Fetch detailed data for a single Polymarket prediction market by slug — outcome prices, volume, liquidity, and resolution status."
+---
+
+The `/v1/markets/{slug}` endpoint returns comprehensive details for a single Polymarket prediction market. In addition to the fields available in the markets list, you receive live outcome prices, all-time volume, the resolution source, and — for resolved markets — the winning outcome and resolution timestamp. Use this endpoint when you need the full picture for a specific market.
+
+## Endpoint
+
+```
+GET https://api.orbscan.com/v1/markets/{slug}
+```
+
+## Path Parameters
+
+<ParamField path="slug" type="string" required>
+  The URL-safe unique identifier for the market (e.g. `will-bitcoin-hit-100k`). You can retrieve slugs from the [List Markets](/api-reference/markets/list-markets) endpoint.
+</ParamField>
+
+## Request Example
+
+```bash curl
+curl --request GET \
+  --url "https://api.orbscan.com/v1/markets/will-bitcoin-hit-100k" \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+## Response Fields
+
+<ResponseField name="slug" type="string">
+  URL-safe unique identifier for the market.
+</ResponseField>
+
+<ResponseField name="question" type="string">
+  The full question text of the prediction market.
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Extended description providing context, rules, and resolution criteria for the market.
+</ResponseField>
+
+<ResponseField name="category" type="string">
+  The category this market belongs to (e.g. `crypto`, `politics`).
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current market status. One of `active`, `resolved`, or `closed`.
+</ResponseField>
+
+<ResponseField name="outcomes" type="array of strings">
+  List of available outcomes traders can bet on (e.g. `["Yes", "No"]` or team names).
+</ResponseField>
+
+<ResponseField name="outcome_prices" type="object">
+  Current implied probability price for each outcome, expressed as a decimal between `0` and `1`. Prices across all outcomes sum to approximately `1.00` (e.g. `{"Yes": 0.72, "No": 0.28}`).
+</ResponseField>
+
+<ResponseField name="end_date" type="string">
+  ISO 8601 date on which the market is scheduled to resolve.
+</ResponseField>
+
+<ResponseField name="volume_24h" type="number">
+  Total trading volume over the last 24 hours, denominated in USD.
+</ResponseField>
+
+<ResponseField name="volume_total" type="number">
+  All-time cumulative trading volume for this market, denominated in USD.
+</ResponseField>
+
+<ResponseField name="liquidity" type="number">
+  Current liquidity available in the market, denominated in USD.
+</ResponseField>
+
+<ResponseField name="resolution_source" type="string">
+  The data source or oracle used to determine the market outcome (e.g. a news outlet, official organization, or on-chain oracle).
+</ResponseField>
+
+<ResponseField name="resolved_outcome" type="string | null">
+  The winning outcome for a resolved market. Returns `null` if the market is still active.
+</ResponseField>
+
+<ResponseField name="resolved_at" type="string | null">
+  ISO 8601 datetime at which the market was resolved. Returns `null` if the market is still active.
+</ResponseField>
+
+<ResponseField name="image_url" type="string">
+  URL of the market's thumbnail image.
+</ResponseField>
+
+## Example Response
+
+```json
+{
+  "slug": "will-bitcoin-hit-100k",
+  "question": "Will Bitcoin reach $100,000 before the end of 2025?",
+  "description": "This market resolves YES if the Bitcoin spot price on Coinbase reaches or exceeds $100,000 USD at any point before 11:59 PM UTC on December 31, 2025. Resolution will use the Coinbase BTC/USD price feed as the primary source.",
+  "category": "crypto",
+  "status": "active",
+  "outcomes": ["Yes", "No"],
+  "outcome_prices": {
+    "Yes": 0.72,
+    "No": 0.28
+  },
+  "end_date": "2025-12-31",
+  "volume_24h": 1284900.50,
+  "volume_total": 24731200.00,
+  "liquidity": 430200.00,
+  "resolution_source": "Coinbase BTC/USD price feed",
+  "resolved_outcome": null,
+  "resolved_at": null,
+  "image_url": "https://assets.orbscan.com/markets/will-bitcoin-hit-100k.png"
+}
+```
+
+## Error Cases
+
+If the `slug` you provide does not match any market in the Orbscan index, the API returns a `404` response:
+
+```json
+{
+  "error": "not_found",
+  "message": "No market found with slug 'will-bitcoin-hit-100k'."
+}
+```

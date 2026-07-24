@@ -1,0 +1,190 @@
+---
+title: "Monitor Live Polymarket Trade Activity with Orbscan"
+sidebarTitle: "Market Activity"
+description: "Stream and query real-time Polymarket trade activity, filter by category or market, and track large whale trades using the Orbscan API."
+---
+
+The activity endpoints let you monitor live trades across all Polymarket markets — or drill into a single market to watch its order flow in real time. Use these endpoints to follow breaking news markets as they heat up, track the moves of specific traders, or surface large whale trades that might signal informed positioning.
+
+## Global activity feed
+
+`GET /v1/activities` returns a paginated feed of the most recent trades across every Polymarket market. By default it returns the latest 20 trades across all categories and trade types.
+
+<CodeGroup>
+
+```bash curl
+# Latest trades across all markets
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/activities?limit=20' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+
+# Latest political trades only
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/activities?category=Politics&limit=50' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://api.orbscan.com/v1/activities",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    params={
+        "category": "Politics",
+        "type": "trades",
+        "limit": 20,
+    },
+)
+
+trades = response.json()["data"]
+
+for trade in trades:
+    print(
+        f"{trade['trader_username']} {trade['side']} {trade['outcome']} "
+        f"on '{trade['market_question']}' — "
+        f"${trade['size_usd']:.2f} @ {trade['price']}"
+    )
+```
+
+</CodeGroup>
+
+### Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `category` | string | — | Filter by market category. Supports `Politics`, `Sports`, `Crypto`, `Business`, `Entertainment`, `Science`. Omit to return all categories. |
+| `type` | string | `all` | Trade type filter. One of `trades` (single-outcome buys/sells), `combos` (multi-leg positions), or `all`. |
+| `min_size` | number | — | Minimum trade size in USD. Omit to return all trade sizes. |
+| `limit` | integer | `20` | Number of trades to return. Maximum `100`. |
+
+### Example response
+
+```json
+{
+  "data": [
+    {
+      "trader_address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+      "trader_username": "swisstony",
+      "market_slug": "will-bitcoin-hit-100k",
+      "market_question": "Will Bitcoin hit $100k in 2025?",
+      "outcome": "Yes",
+      "side": "BUY",
+      "price": 0.50,
+      "size_usd": 636.00,
+      "tx_hash": "0x71dc4332f151cb6e9172d6c151d0f473bd1a96bebec7de55c501137a67f8cb8f",
+      "timestamp": "2026-07-24T05:21:11Z"
+    }
+  ]
+}
+```
+
+| Field | Description |
+|---|---|
+| `side` | Direction of the trade — `BUY` or `SELL` |
+| `price` | Execution price, expressed as an implied probability (0–1) |
+| `size_usd` | Total USD value of the trade at the execution price |
+| `tx_hash` | On-chain transaction hash on the Polygon network |
+| `timestamp` | ISO 8601 UTC timestamp of the trade |
+
+<Note>
+Each `tx_hash` links to the corresponding transaction on Polygonscan for independent on-chain verification. Construct the URL as `https://polygonscan.com/tx/{tx_hash}`.
+</Note>
+
+## Market-specific activity
+
+To watch the order flow on a single market, call `GET /v1/markets/{slug}/activity`. Use the `market_slug` field from any activity or positions response as the path parameter.
+
+```bash curl
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/markets/will-bitcoin-hit-100k/activity?limit=50' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```python Python
+import requests
+
+market_slug = "will-bitcoin-hit-100k"
+
+response = requests.get(
+    f"https://api.orbscan.com/v1/markets/{market_slug}/activity",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    params={"limit": 50},
+)
+
+trades = response.json()["data"]
+print(f"Last {len(trades)} trades in '{market_slug}':")
+
+for trade in trades:
+    print(f"  {trade['side']} {trade['outcome']} — ${trade['size_usd']:.2f} @ {trade['price']}")
+```
+
+This endpoint accepts the same `type`, `min_size`, and `limit` parameters as the global feed, so you can apply the same filters to a single market's order flow.
+
+## Tracking whale trades
+
+Set `min_size` to a large value to filter the activity feed down to only significant trades. This is useful for spotting informed money — large, directional bets that sometimes precede major price moves.
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://api.orbscan.com/v1/activities",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    params={
+        "min_size": 10000,   # Only trades of $10,000 USD or more
+        "type": "trades",
+        "limit": 20,
+    },
+)
+
+whales = response.json()["data"]
+
+print(f"Found {len(whales)} whale trade(s):\n")
+for trade in whales:
+    direction = "📈" if trade["side"] == "BUY" else "📉"
+    print(
+        f"{direction} {trade['trader_username']} — "
+        f"{trade['side']} {trade['outcome']} on '{trade['market_question']}'\n"
+        f"   Size: ${trade['size_usd']:,.2f} | Price: {trade['price']} | "
+        f"Time: {trade['timestamp']}"
+    )
+```
+
+<Tip>
+Combine `min_size=10000` with a specific `category` to focus on whale activity in the markets you care about most. For example, `category=Politics&min_size=10000` will surface only large political trades, filtering out noise from smaller markets.
+</Tip>
+
+## Polling for new activity
+
+The activity feed is not a persistent WebSocket connection — you poll it on a schedule and compare `timestamp` values to identify trades you haven't seen yet. A simple approach is to record the timestamp of the most recent trade after each poll and use it as a cursor on the next request.
+
+```python Python
+import requests
+import time
+
+HEADERS = {"Authorization": "Bearer YOUR_API_KEY"}
+BASE_URL = "https://api.orbscan.com/v1"
+
+last_seen_timestamp = None
+
+while True:
+    response = requests.get(
+        f"{BASE_URL}/activities",
+        headers=HEADERS,
+        params={"limit": 50, "type": "all"},
+    )
+    trades = response.json()["data"]
+
+    new_trades = [
+        t for t in trades
+        if last_seen_timestamp is None or t["timestamp"] > last_seen_timestamp
+    ]
+
+    if new_trades:
+        last_seen_timestamp = new_trades[0]["timestamp"]
+        for trade in new_trades:
+            print(f"New trade: {trade['trader_username']} — {trade['side']} ${trade['size_usd']:.2f}")
+
+    time.sleep(10)  # Poll every 10 seconds
+```

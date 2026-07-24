@@ -1,0 +1,110 @@
+---
+title: "GET /v1/traders/{address}/positions — Open Positions"
+sidebarTitle: "GET Positions"
+description: "List all open Polymarket positions for a wallet — market, outcome, shares held, cost basis, current value, and unrealized PnL."
+---
+
+The positions endpoint returns every currently open position held by a Polymarket trader. Each entry tells you which market and outcome the trader is exposed to, how many shares they hold, what they paid, and how that position is marked at current prices — giving you everything needed to display a live portfolio view or calculate risk exposure.
+
+`GET https://api.orbscan.com/v1/traders/{address}/positions`
+
+## Path Parameters
+
+<ParamField path="address" type="string" required>
+  The 0x-prefixed, 42-character Ethereum wallet address of the trader whose open positions you want to retrieve. Case-insensitive.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="category" type="string">
+  Restrict results to positions in markets belonging to a specific category. Common values include `crypto`, `politics`, `sports`, and `science`. Omit this parameter to return positions across all categories.
+</ParamField>
+
+<ParamField query="limit" type="integer">
+  Number of position objects to return per page. Accepts values between `1` and `200`. Defaults to `50`.
+</ParamField>
+
+<ParamField query="offset" type="integer">
+  Zero-based index of the first result to return. Use in combination with `limit` to paginate through large position lists. Defaults to `0`.
+</ParamField>
+
+## Request Example
+
+<CodeGroup>
+
+```bash curl
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/traders/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/positions?category=politics&limit=50&offset=0' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</CodeGroup>
+
+## Response Fields
+
+The response is an array of position objects. Each object contains the following fields:
+
+<ResponseField name="market_slug" type="string">
+  URL-safe identifier for the market, matching the slug used in Polymarket URLs (e.g. `will-btc-hit-100k-by-eoy-2025`).
+</ResponseField>
+
+<ResponseField name="market_question" type="string">
+  The full question text of the prediction market as displayed on Polymarket (e.g. `"Will Bitcoin exceed $100,000 by end of 2025?"`).
+</ResponseField>
+
+<ResponseField name="category" type="string">
+  The category tag applied to the market on Polymarket (e.g. `crypto`, `politics`, `sports`).
+</ResponseField>
+
+<ResponseField name="outcome" type="string">
+  The specific outcome the trader holds shares in. Typically `"Yes"` or `"No"` for binary markets, but may differ for multi-outcome markets.
+</ResponseField>
+
+<ResponseField name="shares" type="number">
+  The total number of outcome shares the trader currently holds in this position.
+</ResponseField>
+
+<ResponseField name="cost_basis" type="number">
+  The total USD amount the trader paid to acquire their current share holdings, accounting for any partial sells that reduced the position.
+</ResponseField>
+
+<ResponseField name="current_value" type="number">
+  The present mark-to-market value of the position in USD, calculated as `shares × current_price × $1`.
+</ResponseField>
+
+<ResponseField name="unrealized_pnl" type="number">
+  The difference between `current_value` and `cost_basis` in USD. Positive values indicate an unrealized gain; negative values indicate an unrealized loss.
+</ResponseField>
+
+<ResponseField name="price" type="number">
+  The current market price per share for this outcome, expressed as a decimal between `0` and `1`. This value is equivalent to the market's implied probability for the outcome.
+</ResponseField>
+
+## Example Response
+
+```json
+[
+  {
+    "market_slug": "will-btc-hit-100k-by-eoy-2025",
+    "market_question": "Will Bitcoin exceed $100,000 by end of 2025?",
+    "category": "crypto",
+    "outcome": "Yes",
+    "shares": 1500.00,
+    "cost_basis": 825.00,
+    "current_value": 1035.00,
+    "unrealized_pnl": 210.00,
+    "price": 0.69
+  },
+  {
+    "market_slug": "us-presidential-election-2024-winner",
+    "market_question": "Who will win the 2024 US Presidential Election?",
+    "category": "politics",
+    "outcome": "No",
+    "shares": 400.00,
+    "cost_basis": 180.00,
+    "current_value": 152.00,
+    "unrealized_pnl": -28.00,
+    "price": 0.38
+  }
+]
+```

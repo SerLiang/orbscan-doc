@@ -1,0 +1,171 @@
+---
+title: "Fetch Trader Profiles and Positions with Orbscan"
+sidebarTitle: "Trader Profile"
+description: "Query a Polymarket wallet's PnL, open positions, and trade history using the Orbscan Traders API endpoints."
+---
+
+The Traders API gives you complete analytics for any Polymarket wallet address — including realized and unrealized PnL, open positions, trade history, win rate, and risk-adjusted return metrics. Whether you're researching a specific trader or building a portfolio tracker, these endpoints are your starting point.
+
+<Steps>
+
+<Step title="Identify the trader's wallet address">
+
+Every Polymarket trader is identified by their Ethereum wallet address. There are two easy ways to find one:
+
+- **Browse orbscan.com** — search by username or explore the leaderboard, then copy the address from the trader's profile URL. For example: `orbscan.com/profile/0x204f72f35326db932158cba6adff0b9a1da95e14`
+- **From Polymarket directly** — navigate to a trader's public profile on polymarket.com and grab the address from the URL or the connected wallet display.
+
+<Tip>
+Wallet addresses are case-insensitive. `0x204F72...` and `0x204f72...` resolve to the same trader.
+</Tip>
+
+</Step>
+
+<Step title="Fetch their profile">
+
+Call `GET /v1/traders/{address}/profile` to retrieve a full summary of the trader's performance metrics, including 30-day PnL, total PnL, win rate, Sharpe ratio, and portfolio size.
+
+<CodeGroup>
+
+```bash curl
+curl --request GET \
+  --url https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+```python Python
+import requests
+
+address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+
+response = requests.get(
+    f"https://api.orbscan.com/v1/traders/{address}/profile",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+)
+
+profile = response.json()
+print(f"Username: {profile['username']}")
+print(f"30-day PnL: ${profile['pnl_30d']:,.2f}")
+print(f"Win rate: {profile['win_rate'] * 100:.1f}%")
+```
+
+```javascript JavaScript
+const address = "0x204f72f35326db932158cba6adff0b9a1da95e14";
+
+const response = await fetch(
+  `https://api.orbscan.com/v1/traders/${address}/profile`,
+  {
+    headers: {
+      Authorization: "Bearer YOUR_API_KEY",
+    },
+  }
+);
+
+const profile = await response.json();
+console.log(`Username: ${profile.username}`);
+console.log(`30-day PnL: $${profile.pnl_30d.toLocaleString()}`);
+console.log(`Win rate: ${(profile.win_rate * 100).toFixed(1)}%`);
+```
+
+</CodeGroup>
+
+**Example response**
+
+```json
+{
+  "address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+  "username": "swisstony",
+  "pnl_30d": 10418044.50,
+  "pnl_total": 24500000.00,
+  "win_rate": 0.53,
+  "sharpe_ratio": 0.55,
+  "position_value": 48508.24,
+  "active_markets": 493,
+  "resolved_count": 258070
+}
+```
+
+| Field | Description |
+|---|---|
+| `pnl_30d` | Realized + unrealized PnL over the last 30 days, in USD |
+| `pnl_total` | Lifetime PnL across all resolved and open positions |
+| `win_rate` | Fraction of resolved markets where the trader's position finished profitable |
+| `sharpe_ratio` | Risk-adjusted return — higher is more consistent relative to volatility |
+| `position_value` | Current market value of all open positions |
+| `active_markets` | Number of markets the trader currently holds a position in |
+| `resolved_count` | Total number of resolved market positions in the trader's history |
+
+</Step>
+
+<Step title="Fetch open positions">
+
+Call `GET /v1/traders/{address}/positions` to see every market the trader is currently active in, along with their cost basis, current value, and unrealized PnL.
+
+```bash curl
+curl --request GET \
+  --url https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/positions \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+**Example response**
+
+```json
+{
+  "data": [
+    {
+      "market_slug": "will-bitcoin-hit-100k",
+      "market_question": "Will Bitcoin hit $100k in 2025?",
+      "outcome": "Yes",
+      "shares": 250.5,
+      "cost_basis": 125.25,
+      "current_value": 200.40,
+      "unrealized_pnl": 75.15,
+      "price": 0.799
+    }
+  ]
+}
+```
+
+</Step>
+
+<Step title="Fetch trade history">
+
+Call `GET /v1/traders/{address}/trades` to retrieve a chronological log of every buy and sell the trader has made. Use the `limit` and `offset` query parameters to paginate through large histories.
+
+```bash curl
+# Fetch the first 50 trades
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/trades?limit=50&offset=0' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+
+# Fetch the next page
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/trades?limit=50&offset=50' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `limit` | integer | Number of trades to return per page. Maximum `200`, default `50`. |
+| `offset` | integer | Number of trades to skip. Use to page through results. Default `0`. |
+
+<Note>
+Trade history is ordered newest-first. Set `offset=0` to always start from the most recent activity.
+</Note>
+
+</Step>
+
+</Steps>
+
+## Filter positions by market category
+
+Pass a `category` query parameter to `/positions` to narrow results to a specific market vertical. This is useful when you want to evaluate a trader's performance in a domain like Politics or Crypto in isolation.
+
+```bash curl
+# Fetch only the trader's crypto market positions
+curl --request GET \
+  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/positions?category=Crypto' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+Supported category values include `Politics`, `Sports`, `Crypto`, `Business`, `Entertainment`, and `Science`. Category names are case-sensitive. If you omit the parameter, all open positions across every category are returned.

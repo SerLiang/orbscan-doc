@@ -1,0 +1,129 @@
+---
+title: "GET /v1/markets/{slug}/activity — Market Trade Feed"
+sidebarTitle: "Market Activity"
+description: "Fetch recent trades for a specific Polymarket market by slug — buyer, outcome, price, size, and Polygon transaction hash."
+---
+
+The `/v1/markets/{slug}/activity` endpoint returns a paginated feed of recent trades executed on a specific Polymarket prediction market. Each activity record includes the trader's wallet address, the outcome and direction of their trade, the price and USD size, and the on-chain Polygon transaction hash for independent verification. You can filter by minimum trade size or direction to focus on the signals most relevant to your use case.
+
+## Endpoint
+
+```
+GET https://api.orbscan.com/v1/markets/{slug}/activity
+```
+
+## Path Parameters
+
+<ParamField path="slug" type="string" required>
+  The URL-safe unique identifier for the market. Retrieve slugs from the [List Markets](/api-reference/markets/list-markets) endpoint.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="limit" type="integer" default="20">
+  Number of activity records to return per page. Maximum value is `100`.
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Number of records to skip before returning the page. Use with `limit` to paginate through results.
+</ParamField>
+
+<ParamField query="min_size" type="number">
+  Filter results to only include trades with a USD value greater than or equal to this amount. Useful for surfacing whale activity.
+</ParamField>
+
+<ParamField query="side" type="string" default="all">
+  Filter results by trade direction. Accepted values: `BUY`, `SELL`, `all`.
+</ParamField>
+
+## Request Example
+
+```bash curl
+curl --request GET \
+  --url "https://api.orbscan.com/v1/markets/will-bitcoin-hit-100k/activity?limit=20&side=BUY&min_size=500" \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+## Response Fields
+
+<ResponseField name="total" type="integer">
+  Total number of activity records matching your query filters.
+</ResponseField>
+
+<ResponseField name="limit" type="integer">
+  Number of records returned in this response.
+</ResponseField>
+
+<ResponseField name="offset" type="integer">
+  Offset applied to this response.
+</ResponseField>
+
+<ResponseField name="activity" type="array">
+  Array of trade objects.
+
+  <Expandable title="Activity object fields">
+    <ResponseField name="trader_address" type="string">
+      The Polygon wallet address of the trader who executed the trade.
+    </ResponseField>
+
+    <ResponseField name="trader_username" type="string | null">
+      The trader's display name on Polymarket, if they have set one. Returns `null` if no username is set.
+    </ResponseField>
+
+    <ResponseField name="outcome" type="string">
+      The market outcome that was traded (e.g. `"Yes"`, `"No"`, or a team name).
+    </ResponseField>
+
+    <ResponseField name="side" type="string">
+      Direction of the trade. Either `BUY` or `SELL`.
+    </ResponseField>
+
+    <ResponseField name="price" type="number">
+      Price per share at the time of the trade, expressed as a decimal between `0` and `1`.
+    </ResponseField>
+
+    <ResponseField name="size_usd" type="number">
+      Total USD value of the trade.
+    </ResponseField>
+
+    <ResponseField name="tx_hash" type="string">
+      On-chain Polygon transaction hash. Verify the trade independently on Polygonscan using this value.
+    </ResponseField>
+
+    <ResponseField name="timestamp" type="string">
+      ISO 8601 datetime at which the trade was executed on-chain.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Example Response
+
+```json
+{
+  "total": 1438,
+  "limit": 20,
+  "offset": 0,
+  "activity": [
+    {
+      "trader_address": "0xA1B2c3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0",
+      "trader_username": "cryptowhale",
+      "outcome": "Yes",
+      "side": "BUY",
+      "price": 0.72,
+      "size_usd": 15400.00,
+      "tx_hash": "0x4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3",
+      "timestamp": "2025-06-14T10:23:45Z"
+    },
+    {
+      "trader_address": "0xB2C3d4E5f6A7b8C9d0E1f2A3b4C5d6E7f8A9b0C1",
+      "trader_username": null,
+      "outcome": "No",
+      "side": "BUY",
+      "price": 0.28,
+      "size_usd": 3200.50,
+      "tx_hash": "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2",
+      "timestamp": "2025-06-14T10:19:12Z"
+    }
+  ]
+}
+```

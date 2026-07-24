@@ -1,0 +1,74 @@
+---
+title: "Orbscan API Error Codes and Troubleshooting Guide"
+sidebarTitle: "Errors"
+description: "Complete reference for Orbscan API HTTP error codes — 400, 401, 403, 404, 422, 429, 500 — with causes and remediation steps."
+---
+
+The Orbscan API uses standard HTTP status codes to signal whether a request succeeded or failed. Codes in the `2xx` range indicate success, `4xx` codes indicate a problem with the request you sent, and `5xx` codes indicate an unexpected condition on the server side. Every error response includes a machine-readable code and a human-readable message to help you diagnose and fix the issue quickly.
+
+## Error Response Format
+
+Whenever a request fails, the API returns a JSON body with a single top-level `error` object containing three fields: a short error `code`, a descriptive `message`, and the HTTP `status` code.
+
+```json
+{
+  "error": {
+    "code": "INVALID_ADDRESS",
+    "message": "The wallet address provided is not a valid Ethereum address.",
+    "status": 400
+  }
+}
+```
+
+Use the `code` field in your application logic to handle specific error conditions programmatically. The `message` field is intended for logging and debugging.
+
+## Error Code Reference
+
+| HTTP Status | Error Code | Meaning | How to Fix |
+|---|---|---|---|
+| `400` | `INVALID_PARAMS` | One or more request parameters are malformed or missing | Review the endpoint's parameter documentation and check types, formats, and required fields |
+| `400` | `INVALID_ADDRESS` | The wallet address is not a valid hex-encoded Ethereum address | Confirm the address starts with `0x` and is 42 characters long |
+| `401` | `UNAUTHORIZED` | The `Authorization` header is missing or the API key is invalid | Verify your `Authorization: Bearer YOUR_API_KEY` header is present and your key is correct |
+| `403` | `FORBIDDEN` | Your API key is valid but does not have access to this resource | Check whether this endpoint is included in your current plan and upgrade if necessary |
+| `404` | `NOT_FOUND` | The requested trader, market, or resource does not exist | Double-check the wallet address or market slug — it may not exist on Polymarket |
+| `422` | `UNPROCESSABLE` | The request is syntactically valid but semantically invalid | Review the values you passed — for example, a date range where `start` is after `end` |
+| `429` | `RATE_LIMITED` | You have exceeded your plan's request rate limit | Back off and wait until the `X-RateLimit-Reset` window expires before retrying |
+| `500` | `SERVER_ERROR` | An unexpected error occurred on Orbscan's servers | Retry using exponential backoff; if the error persists, contact Orbscan support |
+
+## Retrying Requests
+
+Not all errors are worth retrying. For server-side errors (`500`) and rate limit errors (`429`), retrying after a delay is the right approach. For all other errors, fix the underlying issue in your request before trying again.
+
+For `429` and `500` responses, use **exponential backoff**: wait a short initial delay, then double the wait time on each successive failure, adding a small random jitter to avoid thundering-herd collisions.
+
+<CodeGroup>
+
+```python Python
+import time
+import random
+import requests
+
+def request_with_backoff(url, headers, max_retries=5):
+    delay = 1  # initial delay in seconds
+
+    for attempt in range(max_retries):
+        response = requests.get(url, headers=headers)
+
+        if response.status_code not in (429, 500):
+            return response  # success or non-retryable error
+
+        if attempt < max_retries - 1:
+            jitter = random.uniform(0, 0.5)
+            wait = delay + jitter
+            print(f"Attempt {attempt + 1} failed ({response.status_code}). Retrying in {wait:.2f}s...")
+            time.sleep(wait)
+            delay *= 2  # exponential backoff
+
+    return response  # return final response after exhausting retries
+```
+
+</CodeGroup>
+
+<Warning>
+  Never automatically retry `4xx` errors (except `429`). A `400`, `401`, `403`, `404`, or `422` response will return the same error on every retry until you fix the underlying request. Blindly retrying these wastes your rate limit quota.
+</Warning>
