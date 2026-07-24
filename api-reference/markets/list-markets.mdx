@@ -41,14 +41,14 @@ GET https://api.orbscan.com/v1/markets
 ```bash curl
 curl --request GET \
   --url "https://api.orbscan.com/v1/markets?category=crypto&status=active&sort=volume_24h&limit=20&offset=0" \
-  --header "Authorization: Bearer YOUR_API_KEY"
+  --header "Authorization: Bearer $ORBSCAN_API_KEY"
 ```
 
 ```python Python
 import requests
 
 url = "https://api.orbscan.com/v1/markets"
-headers = {"Authorization": "Bearer YOUR_API_KEY"}
+headers = {"Authorization": "Bearer $ORBSCAN_API_KEY"}
 params = {
     "category": "crypto",
     "status": "active",

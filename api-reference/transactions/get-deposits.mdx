@@ -1,7 +1,7 @@
 ---
 title: "GET /v1/traders/{address}/deposits — USDC Deposit History"
-sidebarTitle: "GET Deposits"
-description: "Fetch all USDC deposit transactions for a Polymarket wallet on Polygon — amount, timestamp, and on-chain transaction hash."
+sidebarTitle: "Get Deposits"
+description: "Fetch the full USDC deposit history for a Polymarket wallet on Polygon — amount, originating address, timestamp, and on-chain transaction hash."
 ---
 
 The `/v1/traders/{address}/deposits` endpoint returns the full USDC deposit history for a given Polymarket wallet address, sourced directly from on-chain Polygon transactions. Each record includes the deposited amount, the originating wallet, a timestamp, and the transaction hash you can use to independently verify the deposit on Polygonscan. Use the date range filters to scope results to a specific time window.
@@ -41,7 +41,7 @@ GET https://api.orbscan.com/v1/traders/{address}/deposits
 ```bash curl
 curl --request GET \
   --url "https://api.orbscan.com/v1/traders/0xA1B2c3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0/deposits?limit=50&start_date=2025-01-01&end_date=2025-06-30" \
-  --header "Authorization: Bearer YOUR_API_KEY"
+  --header "Authorization: Bearer $ORBSCAN_API_KEY"
 ```
 
 ## Response Fields

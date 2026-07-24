@@ -1,7 +1,7 @@
 ---
-title: "GET /v1/markets/{slug} — Single Market Details"
+title: "GET /v1/markets/{slug} — Prediction Market Details"
 sidebarTitle: "Get Market"
-description: "Fetch detailed data for a single Polymarket prediction market by slug — outcome prices, volume, liquidity, and resolution status."
+description: "Fetch full details for a single Polymarket prediction market by slug, including live outcome prices, all-time volume, and resolution data."
 ---
 
 The `/v1/markets/{slug}` endpoint returns comprehensive details for a single Polymarket prediction market. In addition to the fields available in the markets list, you receive live outcome prices, all-time volume, the resolution source, and — for resolved markets — the winning outcome and resolution timestamp. Use this endpoint when you need the full picture for a specific market.
@@ -20,11 +20,25 @@ GET https://api.orbscan.com/v1/markets/{slug}
 
 ## Request Example
 
+<CodeGroup>
+
 ```bash curl
 curl --request GET \
   --url "https://api.orbscan.com/v1/markets/will-bitcoin-hit-100k" \
-  --header "Authorization: Bearer YOUR_API_KEY"
+  --header "Authorization: Bearer $ORBSCAN_API_KEY"
 ```
+
+```python Python
+import requests
+
+url = "https://api.orbscan.com/v1/markets/will-bitcoin-hit-100k"
+headers = {"Authorization": "Bearer $ORBSCAN_API_KEY"}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+
+</CodeGroup>
 
 ## Response Fields
 

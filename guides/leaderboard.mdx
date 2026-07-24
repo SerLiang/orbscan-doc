@@ -33,15 +33,16 @@ GET /v1/leaderboard
 # Top 25 traders by 30-day PnL (default)
 curl --request GET \
   --url 'https://api.orbscan.com/v1/leaderboard?period=monthly&limit=25&page=1' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 
 # Top crypto traders this week
 curl --request GET \
   --url 'https://api.orbscan.com/v1/leaderboard?period=weekly&category=Crypto&limit=25' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 ```python Python
+import os
 import requests
 
 params = {
@@ -53,7 +54,7 @@ params = {
 
 response = requests.get(
     "https://api.orbscan.com/v1/leaderboard",
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    headers={"Authorization": f"Bearer {os.environ['ORBSCAN_API_KEY']}"},
     params=params,
 )
 
@@ -111,7 +112,7 @@ Ranks traders by PnL earned in the current calendar day (UTC). Use this to spot 
 ```bash curl
 curl --request GET \
   --url 'https://api.orbscan.com/v1/leaderboard?period=today' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 </Tab>
@@ -123,7 +124,7 @@ Ranks traders by PnL earned over the last 7 days. A good balance between recency
 ```bash curl
 curl --request GET \
   --url 'https://api.orbscan.com/v1/leaderboard?period=weekly' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 </Tab>
@@ -135,7 +136,7 @@ The default period. Ranks traders by PnL over the last 30 days — broad enough 
 ```bash curl
 curl --request GET \
   --url 'https://api.orbscan.com/v1/leaderboard?period=monthly' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 </Tab>
@@ -147,7 +148,7 @@ Ranks traders by total lifetime PnL. Use this to find consistently strong perfor
 ```bash curl
 curl --request GET \
   --url 'https://api.orbscan.com/v1/leaderboard?period=all' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 </Tab>
@@ -159,6 +160,7 @@ curl --request GET \
 The leaderboard supports up to 1,000 ranked traders. Use `limit` and `page` together to walk through them in batches.
 
 ```python Python
+import os
 import requests
 
 all_traders = []
@@ -167,7 +169,7 @@ page = 1
 while True:
     response = requests.get(
         "https://api.orbscan.com/v1/leaderboard",
-        headers={"Authorization": "Bearer YOUR_API_KEY"},
+        headers={"Authorization": f"Bearer {os.environ['ORBSCAN_API_KEY']}"},
         params={"period": "monthly", "limit": 100, "page": page},
     )
     data = response.json()

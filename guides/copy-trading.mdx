@@ -25,11 +25,12 @@ The key variables to calibrate are:
 Start with the leaderboard and use `sharpe_ratio` as your primary signal alongside win rate. A high 30-day PnL alone can reflect a single outsized bet. A high Sharpe ratio combined with a strong win rate indicates more consistent, risk-adjusted performance over time.
 
 ```python Python
+import os
 import requests
 
 response = requests.get(
     "https://api.orbscan.com/v1/leaderboard",
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    headers={"Authorization": f"Bearer {os.environ['ORBSCAN_API_KEY']}"},
     params={"period": "monthly", "limit": 100},
 )
 
@@ -64,7 +65,7 @@ The trader profile endpoint returns a `copy_pnl_7d` field — the hypothetical P
 ```bash curl
 curl --request GET \
   --url https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 ```json
@@ -89,13 +90,14 @@ The `copy_pnl_7d` value assumes a 1:1 dollar allocation. If you plan to copy at 
 Before mirroring a trader, inspect the markets they are currently active in. This tells you exactly where to place your positions if you decide to copy them.
 
 ```python Python
+import os
 import requests
 
 address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
 
 response = requests.get(
     f"https://api.orbscan.com/v1/traders/{address}/positions",
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    headers={"Authorization": f"Bearer {os.environ['ORBSCAN_API_KEY']}"},
 )
 
 positions = response.json()["data"]
@@ -142,9 +144,10 @@ for pos in positions:
 A practical workflow is to run the leaderboard filter on a schedule, store candidates whose `copy_pnl_7d` meets your threshold, and poll their positions daily to stay in sync with their portfolio.
 
 ```python Python
+import os
 import requests
 
-HEADERS = {"Authorization": "Bearer YOUR_API_KEY"}
+HEADERS = {"Authorization": f"Bearer {os.environ['ORBSCAN_API_KEY']}"}
 BASE_URL = "https://api.orbscan.com/v1"
 
 def get_copy_candidates(min_sharpe=1.0, min_win_rate=0.55, min_resolved=50):

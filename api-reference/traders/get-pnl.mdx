@@ -30,8 +30,27 @@ The PnL endpoint returns a day-by-day profit and loss timeseries for a Polymarke
 
 ```bash curl
 curl --request GET \
-  --url 'https://api.orbscan.com/v1/traders/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/pnl?period=30d&breakdown=true' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/pnl?period=30d&breakdown=true' \
+  --header 'Authorization: Bearer $ORBSCAN_API_KEY'
+```
+
+```python Python
+import requests
+
+address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+
+params = {
+    "period": "30d",
+    "breakdown": "true",
+}
+
+response = requests.get(
+    f"https://api.orbscan.com/v1/traders/{address}/pnl",
+    headers={"Authorization": "Bearer $ORBSCAN_API_KEY"},
+    params=params,
+)
+
+print(response.json())
 ```
 
 </CodeGroup>
@@ -84,7 +103,7 @@ curl --request GET \
 
 ```json
 {
-  "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  "address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
   "period": "30d",
   "total_pnl": 1243.77,
   "realized_pnl": 890.40,

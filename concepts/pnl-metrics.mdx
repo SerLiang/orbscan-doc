@@ -14,19 +14,19 @@ PnL is split into two components:
 
 **Realized PnL** covers positions that have already been closed — either by selling shares before resolution or by collecting a payout after a market resolves. This is money that has definitively been made or lost.
 
-```
+```text
 realized_pnl = sale_proceeds - cost_basis
 ```
 
 **Unrealized PnL** covers positions that are still open. It reflects the gain or loss you _would_ lock in if you sold your current shares at today's market price.
 
-```
+```text
 unrealized_pnl = current_market_value - cost_basis
 ```
 
 The **total PnL** for a trader combines both:
 
-```
+```text
 total_pnl = realized_pnl + unrealized_pnl
 ```
 
@@ -49,7 +49,7 @@ For example, a trader with `pnl_30d = +$840` and a `+34% vs prior 30D` indicator
 
 Win rate measures how consistently a trader picks the correct outcome across all the markets they've participated in:
 
-```
+```text
 win_rate = (resolved_wins / total_resolved_markets) * 100
 ```
 
@@ -61,7 +61,7 @@ Win rate is a useful consistency signal, but it does not capture position sizing
 
 The Sharpe ratio is a **risk-adjusted return** metric. It measures how much return a trader generates per unit of volatility in their performance — rewarding consistent gains and penalizing wild swings, even if those swings are ultimately profitable.
 
-```
+```text
 sharpe_ratio = mean_return / standard_deviation_of_returns
 ```
 

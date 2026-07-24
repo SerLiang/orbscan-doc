@@ -1,7 +1,7 @@
 ---
-title: "Authenticate Requests to the Orbscan API"
+title: "Orbscan API Authentication: Keys, Headers & Errors"
 sidebarTitle: "Authentication"
-description: "Learn how to obtain an Orbscan API key, pass it in request headers, and handle authentication errors like 401 Unauthorized."
+description: "Learn how to obtain an Orbscan API key, pass it correctly in the Authorization header, and troubleshoot common authentication errors."
 ---
 
 Orbscan uses API key authentication to secure every request. All calls to the Orbscan API must include your personal API key in the `Authorization` header using the Bearer scheme. There are no cookies, OAuth flows, or session tokens — just a single header that identifies your account and enforces your plan's rate limits.
@@ -28,7 +28,7 @@ Orbscan uses API key authentication to secure every request. All calls to the Or
 
 Include your API key as a Bearer token in the `Authorization` header of every request:
 
-```
+```http
 Authorization: Bearer YOUR_API_KEY
 ```
 

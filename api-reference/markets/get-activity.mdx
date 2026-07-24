@@ -1,7 +1,7 @@
 ---
 title: "GET /v1/markets/{slug}/activity — Market Trade Feed"
 sidebarTitle: "Market Activity"
-description: "Fetch recent trades for a specific Polymarket market by slug — buyer, outcome, price, size, and Polygon transaction hash."
+description: "Fetch a paginated trade feed for any Polymarket market by slug — trader address, outcome, direction, price, USD size, and Polygon transaction hash."
 ---
 
 The `/v1/markets/{slug}/activity` endpoint returns a paginated feed of recent trades executed on a specific Polymarket prediction market. Each activity record includes the trader's wallet address, the outcome and direction of their trade, the price and USD size, and the on-chain Polygon transaction hash for independent verification. You can filter by minimum trade size or direction to focus on the signals most relevant to your use case.
@@ -38,11 +38,30 @@ GET https://api.orbscan.com/v1/markets/{slug}/activity
 
 ## Request Example
 
+<CodeGroup>
+
 ```bash curl
 curl --request GET \
   --url "https://api.orbscan.com/v1/markets/will-bitcoin-hit-100k/activity?limit=20&side=BUY&min_size=500" \
-  --header "Authorization: Bearer YOUR_API_KEY"
+  --header "Authorization: Bearer $ORBSCAN_API_KEY"
 ```
+
+```python Python
+import requests
+
+url = "https://api.orbscan.com/v1/markets/will-bitcoin-hit-100k/activity"
+headers = {"Authorization": "Bearer $ORBSCAN_API_KEY"}
+params = {
+    "limit": 20,
+    "side": "BUY",
+    "min_size": 500,
+}
+
+response = requests.get(url, headers=headers, params=params)
+print(response.json())
+```
+
+</CodeGroup>
 
 ## Response Fields
 

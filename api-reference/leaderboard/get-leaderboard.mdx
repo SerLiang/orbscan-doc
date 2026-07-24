@@ -1,7 +1,7 @@
 ---
 title: "GET /v1/leaderboard — Top Polymarket Traders Ranked"
 sidebarTitle: "Leaderboard"
-description: "Fetch the Orbscan leaderboard of top Polymarket traders by PnL. Filter by time period and category, paginate up to 100 results."
+description: "Fetch the Orbscan leaderboard of top Polymarket traders ranked by PnL. Filter by time period and category, with win rate, Sharpe ratio, and copy PnL."
 ---
 
 The `/v1/leaderboard` endpoint returns a ranked list of top Polymarket traders ordered by profit and loss (PnL) for your chosen time period. Each entry includes performance metrics such as win rate, Sharpe ratio, open position value, and 7-day copy trading PnL — giving you a rich view of trader quality beyond raw returns. You can scope results to a specific market category to identify specialists in a particular domain.
@@ -37,14 +37,14 @@ GET https://api.orbscan.com/v1/leaderboard
 ```bash curl
 curl --request GET \
   --url "https://api.orbscan.com/v1/leaderboard?period=monthly&category=crypto&limit=25&page=1" \
-  --header "Authorization: Bearer YOUR_API_KEY"
+  --header "Authorization: Bearer $ORBSCAN_API_KEY"
 ```
 
 ```python Python
 import requests
 
 url = "https://api.orbscan.com/v1/leaderboard"
-headers = {"Authorization": "Bearer YOUR_API_KEY"}
+headers = {"Authorization": "Bearer $ORBSCAN_API_KEY"}
 params = {
     "period": "monthly",
     "category": "crypto",

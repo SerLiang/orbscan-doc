@@ -46,14 +46,14 @@ The trades endpoint returns the complete on-chain trade history for a Polymarket
 
 ```bash curl
 curl --request GET \
-  --url 'https://api.orbscan.com/v1/traders/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/trades?limit=50&side=BUY&start_date=2024-01-01&end_date=2024-03-31' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/trades?limit=50&side=BUY&start_date=2024-01-01&end_date=2024-03-31' \
+  --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 ```python Python
 import requests
 
-address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
 
 params = {
     "limit": 50,
@@ -64,7 +64,7 @@ params = {
 
 response = requests.get(
     f"https://api.orbscan.com/v1/traders/{address}/trades",
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    headers={"Authorization": "Bearer $ORBSCAN_API_KEY"},
     params=params,
 )
 
