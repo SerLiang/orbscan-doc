@@ -18,8 +18,40 @@ Returns a trader's Polymarket activity in reverse chronological order. The suppl
   Your Orbscan Open API key.
 </ParamField>
 
+<ParamField query="marketIds" type="string">
+  Filter activity by one or more market IDs. Repeat the parameter to supply multiple IDs, for example `marketIds=2707644&marketIds=2682268`.
+</ParamField>
+
+<ParamField query="txHash" type="string">
+  Filter by an exact transaction hash. Orbscan normalizes the supplied hash to lowercase.
+</ParamField>
+
+<ParamField query="fromBlock" type="integer">
+  Return activity from this block height, inclusive. Use with `toBlock` to define a block range.
+</ParamField>
+
+<ParamField query="toBlock" type="integer">
+  Return activity through this block height, inclusive.
+</ParamField>
+
+<ParamField query="fromTimestamp" type="integer">
+  Return activity at or after this Unix timestamp, expressed in seconds. Use with `toTimestamp` to define a time range.
+</ParamField>
+
+<ParamField query="toTimestamp" type="integer">
+  Return activity at or before this Unix timestamp, expressed in seconds.
+</ParamField>
+
+<ParamField query="cursor" type="string">
+  Base64 pagination cursor returned as `data.nextCursor` by the previous page. Omit it for the first page.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of records per page. The maximum is `100`; values above `100` are treated as `100`.
+</ParamField>
+
 ```bash
-curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?apikey=$ORBSCAN_API_KEY"
+curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?apikey=$ORBSCAN_API_KEY&marketIds=2707644&marketIds=2682268&fromTimestamp=1782500000&toTimestamp=1782900000&limit=50"
 ```
 
 ## Successful response
