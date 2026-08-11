@@ -1,23 +1,23 @@
 ---
-title: "Orbscan API: Polymarket Analytics & Explorer Guide"
+title: "Orbscan API"
 sidebarTitle: "Home"
-description: "Explore the Orbscan API documentation. Query real-time Polymarket trader PnL, positions, markets, leaderboards, and trade activity."
+description: "Orbscan is an on-chain activity explorer for Polymarket — query a wallet's trading activity, deposits and withdrawals, and decode any transaction over a simple JSON API."
 ---
 
-Orbscan is the definitive analytics layer for Polymarket — giving traders, researchers, and developers programmatic access to real-time and historical data across wallets, markets, leaderboards, and live trade activity. Whether you're building a copy-trading dashboard, running performance analysis, or simply tracking your own PnL, the Orbscan API puts the full depth of Polymarket data at your fingertips.
+Orbscan is an on-chain activity explorer for [Polymarket](https://polymarket.com/) prediction markets. It reads events directly from the chain and exposes them through a simple JSON API — so you can pull a wallet's full trading activity, its deposit and withdrawal history, and decode any transaction into a human-readable summary. There's no indexer to run and no on-chain data to parse yourself.
 
 <CardGroup cols={2}>
-  <Card title="Introduction" icon="book-open" href="/introduction">
-    Learn what Orbscan is, what problems it solves, and which endpoints cover your use case.
+  <Card title="What is Orbscan?" icon="circle-question" href="/what-is-orbscan">
+    A quick overview of what Orbscan does and the data it exposes.
   </Card>
-  <Card title="Quickstart" icon="rocket" href="/quickstart">
-    Make your first API call in under 5 minutes and start pulling live Polymarket data immediately.
+  <Card title="Authentication" icon="key" href="/api-reference/authentication">
+    Get an API key and authenticate your requests with a Bearer token.
   </Card>
-  <Card title="API Reference" icon="code" href="/api-reference/overview">
-    Browse the full endpoint catalogue — traders, markets, leaderboards, activity, and more.
+  <Card title="API Overview" icon="book-open" href="/api-reference/overview">
+    Base URL, response envelope, pagination, and the full endpoint list.
   </Card>
-  <Card title="Fetch a Trader Profile" icon="user-magnifying-glass" href="/guides/fetch-trader-profile">
-    Follow a step-by-step guide to retrieving PnL, positions, and stats for any Polymarket wallet.
+  <Card title="Get Trader Activity" icon="list" href="/api-reference/endpoints/get-trader-activity">
+    Pull a wallet's paginated buy, sell, and redeem history.
   </Card>
 </CardGroup>
 
@@ -27,12 +27,17 @@ New to Orbscan? Follow this path to go from zero to your first live data respons
 
 <Steps>
   <Step title="Get your API key">
-    Create a free account at [orbscan.com](https://orbscan.com), navigate to **Settings → API Keys**, and generate your personal key. Your key authenticates every request you make. See [Authentication](/authentication) for full details.
+    Request a key from [Orbscan](https://orbscan.com/contactus). It authenticates every request you make. See [Authentication](/api-reference/authentication) for full details.
   </Step>
   <Step title="Make your first request">
-    Pass your key in the `Authorization: Bearer` header and call any endpoint — for example, fetch a trader profile by wallet address. The [Quickstart](/quickstart) guide walks you through the exact request and response.
+    Pass your key in the `Authorization: Bearer` header and call an endpoint — for example, a trader's activity:
+
+    ```bash
+    curl "https://orbscan.com/open-api/v1/trader/{address}/activity?limit=50" \
+      -H "Authorization: Bearer YOUR_API_KEY"
+    ```
   </Step>
-  <Step title="Explore the full API">
-    Dig into leaderboards, live market activity, copy-trading simulations, deposit history, and more. The [API Reference](/api-reference/overview) documents every available endpoint with parameters, response schemas, and example payloads.
+  <Step title="Explore the endpoints">
+    Three endpoints cover everything: [trader activity](/api-reference/endpoints/get-trader-activity), [deposits &amp; withdrawals](/api-reference/endpoints/get-deposits-withdrawals), and [actions by transaction hash](/api-reference/endpoints/get-transaction). Each page has an interactive **Try it** playground.
   </Step>
 </Steps>
