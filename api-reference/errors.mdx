@@ -1,74 +1,99 @@
 ---
-title: "Orbscan API Error Codes and Troubleshooting Guide"
+title: "Orbscan Open API Errors"
 sidebarTitle: "Errors"
-description: "Complete reference for Orbscan API HTTP error codes — 400, 401, 403, 404, 422, 429, 500 — with causes, error shapes, and remediation steps."
+description: "How the Orbscan Open API signals errors — the response envelope, the status codes you'll actually see (400, 401, 404), and how to handle empty results."
 ---
 
-The Orbscan API uses standard HTTP status codes to signal whether a request succeeded or failed. Codes in the `2xx` range indicate success, `4xx` codes indicate a problem with the request you sent, and `5xx` codes indicate an unexpected condition on the server side. Every error response includes a machine-readable code and a human-readable message to help you diagnose and fix the issue quickly.
-
-## Error Response Format
-
-Whenever a request fails, the API returns a JSON body with a single top-level `error` object containing three fields: a short error `code`, a descriptive `message`, and the HTTP `status` code.
+When a request fails, Orbscan returns the same envelope used for successful responses, with `success` set to `false`, `data` set to `null`, and `code` holding the HTTP status as a string.
 
 ```json
 {
-  "error": {
-    "code": "INVALID_ADDRESS",
-    "message": "The wallet address provided is not a valid Ethereum address.",
-    "status": 400
-  }
+  "success": false,
+  "code": "401",
+  "message": "Missing or invalid API key",
+  "data": null
 }
 ```
 
-Use the `code` field in your application logic to handle specific error conditions programmatically. The `message` field is intended for logging and debugging.
+Handle errors by checking `success` first, then branch on `code` (or the HTTP status, which matches).
 
-## Error Code Reference
+## Status Codes
 
-| HTTP Status | Error Code | Meaning | How to Fix |
+| HTTP | `code` | `message` (example) | Cause & fix |
 |---|---|---|---|
-| `400` | `INVALID_PARAMS` | One or more request parameters are malformed or missing | Review the endpoint's parameter documentation and check types, formats, and required fields |
-| `400` | `INVALID_ADDRESS` | The wallet address is not a valid hex-encoded Ethereum address | Confirm the address starts with `0x` and is 42 characters long |
-| `401` | `UNAUTHORIZED` | The `Authorization` header is missing or the API key is invalid | Verify your `Authorization: Bearer YOUR_API_KEY` header is present and your key is correct |
-| `403` | `FORBIDDEN` | Your API key is valid but does not have access to this resource | Check whether this endpoint is included in your current plan and upgrade if necessary |
-| `404` | `NOT_FOUND` | The requested trader, market, or resource does not exist | Double-check the wallet address or market slug — it may not exist on Polymarket |
-| `422` | `UNPROCESSABLE` | The request is syntactically valid but semantically invalid | Review the values you passed — for example, a date range where `start` is after `end` |
-| `429` | `RATE_LIMITED` | You have exceeded your plan's request rate limit | Back off and wait until the `X-RateLimit-Reset` window expires before retrying |
-| `500` | `SERVER_ERROR` | An unexpected error occurred on Orbscan's servers | Retry using exponential backoff; if the error persists, contact Orbscan support |
+| `401` | `"401"` | `Missing or invalid API key` | The `Authorization: Bearer` header is missing or the key is wrong. Check the key you're sending. |
+| `400` | `"400"` | `Invalid address format` | A path or query value is malformed — most often an `address` that isn't a valid `0x…` hex address. |
+| `404` | `"404"` | `Not found: <path>` | The route doesn't exist. Check the endpoint path and spelling. |
+| `5xx` | `"5xx"` | — | A transient server or gateway error. Retry with backoff. |
 
-## Retrying Requests
+## Empty Results Are Not Errors
 
-Not all errors are worth retrying. For server-side errors (`500`) and rate limit errors (`429`), retrying after a delay is the right approach. For all other errors, fix the underlying issue in your request before trying again.
-
-For `429` and `500` responses, use **exponential backoff**: wait a short initial delay, then double the wait time on each successive failure, adding a small random jitter to avoid thundering-herd collisions.
+A valid request that simply has no data to return still succeeds with HTTP `200` and `success: true`:
 
 <CodeGroup>
 
-```python Python
-import time
-import random
-import requests
+```json List endpoint — no matching records
+{
+  "success": true,
+  "code": "0",
+  "message": "success",
+  "data": { "items": [], "nextCursor": null }
+}
+```
 
-def request_with_backoff(url, headers, max_retries=5):
-    delay = 1  # initial delay in seconds
-
-    for attempt in range(max_retries):
-        response = requests.get(url, headers=headers)
-
-        if response.status_code not in (429, 500):
-            return response  # success or non-retryable error
-
-        if attempt < max_retries - 1:
-            jitter = random.uniform(0, 0.5)
-            wait = delay + jitter
-            print(f"Attempt {attempt + 1} failed ({response.status_code}). Retrying in {wait:.2f}s...")
-            time.sleep(wait)
-            delay *= 2  # exponential backoff
-
-    return response  # return final response after exhausting retries
+```json Single lookup — nothing found
+{
+  "success": true,
+  "code": "0",
+  "message": "success",
+  "data": null
+}
 ```
 
 </CodeGroup>
 
 <Warning>
-  Never automatically retry `4xx` errors (except `429`). A `400`, `401`, `403`, `404`, or `422` response will return the same error on every retry until you fix the underlying request. Blindly retrying these wastes your rate limit quota.
+  Don't treat a `200` with empty `data` as a failure. Always inspect `data` — an empty `items` array (list endpoints) or a `null` `data` (single-record lookups) means "no results," not "error."
 </Warning>
+
+## Handling Errors in Code
+
+<CodeGroup>
+
+```python Python
+import requests
+
+resp = requests.get(url, timeout=30)
+body = resp.json()
+
+if not body["success"]:
+    code = body["code"]
+    if code == "401":
+        raise RuntimeError("Check your Orbscan API key")
+    raise RuntimeError(f"Orbscan error {code}: {body['message']}")
+
+data = body["data"]
+if not data or (isinstance(data, dict) and not data.get("items")):
+    print("No results")
+else:
+    print(data)
+```
+
+```javascript JavaScript
+const resp = await fetch(url);
+const body = await resp.json();
+
+if (!body.success) {
+  if (body.code === "401") throw new Error("Check your Orbscan API key");
+  throw new Error(`Orbscan error ${body.code}: ${body.message}`);
+}
+
+const { data } = body;
+if (!data || (Array.isArray(data.items) && data.items.length === 0)) {
+  console.log("No results");
+} else {
+  console.log(data);
+}
+```
+
+</CodeGroup>

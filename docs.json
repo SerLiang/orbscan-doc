@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "Orbscan",
-  "theme": "luma",
+  "theme": "mint",
   "colors": {
     "primary": "#0F57FF",
     "light": "#5082F7",
@@ -27,43 +27,22 @@
     "tabs": [
       {
         "tab": "API Reference",
+        "openapi": "openapi.json",
         "groups": [
           {
             "group": "Overview",
             "pages": [
               "api-reference/overview",
-              "api-reference/errors",
-              "api-reference/rate-limits"
+              "api-reference/authentication",
+              "api-reference/errors"
             ]
           },
           {
-            "group": "Traders",
+            "group": "Endpoints",
             "pages": [
-              "api-reference/traders/get-profile",
-              "api-reference/traders/get-positions",
-              "api-reference/traders/get-trades",
-              "api-reference/traders/get-pnl"
-            ]
-          },
-          {
-            "group": "Markets",
-            "pages": [
-              "api-reference/markets/list-markets",
-              "api-reference/markets/get-market",
-              "api-reference/markets/get-activity"
-            ]
-          },
-          {
-            "group": "Leaderboard",
-            "pages": [
-              "api-reference/leaderboard/get-leaderboard"
-            ]
-          },
-          {
-            "group": "Deposits & Withdrawals",
-            "pages": [
-              "api-reference/transactions/get-deposits",
-              "api-reference/transactions/get-withdrawals"
+              "api-reference/endpoints/get-trader-activity",
+              "api-reference/endpoints/get-deposits-withdrawals",
+              "api-reference/endpoints/get-transaction"
             ]
           }
         ]
