@@ -26,36 +26,6 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
-        "groups": [
-          {
-            "group": "Get Started",
-            "pages": [
-              "introduction",
-              "quickstart",
-              "authentication"
-            ]
-          },
-          {
-            "group": "Core Concepts",
-            "pages": [
-              "concepts/traders",
-              "concepts/markets",
-              "concepts/pnl-metrics"
-            ]
-          },
-          {
-            "group": "Guides",
-            "pages": [
-              "guides/fetch-trader-profile",
-              "guides/leaderboard",
-              "guides/copy-trading",
-              "guides/market-activity"
-            ]
-          }
-        ]
-      },
-      {
         "tab": "API Reference",
         "groups": [
           {
@@ -111,6 +81,13 @@
     }
   },
   "fonts": {
-    "family": "Inter"
+    "heading": {
+      "family": "Inter",
+      "weight": 600
+    },
+    "body": {
+      "family": "Inter",
+      "weight": 400
+    }
   }
 }
