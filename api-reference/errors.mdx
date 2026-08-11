@@ -21,7 +21,7 @@ Handle errors by checking `success` first, then branch on `code` (or the HTTP st
 
 | HTTP | `code` | `message` (example) | Cause & fix |
 |---|---|---|---|
-| `401` | `"401"` | `Missing or invalid API key` | The `apikey` query parameter is missing or wrong. Check the key you're sending. |
+| `401` | `"401"` | `Missing or invalid API key` | The `Authorization: Bearer` header is missing or the key is wrong. Check the key you're sending. |
 | `400` | `"400"` | `Invalid address format` | A path or query value is malformed — most often an `address` that isn't a valid `0x…` hex address. |
 | `404` | `"404"` | `Not found: <path>` | The route doesn't exist. Check the endpoint path and spelling. |
 | `5xx` | `"5xx"` | — | A transient server or gateway error. Retry with backoff. |

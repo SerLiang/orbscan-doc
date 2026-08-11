@@ -13,7 +13,7 @@
   ],
   "security": [
     {
-      "apiKeyAuth": []
+      "bearerAuth": []
     }
   ],
   "paths": {
@@ -358,11 +358,10 @@
   },
   "components": {
     "securitySchemes": {
-      "apiKeyAuth": {
-        "type": "apiKey",
-        "in": "query",
-        "name": "apikey",
-        "description": "Your Orbscan API key, passed as the `apikey` query parameter on every request."
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Pass your Orbscan API key as a Bearer token in the `Authorization` header: `Authorization: Bearer YOUR_API_KEY`."
       }
     },
     "responses": {

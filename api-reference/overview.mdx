@@ -18,11 +18,14 @@ Every endpoint path in this reference is relative to that base — for example, 
 
 ## Authentication
 
-Every request must include your API key as the `apikey` query parameter. Requests without a valid key return `401`.
+Every request must include your API key as a **Bearer token** in the `Authorization` header. Requests without a valid key return `401`.
 
 ```bash
-curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=1&apikey=YOUR_API_KEY"
+curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=1" \
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
+
+See [Authentication](/api-reference/authentication) for full details and code samples.
 
 <Warning>
   Your API key is a secret. Keep it server-side and never commit it to a public repository or expose it in client-side code.
@@ -63,10 +66,12 @@ The list endpoints (activity, deposits & withdrawals) are cursor-paginated:
 
 ```bash
 # Page 1
-curl "https://orbscan.com/open-api/v1/trader/{address}/activity?limit=50&apikey=YOUR_API_KEY"
+curl "https://orbscan.com/open-api/v1/trader/{address}/activity?limit=50" \
+  -H "Authorization: Bearer YOUR_API_KEY"
 
 # Page 2 — feed nextCursor back in
-curl "https://orbscan.com/open-api/v1/trader/{address}/activity?limit=50&cursor=NEXT_CURSOR&apikey=YOUR_API_KEY"
+curl "https://orbscan.com/open-api/v1/trader/{address}/activity?limit=50&cursor=NEXT_CURSOR" \
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ## Available Endpoints
