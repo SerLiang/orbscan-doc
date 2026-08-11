@@ -43,5 +43,10 @@
         ]
       }
     ]
+  },
+  "logo": {
+    "light": "/images/logo-light.svg",
+    "dark": "/images/logo.svg",
+    "href": "https://orbscan.com"
   }
 }
