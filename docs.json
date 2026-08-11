@@ -8,8 +8,8 @@
     "dark": "#4fa1ab"
   },
   "favicon": {
-    "light": "/images/logo-symbol-light.svg",
-    "dark": "/images/logo-symbol.svg"
+    "light": "/images/logo-symbol.svg",
+    "dark": "/images/logo-symbol-light.svg"
   },
   "navbar": {
     "primary": {
@@ -101,8 +101,8 @@
     ]
   },
   "logo": {
-    "light": "/images/logo-light.svg",
-    "dark": "/images/logo.svg",
+    "light": "/images/logo.svg",
+    "dark": "/images/logo-light.svg",
     "href": "https://orbscan.com"
   }
 }
