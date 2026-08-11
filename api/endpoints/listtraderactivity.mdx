@@ -1,10 +1,121 @@
 ---
 title: "List a trader's activity"
-description: "Return paginated buy, sell, and redeem activity for a wallet."
+description: "Return a trader's on-chain buys, sells, and redeems."
+api: "GET /open-api/v1/trader/{address}/activity"
 ---
 
-## GET `/api/v1/listtraderactivity`
+Returns a trader's Polymarket activity in reverse chronological order. The supplied test request returned HTTP `200`, 50 activity records, and an opaque `nextCursor` value.
 
-Returns every buy, sell, and redeem action for a trader, paginated across all markets they have touched.
+## Request
 
-<Note>Every request requires an API key. See [Authentication](/).</Note>
+`GET https://orbscan.com/open-api/v1/trader/{address}/activity`
+
+<ParamField path="address" type="string" required>
+  The 0x-prefixed trader wallet address.
+</ParamField>
+
+<ParamField query="apikey" type="string" required>
+  Your Orbscan Open API key.
+</ParamField>
+
+<ParamField query="marketIds" type="string">
+  Filter activity by one or more market IDs. Repeat the parameter to supply multiple IDs, for example `marketIds=2707644&marketIds=2682268`.
+</ParamField>
+
+<ParamField query="txHash" type="string">
+  Filter by an exact transaction hash. Orbscan normalizes the supplied hash to lowercase.
+</ParamField>
+
+<ParamField query="fromBlock" type="integer">
+  Return activity from this block height, inclusive. Use with `toBlock` to define a block range.
+</ParamField>
+
+<ParamField query="toBlock" type="integer">
+  Return activity through this block height, inclusive.
+</ParamField>
+
+<ParamField query="fromTimestamp" type="integer">
+  Return activity at or after this Unix timestamp, expressed in seconds. Use with `toTimestamp` to define a time range.
+</ParamField>
+
+<ParamField query="toTimestamp" type="integer">
+  Return activity at or before this Unix timestamp, expressed in seconds.
+</ParamField>
+
+<ParamField query="cursor" type="string">
+  Base64 pagination cursor returned as `data.nextCursor` by the previous page. Omit it for the first page.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of records per page. The maximum is `100`; values above `100` are treated as `100`.
+</ParamField>
+
+```bash
+curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?apikey=$ORBSCAN_API_KEY&marketIds=2707644&marketIds=2682268&fromTimestamp=1782500000&toTimestamp=1782900000&limit=50"
+```
+
+## Successful response
+
+```json
+{
+  "success": true,
+  "code": "0",
+  "message": "success",
+  "data": {
+    "items": [
+      {
+        "time": 1782861128,
+        "action": "Redeem",
+        "recordType": "REDEEMS",
+        "actionType": 1,
+        "price": 100,
+        "quantity": 5,
+        "fee": 0,
+        "grossValue": 5,
+        "transferNetAmount": -5,
+        "txHash": "0x71bf46c3089e2349a62ec6b93638522e8cc635a9836f1308ac7621ce1ecbb609",
+        "tokenId": "91355094557016369228768123360298492968992168419338047915199416797057852525950",
+        "marketId": "2707644",
+        "marketSlug": "fifwc-fra-swe-2026-06-30-fra",
+        "eventSlug": "fifwc-fra-swe-2026-06-30",
+        "conditionId": "0x378f7b5c668014d9f6c42c305ec83902f3c8f6c770b336363aed0076ce6ce1c9",
+        "marketTitle": "Will France win on 2026-06-30?",
+        "positionSide": "Yes",
+        "outcomeIndex": 0,
+        "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/soccer ball-bba4025f77.png",
+        "trader": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
+        "liquidityRole": null
+      }
+    ],
+    "nextCursor": "opaque cursor"
+  }
+}
+```
+
+## Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `data.items` | array | Activity records for the requested trader. |
+| `time` | integer | Unix timestamp for the activity. |
+| `action` | string | Human-readable action, such as `Buy`, `Sell`, or `Redeem`. |
+| `recordType` | string | Orbscan record classification. |
+| `actionType` | integer | Numeric action classification. |
+| `price` | number | Recorded execution or redemption price. |
+| `quantity` | number | Number of position shares. |
+| `fee` | number | Fee charged for the action. |
+| `grossValue` | number | Gross value of the activity. |
+| `transferNetAmount` | number | Net change in outcome shares caused by the activity. Positive values mean shares were received; negative values mean shares were removed, sold, or redeemed. This field represents shares, not USD. |
+| `txHash` | string | On-chain transaction hash. |
+| `tokenId` | string | Polymarket outcome token identifier. |
+| `marketId` | string | Orbscan market identifier. |
+| `marketSlug` | string | URL-safe market identifier. |
+| `eventSlug` | string | URL-safe event identifier. |
+| `conditionId` | string | On-chain condition identifier. |
+| `marketTitle` | string | Human-readable market question. |
+| `positionSide` | string | Outcome side involved in the activity. |
+| `outcomeIndex` | integer | Numeric outcome index. |
+| `logo` | string | Market image URL. |
+| `trader` | string | Trader wallet address. |
+| `liquidityRole` | string or null | `MAKER`, `TAKER`, or `null`. |
+| `data.nextCursor` | string or null | Cursor supplied when another page is available. |

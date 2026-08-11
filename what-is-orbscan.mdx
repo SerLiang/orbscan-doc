@@ -5,9 +5,9 @@ description: "An on-chain activity explorer for Polymarket prediction markets."
 
 [Orbscan](https://orbscan.com) is an on-chain activity explorer for [Polymarket](https://polymarket.com) prediction markets. It reads events directly from the chain and exposes them through a small JSON API, so you can:
 
-- Look up a trader's **current portfolio** of open positions and USD holdings.
-- Pull a trader's **full activity history** — every buy, sell, and redeem across every market they have touched, paginated.
-- Decode any **transaction hash** into a human-readable summary and the individual actions it contains.
+- Pull a trader's **full activity history** across markets.
+- List a trader's **deposits and withdrawals** with amounts and transaction hashes.
+- Decode any **transaction hash** into a human-readable summary and its individual actions.
 
 <Note>
   There is no indexer to run and no on-chain data to parse yourself — Orbscan has already done that work.
@@ -15,18 +15,23 @@ description: "An on-chain activity explorer for Polymarket prediction markets."
 
 ## Response format
 
-All endpoints are served under `https://orbscan.com/api/v1` and return a common envelope:
+All endpoints are served under `https://orbscan.com/open-api/v1` and return a common envelope:
 
 ```json
-{ "success": true, "code": "0", "message": "success", "data": {} }
+{
+  "success": true,
+  "code": "0",
+  "message": "success",
+  "data": {}
+}
 ```
 
-`success`, `code`, and `message` are consistent across every response, so you can handle errors the same way regardless of which endpoint you call. The endpoint-specific payload always lives under `data`.
+`success`, `code`, and `message` are consistent across successful responses. The endpoint-specific payload lives under `data`.
 
 ## Where to go next
 
-- [Get a trader's portfolio](/api/endpoints/gettraderportfolio) — a wallet's current open positions and USD holdings.
-- [List a trader's activity](/api/endpoints/listtraderactivity) — paginated buy, sell, and redeem history for a wallet.
-- [Get actions by transaction hash](/api/endpoints/gettxactions) — decode a transaction into its underlying actions.
+- [List a trader's activity](/api/endpoints/listtraderactivity) — paginated buy, sell, and redeem history.
+- [List deposits and withdrawals](/api/endpoints/listdepositswithdrawals) — a trader's balance-transfer history.
+- [Get actions by transaction hash](/api/endpoints/gettxactions) — decode one transaction into its underlying actions.
 
-Every request requires an API key. See [Authentication](/) to request one.
+Every request requires an API key. See [Authentication](/) for usage guidance.
