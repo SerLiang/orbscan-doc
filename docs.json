@@ -29,8 +29,9 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "Overview",
+            "group": "Get Started",
             "pages": [
+              "untitled-page",
               "api-reference/overview",
               "api-reference/authentication",
               "api-reference/errors"
