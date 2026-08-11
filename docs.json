@@ -1,17 +1,17 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "Orbscan API",
+  "name": "Orbscan",
   "theme": "luma",
   "colors": {
-    "primary": "#0F57FF",
-    "light": "#5082F7",
-    "dark": "#0C46CC"
+    "primary": "#ef7025",
+    "light": "#eec9bc",
+    "dark": "#4fa1ab"
   },
   "favicon": "/favicon.svg",
   "navbar": {
     "primary": {
       "type": "button",
-      "label": "Orbscan",
+      "label": "Visit Orbscan",
       "href": "https://orbscan.com"
     }
   },
@@ -21,32 +21,80 @@
     }
   },
   "navigation": {
-    "groups": [
+    "tabs": [
       {
-        "group": "Overview",
-        "pages": [
-          "what-is-orbscan"
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/traders",
+              "concepts/markets",
+              "concepts/pnl-metrics"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/fetch-trader-profile",
+              "guides/leaderboard",
+              "guides/copy-trading",
+              "guides/market-activity"
+            ]
+          }
         ]
       },
       {
-        "group": "Get Started",
-        "pages": [
-          "index"
-        ]
-      },
-      {
-        "group": "Endpoints",
-        "pages": [
-          "api/endpoints/listtraderactivity",
-          "api/endpoints/listdepositswithdrawals",
-          "api/endpoints/gettxactions"
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference/overview",
+              "api-reference/errors",
+              "api-reference/rate-limits"
+            ]
+          },
+          {
+            "group": "Traders",
+            "pages": [
+              "api-reference/traders/get-profile",
+              "api-reference/traders/get-positions",
+              "api-reference/traders/get-trades",
+              "api-reference/traders/get-pnl"
+            ]
+          },
+          {
+            "group": "Markets",
+            "pages": [
+              "api-reference/markets/list-markets",
+              "api-reference/markets/get-market",
+              "api-reference/markets/get-activity"
+            ]
+          },
+          {
+            "group": "Leaderboard",
+            "pages": [
+              "api-reference/leaderboard/get-leaderboard"
+            ]
+          },
+          {
+            "group": "Deposits & Withdrawals",
+            "pages": [
+              "api-reference/transactions/get-deposits",
+              "api-reference/transactions/get-withdrawals"
+            ]
+          }
         ]
       }
     ]
-  },
-  "logo": {
-    "light": "/images/logo-light.svg",
-    "dark": "/images/logo.svg",
-    "href": "https://orbscan.com"
   }
 }
