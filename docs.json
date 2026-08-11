@@ -3,9 +3,9 @@
   "name": "Orbscan API",
   "theme": "luma",
   "colors": {
-    "primary": "#ef7025",
-    "light": "#eec9bc",
-    "dark": "#4fa1ab"
+    "primary": "#0F57FF",
+    "light": "#5082F7",
+    "dark": "#0C46CC"
   },
   "favicon": "/favicon.svg",
   "navbar": {
@@ -24,17 +24,21 @@
     "groups": [
       {
         "group": "Overview",
-        "pages": ["what-is-orbscan"]
+        "pages": [
+          "what-is-orbscan"
+        ]
       },
       {
         "group": "Get Started",
-        "pages": ["index"]
+        "pages": [
+          "index"
+        ]
       },
       {
         "group": "Endpoints",
         "pages": [
-          "api/endpoints/gettraderportfolio",
           "api/endpoints/listtraderactivity",
+          "api/endpoints/listdepositswithdrawals",
           "api/endpoints/gettxactions"
         ]
       }
