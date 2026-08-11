@@ -1,0 +1,23 @@
+---
+title: "Get Trader Activity"
+sidebarTitle: "Get Trader Activity"
+description: "Return paginated buy, sell, and redeem activity for a Polymarket wallet across every market it has traded."
+openapi: "openapi.json GET /v1/trader/{address}/activity"
+---
+
+Use this endpoint to pull a wallet's full trading history — every **buy**, **sell**, and **redeem** across all the Polymarket markets it has touched, newest first.
+
+Each item tells you *what* happened (`action`), *in which market* (`marketTitle`, `marketSlug`), *at what price and size* (`price`, `quantity`), and *how much money moved* (`transferNetAmount`). Prices are in cents, so `78.0` means **78¢ per share**.
+
+<Tip>
+  Results are paginated. When the response includes a `nextCursor`, pass it back as the `cursor` query parameter to fetch the next page. When `nextCursor` is `null`, you've reached the end.
+</Tip>
+
+## Filtering
+
+You can narrow results with any combination of:
+
+- **`marketIds`** — one or more market IDs. Repeat the parameter to pass several: `?marketIds=2707644&marketIds=2682268`.
+- **`txHash`** — a single transaction hash (auto-lowercased).
+- **`fromBlock` / `toBlock`** — a block-height range.
+- **`fromTimestamp` / `toTimestamp`** — a time range, in **Unix seconds**.

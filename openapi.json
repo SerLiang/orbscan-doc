@@ -1,0 +1,472 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Orbscan Open API",
+    "description": "REST endpoints for Polymarket trader activity, deposits & withdrawals, and per-transaction action details, sourced directly from on-chain data.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://orbscan.com/open-api",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/trader/{address}/activity": {
+      "get": {
+        "operationId": "getTraderActivity",
+        "summary": "Get trader activity",
+        "description": "Returns paginated buy, sell, and redeem activity for a wallet across every Polymarket market it has touched. Results are ordered newest-first and paginated with an opaque cursor.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "The wallet address to query.",
+            "schema": {
+              "type": "string",
+              "example": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
+            }
+          },
+          {
+            "name": "marketIds",
+            "in": "query",
+            "required": false,
+            "description": "Filter to one or more market IDs. Repeat the parameter to pass multiple IDs (e.g. `marketIds=2707644&marketIds=2682268`).",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": { "type": "string" },
+              "example": ["2707644"]
+            }
+          },
+          {
+            "name": "txHash",
+            "in": "query",
+            "required": false,
+            "description": "Filter to a single transaction hash. The value is automatically lower-cased before matching.",
+            "schema": {
+              "type": "string",
+              "example": "0x71bf46c3089e2349a62ec6b93638522e8cc635a9836f1308ac7621ce1ecbb609"
+            }
+          },
+          {
+            "name": "fromBlock",
+            "in": "query",
+            "required": false,
+            "description": "Only include activity at or after this block height.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "toBlock",
+            "in": "query",
+            "required": false,
+            "description": "Only include activity at or before this block height.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "fromTimestamp",
+            "in": "query",
+            "required": false,
+            "description": "Only include activity at or after this Unix timestamp, in seconds.",
+            "schema": { "type": "integer", "format": "int64", "example": 1782700000 }
+          },
+          {
+            "name": "toTimestamp",
+            "in": "query",
+            "required": false,
+            "description": "Only include activity at or before this Unix timestamp, in seconds.",
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Pagination cursor. Pass the `nextCursor` (a base64 string) returned by the previous page to fetch the next page.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Number of records per page. Defaults to 50, maximum 100. Values above 100 are capped at 100.",
+            "schema": { "type": "integer", "default": 50, "maximum": 100, "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "code": { "type": "string", "example": "0" },
+                    "message": { "type": "string", "example": "success" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/ActivityItem" }
+                        },
+                        "nextCursor": {
+                          "type": "string",
+                          "description": "Opaque base64 cursor for the next page, or null when there are no more results.",
+                          "nullable": true,
+                          "example": "MTc4Mjc2NTk1Nnw4OTM3Mzk3NHwxNzR8MHhiZjE1..."
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "code": "0",
+                  "message": "success",
+                  "data": {
+                    "items": [
+                      {
+                        "time": 1782861128,
+                        "action": "Redeem",
+                        "recordType": "REDEEMS",
+                        "actionType": 1,
+                        "price": 100.0,
+                        "quantity": 5.0,
+                        "fee": 0.0,
+                        "grossValue": 5.0,
+                        "transferNetAmount": -5.0,
+                        "txHash": "0x71bf46c3089e2349a62ec6b93638522e8cc635a9836f1308ac7621ce1ecbb609",
+                        "tokenId": "91355094557016369228768123360298492968992168419338047915199416797057852525950",
+                        "marketId": "2707644",
+                        "marketSlug": "fifwc-fra-swe-2026-06-30-fra",
+                        "eventSlug": "fifwc-fra-swe-2026-06-30",
+                        "conditionId": "0x378f7b5c668014d9f6c42c305ec83902f3c8f6c770b336363aed0076ce6ce1c9",
+                        "marketTitle": "Will France win on 2026-06-30?",
+                        "positionSide": "Yes",
+                        "outcomeIndex": 0,
+                        "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/soccer-ball.png",
+                        "trader": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
+                        "liquidityRole": null
+                      },
+                      {
+                        "time": 1782765956,
+                        "action": "Buy",
+                        "recordType": "SUMMARY",
+                        "actionType": 0,
+                        "price": 78.0,
+                        "quantity": 5.0,
+                        "fee": 0.02574,
+                        "grossValue": 3.9,
+                        "transferNetAmount": 5.0,
+                        "txHash": "0xbf15dbfb9d3b8b1f5210a582ca78deb73bf77372cb43d8e15edb323750461b1c",
+                        "tokenId": "91355094557016369228768123360298492968992168419338047915199416797057852525950",
+                        "marketId": "2707644",
+                        "marketSlug": "fifwc-fra-swe-2026-06-30-fra",
+                        "eventSlug": "fifwc-fra-swe-2026-06-30",
+                        "conditionId": "0x378f7b5c668014d9f6c42c305ec83902f3c8f6c770b336363aed0076ce6ce1c9",
+                        "marketTitle": "Will France win on 2026-06-30?",
+                        "positionSide": "Yes",
+                        "outcomeIndex": 0,
+                        "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/soccer-ball.png",
+                        "trader": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
+                        "liquidityRole": "TAKER"
+                      }
+                    ],
+                    "nextCursor": "MTc4Mjc2NTk1Nnw4OTM3Mzk3NHwxNzR8MHhiZjE1..."
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/trader/{address}/deposits-withdrawals": {
+      "get": {
+        "operationId": "getDepositsWithdrawals",
+        "summary": "Get deposits & withdrawals",
+        "description": "Returns the combined USDC deposit and withdrawal history for a wallet, ordered newest-first and paginated with a cursor. Each record's `type` is either `deposit` or `withdrawal`.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "The wallet address to query.",
+            "schema": {
+              "type": "string",
+              "example": "0x43372356634781eea88d61bbdd7824cdce958882"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Number of records per page. Defaults to 50, maximum 100.",
+            "schema": { "type": "integer", "default": 50, "maximum": 100, "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "code": { "type": "string", "example": "0" },
+                    "message": { "type": "string", "example": "success" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/TransferItem" }
+                        },
+                        "nextCursor": {
+                          "type": "string",
+                          "description": "Cursor for the next page, or null when there are no more results.",
+                          "nullable": true,
+                          "example": "1786279260_1309417193"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "code": "0",
+                  "message": "success",
+                  "data": {
+                    "items": [
+                      {
+                        "txHash": "0x9c094e302971de8a6df70ee386bc3815597cbc24002b5f26e25c7127382efa31",
+                        "type": "deposit",
+                        "amount": 96240.383886,
+                        "time": 1786369038,
+                        "address": "0x0000000000000000000000000000000000000000"
+                      },
+                      {
+                        "txHash": "0xe5a5321c1486c7e11bb60b0d66cf56ba9b0c8c9e3800ac00a7e9732fc63463ab",
+                        "type": "withdrawal",
+                        "amount": 15.0,
+                        "time": 1786291032,
+                        "address": "0x4627ccd2de6c88ce2c0987f14f1d1b8e22697c23"
+                      }
+                    ],
+                    "nextCursor": "1786279260_1309417193"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/tx/{txHash}": {
+      "get": {
+        "operationId": "getTransactionActions",
+        "summary": "Get actions by transaction hash",
+        "description": "Returns a decoded, human-readable summary of a single transaction plus every individual on-chain action (fills) it contains. Useful for inspecting exactly what happened inside one trade.",
+        "parameters": [
+          {
+            "name": "txHash",
+            "in": "path",
+            "required": true,
+            "description": "The transaction hash to decode.",
+            "schema": {
+              "type": "string",
+              "example": "0x66dc87fb47faf587002b89d183dbb9505fc7ef80da5e6ec49e271278e8d95fad"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "code": { "type": "string", "example": "0" },
+                    "message": { "type": "string", "example": "success" },
+                    "data": { "$ref": "#/components/schemas/TransactionDetail" }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "code": "0",
+                  "message": "success",
+                  "data": {
+                    "txHash": "0x66dc87fb47faf587002b89d183dbb9505fc7ef80da5e6ec49e271278e8d95fad",
+                    "blockNumber": 88229726,
+                    "blockTimestamp": 1781049574,
+                    "profileAddress": "0xaac2469db4c243a2931acc252967b171bd97e8ce",
+                    "sourceType": "TRADE",
+                    "actionType": "Buy",
+                    "sentence": "Buy 3604.58 No for $3546.12269 in Will Bitcoin dip to $59,000 on June 9?",
+                    "marketSlug": "will-bitcoin-dip-to-59k-on-june-9",
+                    "marketId": "2475928",
+                    "actions": [
+                      {
+                        "actionType": "Buy",
+                        "assetId": "38163660360188728397792916713023875464787138529265352624189549073473314732690",
+                        "shares": "3604.58",
+                        "price": "98.378249",
+                        "txValue": "3546.12269",
+                        "actor": "0xaac2469db4c243a2931acc252967b171bd97e8ce",
+                        "txHash": "0x66dc87fb47faf587002b89d183dbb9505fc7ef80da5e6ec49e271278e8d95fad",
+                        "blockTimestamp": 1781049574,
+                        "fee": "4.02564",
+                        "marketId": "2475928",
+                        "marketSlug": "will-bitcoin-dip-to-59k-on-june-9",
+                        "eventSlug": "what-price-will-bitcoin-hit-on-june-9",
+                        "marketTitle": "Will Bitcoin dip to $59,000 on June 9?",
+                        "positionSide": "No",
+                        "outcomeIndex": 1,
+                        "marketLogo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/BTC-fullsize.png",
+                        "liquidityRole": "TAKER"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "apikey",
+        "description": "Your Orbscan API key, passed as the `apikey` query parameter on every request."
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "The API key is missing or invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": false },
+                "code": { "type": "string", "example": "401" },
+                "message": { "type": "string", "example": "Missing or invalid API key" },
+                "data": { "type": "null" }
+              }
+            },
+            "example": {
+              "success": false,
+              "code": "401",
+              "message": "Missing or invalid API key",
+              "data": null
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ActivityItem": {
+        "type": "object",
+        "properties": {
+          "time": { "type": "integer", "format": "int64", "description": "Unix timestamp (seconds) of the action." },
+          "action": { "type": "string", "description": "Human-readable action label.", "example": "Buy", "enum": ["Buy", "Sell", "Redeem"] },
+          "recordType": { "type": "string", "description": "Internal record classification.", "example": "SUMMARY" },
+          "actionType": { "type": "integer", "description": "Numeric action code: 0 = Buy, 1 = Redeem, and so on.", "example": 0 },
+          "price": { "type": "number", "description": "Price per share, in cents (0–100).", "example": 78.0 },
+          "quantity": { "type": "number", "description": "Number of shares.", "example": 5.0 },
+          "fee": { "type": "number", "description": "Fee charged, in USDC.", "example": 0.02574 },
+          "grossValue": { "type": "number", "description": "Gross USDC value of the action.", "example": 3.9 },
+          "transferNetAmount": { "type": "number", "description": "Net USDC moved (positive = in, negative = out).", "example": 5.0 },
+          "txHash": { "type": "string", "description": "On-chain transaction hash." },
+          "tokenId": { "type": "string", "description": "Polymarket outcome token ID." },
+          "marketId": { "type": "string" },
+          "marketSlug": { "type": "string" },
+          "eventSlug": { "type": "string" },
+          "conditionId": { "type": "string" },
+          "marketTitle": { "type": "string" },
+          "positionSide": { "type": "string", "description": "Which outcome the trade is on.", "example": "Yes" },
+          "outcomeIndex": { "type": "integer", "example": 0 },
+          "logo": { "type": "string", "description": "Market logo URL." },
+          "trader": { "type": "string", "description": "The queried wallet address." },
+          "liquidityRole": { "type": "string", "nullable": true, "description": "MAKER or TAKER, or null for non-trade actions such as redeems.", "example": "TAKER", "enum": ["MAKER", "TAKER", null] }
+        }
+      },
+      "TransferItem": {
+        "type": "object",
+        "properties": {
+          "txHash": { "type": "string", "description": "On-chain transaction hash." },
+          "type": { "type": "string", "description": "Transfer direction.", "example": "deposit", "enum": ["deposit", "withdrawal"] },
+          "amount": { "type": "number", "description": "USDC amount transferred.", "example": 96240.383886 },
+          "time": { "type": "integer", "format": "int64", "description": "Unix timestamp (seconds)." },
+          "address": { "type": "string", "description": "Counterparty address. For deposits this may be the zero address when funds are bridged in." }
+        }
+      },
+      "TransactionAction": {
+        "type": "object",
+        "properties": {
+          "actionType": { "type": "string", "example": "Buy" },
+          "assetId": { "type": "string", "description": "Polymarket outcome token ID involved in this fill." },
+          "shares": { "type": "string", "description": "Number of shares in this fill." },
+          "price": { "type": "string", "description": "Price per share, in cents." },
+          "txValue": { "type": "string", "description": "USDC value of this fill." },
+          "actor": { "type": "string", "description": "Address that performed this fill." },
+          "txHash": { "type": "string" },
+          "blockTimestamp": { "type": "integer", "format": "int64" },
+          "fee": { "type": "string" },
+          "marketId": { "type": "string" },
+          "marketSlug": { "type": "string" },
+          "eventSlug": { "type": "string" },
+          "marketTitle": { "type": "string" },
+          "positionSide": { "type": "string", "example": "No" },
+          "outcomeIndex": { "type": "integer", "example": 1 },
+          "marketLogo": { "type": "string" },
+          "liquidityRole": { "type": "string", "nullable": true, "example": "TAKER", "enum": ["MAKER", "TAKER", null] }
+        }
+      },
+      "TransactionDetail": {
+        "type": "object",
+        "properties": {
+          "txHash": { "type": "string" },
+          "blockNumber": { "type": "integer", "format": "int64" },
+          "blockTimestamp": { "type": "integer", "format": "int64" },
+          "profileAddress": { "type": "string", "description": "The primary wallet this transaction is attributed to." },
+          "sourceType": { "type": "string", "example": "TRADE" },
+          "actionType": { "type": "string", "description": "Top-level action for the transaction.", "example": "Buy" },
+          "sentence": { "type": "string", "description": "Plain-English summary of the transaction.", "example": "Buy 3604.58 No for $3546.12269 in Will Bitcoin dip to $59,000 on June 9?" },
+          "marketSlug": { "type": "string" },
+          "marketId": { "type": "string" },
+          "actions": {
+            "type": "array",
+            "description": "Every individual on-chain fill contained in this transaction.",
+            "items": { "$ref": "#/components/schemas/TransactionAction" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,77 +1,82 @@
 ---
-title: "Orbscan REST API Overview, Base URL, and Response Format"
+title: "Orbscan Open API Overview"
 sidebarTitle: "Overview"
-description: "The Orbscan API provides REST endpoints for Polymarket trader analytics, market data, leaderboards, and live activity. Base URL and format details."
+description: "Base URL, authentication, response envelope, and pagination for the Orbscan Open API — REST access to Polymarket trader activity, transfers, and transaction details."
 ---
 
-The Orbscan API is a REST API that returns JSON responses, giving you programmatic access to Polymarket data across trader analytics, market information, leaderboards, and live trade activity. Whether you're building a trading dashboard, running analytics, or tracking on-chain activity, the API provides the data you need in a consistent, predictable format.
+The Orbscan Open API is a REST API that returns JSON. It gives you programmatic access to on-chain Polymarket data: a wallet's trading activity, its deposits and withdrawals, and a decoded breakdown of any single transaction.
 
 ## Base URL
 
-All API requests are made to the following base URL:
+All requests go to:
 
 ```text
-https://api.orbscan.com/v1
+https://orbscan.com/open-api
 ```
 
-## Request Format
+Every endpoint path in this reference is relative to that base — for example, `GET /v1/trader/{address}/activity` means `https://orbscan.com/open-api/v1/trader/{address}/activity`.
 
-Every request to the Orbscan API must meet the following requirements:
+## Authentication
 
-- **HTTPS only.** Plain HTTP requests are not accepted.
-- **Authentication header.** Pass your API key using the `Authorization` header on every request:
+Every request must include your API key as the `apikey` query parameter. Requests without a valid key return `401`.
 
-```http
-Authorization: Bearer YOUR_API_KEY
+```bash
+curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=1&apikey=YOUR_API_KEY"
 ```
 
-- **Query parameters.** Use query parameters to filter results, paginate through large datasets, and sort responses. Each endpoint documents its own supported parameters.
+<Warning>
+  Your API key is a secret. Keep it server-side and never commit it to a public repository or expose it in client-side code.
+</Warning>
 
 ## Response Format
 
-All responses return JSON. A successful response always contains a top-level `data` field wrapping the requested resource or collection.
-
-**Success envelope:**
+Every response — success or error — uses the same envelope:
 
 ```json
 {
-  "data": {
-    "address": "0xabc123...",
-    "volume": 142500.00,
-    "pnl": 8320.50
-  }
+  "success": true,
+  "code": "0",
+  "message": "success",
+  "data": { }
 }
 ```
 
-**Error envelope:**
-
-```json
-{
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "No trader found for the given address.",
-    "status": 404
-  }
-}
-```
-
-See the [Errors](/api-reference/errors) page for the full list of error codes and how to handle them.
-
-## Versioning
-
-The current API version is **v1**, reflected in the base URL path (`/v1/`). Orbscan will not introduce breaking changes within a version. When breaking changes are necessary, they will be released under a new version path (for example, `/v2/`), and the previous version will continue to work during a documented deprecation window.
-
-## Available Resources
-
-The following resource groups are available under the v1 API:
-
-| Resource | Base Path | Description |
+| Field | Type | Description |
 |---|---|---|
-| Traders | `/v1/traders/{address}/...` | Per-address analytics, positions, P&L, and trade history |
-| Markets | `/v1/markets/...` | Market metadata, pricing, volume, and outcome data |
-| Leaderboard | `/v1/leaderboard` | Ranked list of top traders by volume or profit |
-| Activities | `/v1/activities` | Live and historical trade activity feed |
+| `success` | boolean | `true` if the request succeeded, `false` otherwise. |
+| `code` | string | `"0"` on success. On failure this is the HTTP status as a string (e.g. `"401"`, `"400"`, `"404"`). |
+| `message` | string | `"success"`, or a human-readable error message. |
+| `data` | object / null | The requested payload. `null` when a request fails, or when a valid lookup simply has no result. |
+
+<Note>
+  A successful lookup that finds nothing still returns `200` with `success: true`. For list endpoints, `data.items` is an empty array; for single-record lookups, `data` is `null`. Check the shape of `data` rather than relying on the HTTP status alone.
+</Note>
+
+## Pagination
+
+The list endpoints (activity, deposits & withdrawals) are cursor-paginated:
+
+1. Request a page, optionally setting `limit` (default `50`, maximum `100`).
+2. Read `data.nextCursor` from the response.
+3. If it is **not** `null`, pass it back as the `cursor` query parameter to fetch the next page.
+4. When `nextCursor` is `null`, you've reached the end.
+
+```bash
+# Page 1
+curl "https://orbscan.com/open-api/v1/trader/{address}/activity?limit=50&apikey=YOUR_API_KEY"
+
+# Page 2 — feed nextCursor back in
+curl "https://orbscan.com/open-api/v1/trader/{address}/activity?limit=50&cursor=NEXT_CURSOR&apikey=YOUR_API_KEY"
+```
+
+## Available Endpoints
+
+| Endpoint | Path | Description |
+|---|---|---|
+| [Get Trader Activity](/api-reference/endpoints/get-trader-activity) | `/v1/trader/{address}/activity` | Paginated buy, sell, and redeem history for a wallet |
+| [Get Deposits & Withdrawals](/api-reference/endpoints/get-deposits-withdrawals) | `/v1/trader/{address}/deposits-withdrawals` | Combined USDC transfer history for a wallet |
+| [Get Actions by Hash](/api-reference/endpoints/get-transaction) | `/v1/tx/{txHash}` | Decoded summary and fills for a single transaction |
 
 <Tip>
-  You'll need an API key to authenticate your requests. See the [Authentication](/authentication) page for instructions on generating and using your key.
+  Prices in activity and transaction responses are expressed in **cents** (0–100). A `price` of `78.0` means 78¢ per share.
 </Tip>
