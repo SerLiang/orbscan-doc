@@ -3,9 +3,9 @@
   "name": "Orbscan",
   "theme": "luma",
   "colors": {
-    "primary": "#ef7025",
-    "light": "#eec9bc",
-    "dark": "#4fa1ab"
+    "primary": "#0F57FF",
+    "light": "#5082F7",
+    "dark": "#0C46CC"
   },
   "favicon": {
     "light": "/images/logo-symbol.svg",
@@ -104,5 +104,13 @@
     "light": "/images/logo.svg",
     "dark": "/images/logo-light.svg",
     "href": "https://orbscan.com"
+  },
+  "background": {
+    "color": {
+      "dark": "#0A0B10"
+    }
+  },
+  "fonts": {
+    "family": "Inter"
   }
 }
