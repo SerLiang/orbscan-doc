@@ -31,7 +31,7 @@
           {
             "group": "Get Started",
             "pages": [
-              "untitled-page",
+              "what-is-orbscan",
               "api-reference/overview",
               "api-reference/authentication",
               "api-reference/errors"
