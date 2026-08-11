@@ -105,7 +105,7 @@ curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1e
 | `quantity` | number | Number of position shares. |
 | `fee` | number | Fee charged for the action. |
 | `grossValue` | number | Gross value of the activity. |
-| `transferNetAmount` | number | Net position transfer amount. |
+| `transferNetAmount` | number | Net change in outcome shares caused by the activity. Positive values mean shares were received; negative values mean shares were removed, sold, or redeemed. This field represents shares, not USD. |
 | `txHash` | string | On-chain transaction hash. |
 | `tokenId` | string | Polymarket outcome token identifier. |
 | `marketId` | string | Orbscan market identifier. |
