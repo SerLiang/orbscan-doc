@@ -83,7 +83,7 @@ When authentication fails, the API returns an HTTP `401` with `status_code: "0"`
 | Status code | Meaning | How to resolve |
 |---|---|---|
 | `401 Unauthorized` | Your API key is missing or invalid. | Check that the `Authorization` header is present and that the key value is correct. Regenerate the key in Settings if needed. |
-| `429 Too Many Requests` | Your key has exceeded its rate limit for the current window. | Wait and retry with backoff. See [Rate Limits](/api-reference/rate-limits) for details. |
+| `429 Too Many Requests` | Your key has exceeded its rate limit for the current window. | Wait a few seconds and retry with exponential backoff. |
 
 ### Example error response
 

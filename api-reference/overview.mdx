@@ -55,9 +55,9 @@ Every response — success or error — uses the same envelope:
 
 ## Pagination
 
-The list endpoints (activity, deposits & withdrawals) are cursor-paginated:
+The list endpoints (activity, deposits & withdrawals, positions, rewards) are cursor-paginated:
 
-1. Request a page, optionally setting `limit` (default `50`, maximum `100`).
+1. Request a page, optionally setting `limit` (max `100`; the per-endpoint default is `20` or `50` — see each endpoint reference).
 2. Read `data.nextCursor` from the response.
 3. If it is **not** `null`, pass it back as the `cursor` query parameter to fetch the next page.
 4. When `nextCursor` is `null`, you've reached the end.

@@ -1,0 +1,14 @@
+# Secrets / credentials
+*.env
+!.env.example
+github-token.env
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Mintlify local dev
+.mintlify/
+node_modules/

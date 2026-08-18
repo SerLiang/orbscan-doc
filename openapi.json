@@ -955,13 +955,13 @@
               "type": "object",
               "properties": {
                 "message": { "type": "string", "example": "Missing or invalid API key" },
-                "status_code": { "type": "string", "example": "401" },
+                "status_code": { "type": "string", "example": "0" },
                 "data": { "type": "null" }
               }
             },
             "example": {
               "message": "Missing or invalid API key",
-              "status_code": "401",
+              "status_code": "0",
               "data": null
             }
           }
@@ -990,7 +990,7 @@
           "outcomeIndex": { "type": "integer", "example": 0 },
           "logo": { "type": "string", "description": "Market logo URL." },
           "traderAddress": { "type": "string", "description": "The queried wallet address." },
-          "liquidityRole": { "type": "string", "nullable": true, "description": "MAKER or TAKER, or null for non-trade actions such as redeems.", "example": "TAKER", "enum": ["MAKER", "TAKER", null] }
+          "liquidityRole": { "type": "string", "nullable": true, "description": "MAKER or TAKER, or null for non-trade actions such as redeems.", "example": "TAKER", "enum": ["MAKER", "TAKER"] }
         }
       },
       "TransferItem": {
@@ -1036,7 +1036,7 @@
           "positionSide": { "type": "string", "example": "No" },
           "outcomeIndex": { "type": "integer", "example": 1 },
           "logo": { "type": "string", "description": "Market logo URL." },
-          "liquidityRole": { "type": "string", "nullable": true, "example": "TAKER", "enum": ["MAKER", "TAKER", null] }
+          "liquidityRole": { "type": "string", "nullable": true, "example": "TAKER", "enum": ["MAKER", "TAKER"] }
         }
       },
       "TransactionDetail": {
@@ -1075,7 +1075,7 @@
           "logo": { "type": "string", "description": "Market logo URL." },
           "closed": { "type": "boolean", "description": "Whether the position is closed." },
           "tokenId": { "type": "string", "description": "Token ID." },
-          "positionSide": { "type": "string", "description": "Position side, e.g. `YES` / `NO`.", "example": "YES" },
+          "positionSide": { "type": "string", "description": "Position side. Varies by market — e.g. `Yes` / `No` for binary markets, `Up` / `Down` for price direction markets.", "example": "Yes" },
           "outcomeIndex": { "type": "integer", "description": "Outcome index.", "example": 0 },
           "balance": { "type": "string", "description": "Remaining position balance (shares)." },
           "avgPrice": { "type": "string", "description": "Average entry price, 0–1 scale." },
@@ -1103,7 +1103,7 @@
           "marketSlug": { "type": "string", "description": "Market slug." },
           "eventSlug": { "type": "string", "description": "Event slug." },
           "outcomeIndex": { "type": "integer", "description": "Outcome index." },
-          "outcome": { "type": "string", "description": "Outcome label, e.g. `YES` / `NO`.", "example": "YES" },
+          "outcome": { "type": "string", "description": "Outcome label. Varies by market — e.g. `Yes` / `No`, or an outcome name for named markets.", "example": "Yes" },
           "outcomePrice": { "type": "string", "description": "Leg outcome price, 0–1 scale." },
           "resolved": { "type": "boolean", "description": "Whether the leg market is resolved." }
         }

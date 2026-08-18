@@ -43,6 +43,7 @@
             "group": "Get Started",
             "pages": [
               "index",
+              "quickstart",
               "api-reference/overview",
               "api-reference/authentication",
               "api-reference/errors"
