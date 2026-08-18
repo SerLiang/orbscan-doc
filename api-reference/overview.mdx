@@ -22,7 +22,7 @@ Every request must include your API key as a **Bearer token** in the `Authorizat
 
 ```bash
 curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=1" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+  -H "Authorization: Bearer <your_api_key>"
 ```
 
 See [Authentication](/api-reference/authentication) for full details and code samples.
@@ -65,11 +65,11 @@ The list endpoints (activity, deposits & withdrawals) are cursor-paginated:
 ```bash
 # Page 1
 curl "https://api.orbscan.com/v1/trader/{address}/activity?limit=50" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+  -H "Authorization: Bearer <your_api_key>"
 
 # Page 2 — feed nextCursor back in
 curl "https://api.orbscan.com/v1/trader/{address}/activity?limit=50&cursor=NEXT_CURSOR" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+  -H "Authorization: Bearer <your_api_key>"
 ```
 
 ## Available Endpoints

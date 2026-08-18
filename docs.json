@@ -23,6 +23,17 @@
       "x": "https://x.com/OrbscanHQ"
     }
   },
+  "api": {
+    "playground": {
+      "display": "interactive"
+    },
+    "mdx": {
+      "auth": {
+        "method": "bearer",
+        "name": "your_api_key"
+      }
+    }
+  },
   "navigation": {
     "tabs": [
       {

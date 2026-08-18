@@ -19,14 +19,14 @@ Request an API key by filling out the [sign-up form](https://orbscan.com/contact
 Pass your key as a **Bearer token** in the `Authorization` header on every request:
 
 ```http
-Authorization: Bearer YOUR_API_KEY
+Authorization: Bearer <your_api_key>
 ```
 
 ### Example request
 
 ```bash cURL
 curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+  -H "Authorization: Bearer <your_api_key>"
 ```
 
 ```python Python
@@ -35,7 +35,7 @@ import requests
 resp = requests.get(
     "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity",
     params={"limit": 50},
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    headers={"Authorization": "Bearer <your_api_key>"},
     timeout=30,
 )
 print(resp.json())
@@ -44,7 +44,7 @@ print(resp.json())
 ```javascript JavaScript
 const resp = await fetch(
   "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50",
-  { headers: { Authorization: "Bearer YOUR_API_KEY" } }
+  { headers: { Authorization: "Bearer <your_api_key>" } }
 );
 const body = await resp.json();
 console.log(body);

@@ -29,7 +29,7 @@ Orbscan uses API key authentication to secure every request. All calls to the Or
 Include your API key as a Bearer token in the `Authorization` header of every request:
 
 ```http
-Authorization: Bearer YOUR_API_KEY
+Authorization: Bearer <your_api_key>
 ```
 
 The following examples show how to add this header in common HTTP clients:
@@ -37,7 +37,7 @@ The following examples show how to add this header in common HTTP clients:
 <CodeGroup>
   ```bash curl
   curl -X GET "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=5" \
-    -H "Authorization: Bearer YOUR_API_KEY" \
+    -H "Authorization: Bearer <your_api_key>" \
     -H "Accept: application/json"
   ```
 
