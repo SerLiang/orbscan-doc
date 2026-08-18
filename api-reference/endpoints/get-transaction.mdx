@@ -9,7 +9,7 @@ Use this endpoint to look **inside a single transaction**. Given a transaction h
 
 The top-level `sentence` field gives you a ready-to-read description, for example:
 
-> Buy 3604.58 No for $3546.12269 in Will Bitcoin dip to $59,000 on June 9?
+> Buy 3604.58 No for 3546.12269 in `Will Bitcoin dip to 59,000 on June 9?`
 
 The `actions` array then lists each individual fill — one transaction often contains several, because a single trade can be matched against multiple counterparties. Each fill shows who acted (`traderAddress`), the `size` (shares), the `price` (decimal 0–1), the `usdcSize` (USDC value), and whether they were the `MAKER` or `TAKER` (`liquidityRole`).
 

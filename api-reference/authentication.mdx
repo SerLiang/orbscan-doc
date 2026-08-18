@@ -1,10 +1,9 @@
 ---
 title: "Authentication"
 sidebarTitle: "Authentication"
-description: "Authenticate to the Orbscan Open API with your API key, passed as a Bearer token in the Authorization header."
 ---
 
-Every request to the Orbscan Open API requires an **API key**. Requests without a valid key are rejected with a `401` response.
+Authenticate to the Orbscan Open API with your **API key**, passed as a Bearer token in the Authorization header. Requests without a valid key are rejected with a `401 `response.
 
 ## Getting an API Key
 
@@ -25,7 +24,7 @@ Authorization: Bearer YOUR_API_KEY
 ### Example request
 
 ```bash cURL
-curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50" \
+curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -33,7 +32,7 @@ curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033
 import requests
 
 resp = requests.get(
-    "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity",
+    "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity",
     params={"limit": 50},
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     timeout=30,
@@ -43,7 +42,7 @@ print(resp.json())
 
 ```javascript JavaScript
 const resp = await fetch(
-  "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50",
+  "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50",
   { headers: { Authorization: "Bearer YOUR_API_KEY" } }
 );
 const body = await resp.json();
