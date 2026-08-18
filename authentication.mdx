@@ -78,26 +78,19 @@ The following examples show how to add this header in common HTTP clients:
 
 ## Authentication error codes
 
-When something goes wrong with authentication, the API returns a standard HTTP error status alongside a JSON body that describes the problem.
+When authentication fails, the API returns an HTTP `401` with `status_code: "0"` in the body.
 
 | Status code | Meaning | How to resolve |
 |---|---|---|
-| `401 Unauthorized` | Your API key is missing, malformed, or has been revoked. | Check that the `Authorization` header is present and that the key value is correct. Regenerate the key in Settings if needed. |
-| `403 Forbidden` | Your key is valid but does not have permission to access this endpoint. | Verify that your current plan includes access to the endpoint you're calling. Upgrade your plan if necessary. |
-| `429 Too Many Requests` | Your key has exceeded its rate limit for the current window. | Wait for the window to reset (check the `Retry-After` response header) or reduce your request frequency. |
+| `401 Unauthorized` | Your API key is missing or invalid. | Check that the `Authorization` header is present and that the key value is correct. Regenerate the key in Settings if needed. |
+| `429 Too Many Requests` | Your key has exceeded its rate limit for the current window. | Wait and retry with backoff. See [Rate Limits](/api-reference/rate-limits) for details. |
 
 ### Example error response
 
 ```json
 {
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "API key is missing or invalid. Provide a valid key in the Authorization header.",
-    "status": 401
-  }
+  "message": "Missing or invalid API key",
+  "status_code": "0",
+  "data": null
 }
 ```
-
-<Note>
-  Rate limits vary by plan. The response headers `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` are included on every response so you can monitor your usage programmatically.
-</Note>
