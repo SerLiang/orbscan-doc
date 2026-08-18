@@ -24,7 +24,7 @@ Authorization: Bearer YOUR_API_KEY
 ### Example request
 
 ```bash cURL
-curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50" \
+curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -32,7 +32,7 @@ curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1e
 import requests
 
 resp = requests.get(
-    "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity",
+    "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity",
     params={"limit": 50},
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     timeout=30,
@@ -42,7 +42,7 @@ print(resp.json())
 
 ```javascript JavaScript
 const resp = await fetch(
-  "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50",
+  "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50",
   { headers: { Authorization: "Bearer YOUR_API_KEY" } }
 );
 const body = await resp.json();
