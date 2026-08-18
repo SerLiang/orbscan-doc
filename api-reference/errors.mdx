@@ -4,56 +4,44 @@ sidebarTitle: "Errors"
 description: "How the Orbscan Open API signals errors — the response envelope, the status codes you'll actually see (400, 401, 404), and how to handle empty results."
 ---
 
-When a request fails, Orbscan returns the same envelope used for successful responses, with `success` set to `false`, `data` set to `null`, and `code` holding the HTTP status as a string.
+Every response — success or failure — uses the same envelope with three fields: `message`, `status_code`, and `data`.
+
+- On **success**: `status_code` is `"1"`, `message` is `"OK"`, and `data` holds the result.
+- On **error**: `status_code` is `"0"`, `message` describes the problem, and `data` is `null`.
+
+Use the **HTTP status code** to determine the type of error.
 
 ```json
 {
-  "success": false,
-  "code": "401",
   "message": "Missing or invalid API key",
+  "status_code": "0",
   "data": null
 }
 ```
 
-Handle errors by checking `success` first, then branch on `code` (or the HTTP status, which matches).
-
 ## Status Codes
 
-| HTTP | `code` | `message` (example) | Cause & fix |
-|---|---|---|---|
-| `401` | `"401"` | `Missing or invalid API key` | The `Authorization: Bearer` header is missing or the key is wrong. Check the key you're sending. |
-| `400` | `"400"` | `Invalid address format` | A path or query value is malformed — most often an `address` that isn't a valid `0x…` hex address. |
-| `404` | `"404"` | `Not found: <path>` | The route doesn't exist. Check the endpoint path and spelling. |
-| `5xx` | `"5xx"` | — | A transient server or gateway error. Retry with backoff. |
+| HTTP | `message` (example) | Cause & fix |
+|---|---|---|
+| `401` | `Missing or invalid API key` | The `apikey` header is missing or the key is wrong. Check the key you're sending. |
+| `400` | `Invalid address format` | A path or query value is malformed — most often an `address` that isn't a valid `0x…` hex address. |
+| `404` | `Not found` | The route doesn't exist. Check the endpoint path and spelling. |
+| `5xx` | — | A transient server or gateway error. Retry with backoff. |
 
 ## Empty Results Are Not Errors
 
-A valid request that simply has no data to return still succeeds with HTTP `200` and `success: true`:
+A valid request that simply has no data to return still succeeds with HTTP `200`, `status_code` `"1"`, and an empty `items` array:
 
-<CodeGroup>
-
-```json List endpoint — no matching records
+```json
 {
-  "success": true,
-  "code": "0",
-  "message": "success",
+  "message": "OK",
+  "status_code": "1",
   "data": { "items": [], "nextCursor": null }
 }
 ```
 
-```json Single lookup — nothing found
-{
-  "success": true,
-  "code": "0",
-  "message": "success",
-  "data": null
-}
-```
-
-</CodeGroup>
-
 <Warning>
-  Don't treat a `200` with empty `data` as a failure. Always inspect `data` — an empty `items` array (list endpoints) or a `null` `data` (single-record lookups) means "no results," not "error."
+  Don't treat a `200` with empty `data` as a failure. An empty `items` array means "no results," not "error."
 </Warning>
 
 ## Handling Errors in Code
@@ -66,14 +54,11 @@ import requests
 resp = requests.get(url, timeout=30)
 body = resp.json()
 
-if not body["success"]:
-    code = body["code"]
-    if code == "401":
-        raise RuntimeError("Check your Orbscan API key")
-    raise RuntimeError(f"Orbscan error {code}: {body['message']}")
+if body["status_code"] != "1":
+    raise RuntimeError(f"Orbscan error {resp.status_code}: {body['message']}")
 
 data = body["data"]
-if not data or (isinstance(data, dict) and not data.get("items")):
+if not data or not data.get("items"):
     print("No results")
 else:
     print(data)
@@ -83,9 +68,8 @@ else:
 const resp = await fetch(url);
 const body = await resp.json();
 
-if (!body.success) {
-  if (body.code === "401") throw new Error("Check your Orbscan API key");
-  throw new Error(`Orbscan error ${body.code}: ${body.message}`);
+if (body.status_code !== "1") {
+  throw new Error(`Orbscan error ${resp.status}: ${body.message}`);
 }
 
 const { data } = body;
