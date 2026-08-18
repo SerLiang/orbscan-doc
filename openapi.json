@@ -528,6 +528,102 @@
         }
       }
     },
+    "/v1/trader/{address}/combo-positions/closed": {
+      "get": {
+        "operationId": "getComboClosedPositions",
+        "summary": "Get combo closed positions",
+        "description": "Returns all closed combo (parlay) positions for a wallet — positions where the combo has fully resolved or been sold. Results are cursor-paginated.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "The wallet address to query.",
+            "schema": { "type": "string", "example": "0xb88a7733e9abb384f64579970ae17cecb8588cce" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Number of results per page. Defaults to 50, maximum 100.",
+            "schema": { "type": "integer", "default": 50, "maximum": 100 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor returned by a previous response's `nextCursor` field. Omit for the first page.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "OK" },
+                    "status_code": { "type": "string", "example": "1" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": { "type": "array", "items": { "$ref": "#/components/schemas/ComboPosition" } },
+                        "nextCursor": { "type": "string", "nullable": true }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "OK",
+                  "status_code": "1",
+                  "data": {
+                    "items": [
+                      {
+                        "comboPositionId": "1806159698331040881191422092150869298275778236938264756488486412349341696001",
+                        "comboConditionId": "0x03fe400a9f29d9d3469b8a762cfbca69440000000000000000000000000000",
+                        "amount": "0",
+                        "avgPrice": "0.978552",
+                        "realizedPnl": "2.860071",
+                        "totalBought": "133.349119",
+                        "balance": "0",
+                        "balanceTimestamp": 1787031040,
+                        "totalFee": "0",
+                        "recentTradeTime": 1787031040,
+                        "firstTradeTime": 1787023944,
+                        "currentPrice": "0",
+                        "unrealizedPnl": "0",
+                        "totalPnl": "2.860071",
+                        "percentPnl": "2.19",
+                        "legs": [
+                          {
+                            "comboPositionId": "1806159698331040881191422092150869298275778236938264756488486412349341696001",
+                            "legIndex": 0,
+                            "legPositionId": "458130169191096182666148879069006345232346455474071968405503421352008220672",
+                            "marketId": "3619229",
+                            "marketTitle": "Prague 2: Max Hans Rehberg vs Jakub Nicod",
+                            "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/atp-tour-b4390c4fb8.jpg",
+                            "marketSlug": "atp-rehberg-nicod-2026-08-17",
+                            "eventSlug": "atp-rehberg-nicod-2026-08-17",
+                            "outcomeIndex": 0,
+                            "outcome": "Max Hans Rehberg",
+                            "outcomePrice": "0.69",
+                            "resolved": false
+                          }
+                        ]
+                      }
+                    ],
+                    "nextCursor": null
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
     "/v1/trader/{address}/portfolio": {
       "get": {
         "operationId": "getPortfolio",
