@@ -13,7 +13,7 @@
   ],
   "security": [
     {
-      "apiKey": []
+      "bearerAuth": []
     }
   ],
   "paths": {
@@ -345,6 +345,93 @@
         }
       }
     },
+    "/v1/trader/{address}/positions/closed": {
+      "get": {
+        "operationId": "getClosedPositions",
+        "summary": "Get closed positions",
+        "description": "Returns all closed positions for a wallet — outcome tokens the wallet previously held in markets that have since resolved. Positions here have `balance: \"0\"` and `closed: true`. Results are cursor-paginated.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "The wallet address to query.",
+            "schema": { "type": "string", "example": "0x0484e64092ba4108c2786b61e6fc052d3bf41b1a" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Number of results per page. Defaults to 50, maximum 100.",
+            "schema": { "type": "integer", "default": 50, "maximum": 100 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor returned by a previous response's `nextCursor` field. Omit for the first page.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "OK" },
+                    "status_code": { "type": "string", "example": "1" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": { "type": "array", "items": { "$ref": "#/components/schemas/OpenPosition" } },
+                        "nextCursor": { "type": "string", "nullable": true }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "OK",
+                  "status_code": "1",
+                  "data": {
+                    "items": [
+                      {
+                        "marketId": "3658111",
+                        "marketSlug": "btc-updown-5m-1787036100",
+                        "eventSlug": "btc-updown-5m-1787036100",
+                        "conditionId": "0xb8dd5113e94626f2d31209d00fb46596ed7dc397b472ba995a32048b4863024f",
+                        "marketTitle": "Bitcoin Up or Down - August 18, 2:55AM-3:00AM ET",
+                        "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/BTC+fullsize.png",
+                        "closed": true,
+                        "tokenId": "89557885051081542286903003624357156109233126349016624043674353363446112914315",
+                        "positionSide": "Up",
+                        "outcomeIndex": 0,
+                        "balance": "0",
+                        "avgPrice": "0.213749",
+                        "currentPrice": "1",
+                        "avgExit": "1",
+                        "totalInvested": "8.54996",
+                        "totalBought": "40",
+                        "value": "0",
+                        "unrealizedPnl": "0",
+                        "realizedPnl": "31.45004",
+                        "totalPnl": "31.45004",
+                        "percentPnl": null,
+                        "closedAt": 1787036472
+                      }
+                    ],
+                    "nextCursor": "3657217|1787033766|417536012314..."
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
     "/v1/trader/{address}/combo-positions/open": {
       "get": {
         "operationId": "getComboOpenPositions",
@@ -607,11 +694,10 @@
   },
   "components": {
     "securitySchemes": {
-      "apiKey": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "apikey",
-        "description": "Pass your Orbscan API key in the `apikey` request header."
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Pass your Orbscan API key as a Bearer token in the `Authorization` header."
       }
     },
     "responses": {
