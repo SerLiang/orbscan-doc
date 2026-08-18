@@ -40,13 +40,13 @@
           {
             "group": "Endpoints",
             "pages": [
-              "api-reference/endpoints/get-trader-activity",
-              "api-reference/endpoints/get-deposits-withdrawals",
-              "api-reference/endpoints/get-transaction",
+              "api-reference/endpoints/get-wallet-address",
+              "api-reference/endpoints/get-portfolio",
               "api-reference/endpoints/get-open-positions",
               "api-reference/endpoints/get-combo-open-positions",
-              "api-reference/endpoints/get-portfolio",
-              "api-reference/endpoints/get-wallet-address"
+              "api-reference/endpoints/get-trader-activity",
+              "api-reference/endpoints/get-deposits-withdrawals",
+              "api-reference/endpoints/get-transaction"
             ]
           }
         ]
