@@ -272,6 +272,264 @@
         }
       }
     },
+    "/v1/trader/{address}/positions/open": {
+      "get": {
+        "operationId": "getOpenPositions",
+        "summary": "Get open positions",
+        "description": "Returns all currently open positions for a wallet — every outcome token the wallet holds with a non-zero balance, along with pricing, PnL, and market metadata.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "The wallet address to query.",
+            "schema": { "type": "string", "example": "0x0484e64092ba4108c2786b61e6fc052d3bf41b1a" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "OK" },
+                    "status_code": { "type": "string", "example": "1" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": { "type": "array", "items": { "$ref": "#/components/schemas/OpenPosition" } },
+                        "nextCursor": { "type": "string", "nullable": true }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "OK",
+                  "status_code": "1",
+                  "data": {
+                    "items": [
+                      {
+                        "marketId": "3656310",
+                        "marketSlug": "btc-updown-5m-1787031000",
+                        "eventSlug": "btc-updown-5m-1787031000",
+                        "conditionId": "0xa31ec3151a6791a9e74d5f5f84b1f0c00fa077212f9b63fc5582fba6bfc87cce",
+                        "marketTitle": "Bitcoin Up or Down - August 18, 1:30AM-1:35AM ET",
+                        "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/BTC+fullsize.png",
+                        "closed": false,
+                        "tokenId": "100556202915779895602586020414430867023426296240912333256993650161520744311843",
+                        "positionSide": "Up",
+                        "outcomeIndex": 0,
+                        "balance": "45",
+                        "avgPrice": "0.175555",
+                        "currentPrice": "0.01",
+                        "avgExit": "0",
+                        "totalInvested": "7.899975",
+                        "totalBought": "45",
+                        "value": "0.45",
+                        "unrealizedPnl": "-7.449975",
+                        "realizedPnl": "0",
+                        "totalPnl": "-7.449975",
+                        "percentPnl": "-94.303779",
+                        "closedAt": 1787031184
+                      }
+                    ],
+                    "nextCursor": null
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/trader/{address}/combo-positions/open": {
+      "get": {
+        "operationId": "getComboOpenPositions",
+        "summary": "Get combo open positions",
+        "description": "Returns all currently open combo (parlay) positions for a wallet. Each combo position contains multiple legs, each representing a single market outcome. The overall position is valued based on all legs resolving correctly.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "The wallet address to query.",
+            "schema": { "type": "string", "example": "0xb88a7733e9abb384f64579970ae17cecb8588cce" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "OK" },
+                    "status_code": { "type": "string", "example": "1" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": { "type": "array", "items": { "$ref": "#/components/schemas/ComboPosition" } },
+                        "nextCursor": { "type": "string", "nullable": true }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "OK",
+                  "status_code": "1",
+                  "data": {
+                    "items": [
+                      {
+                        "comboPositionId": "1466088136155411495486445580031077146305112146146209458958329510363605762049",
+                        "comboConditionId": "0x033dc6c7521e51246df19efefd4fb699400000000000000000000000000000",
+                        "amount": "293.546934",
+                        "avgPrice": "0.695077",
+                        "realizedPnl": "0",
+                        "totalBought": "293.546934",
+                        "balance": "293.546934",
+                        "balanceTimestamp": 1787028547,
+                        "totalFee": "0",
+                        "recentTradeTime": 1787028547,
+                        "firstTradeTime": 1787028547,
+                        "currentPrice": "0.999",
+                        "unrealizedPnl": "89.215665",
+                        "totalPnl": "89.215665",
+                        "percentPnl": "43.73",
+                        "legs": [
+                          {
+                            "comboPositionId": "1466088136155411495486445580031077146305112146146209458958329510363605762049",
+                            "legIndex": 0,
+                            "legPositionId": "747857295054834995410619171544306138708812161766864978579067866496660144128",
+                            "marketId": "3625100",
+                            "marketTitle": "Cincinnati Open: Tommy Paul vs Adolfo Vallejo",
+                            "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/atp-tour-b4390c4fb8.jpg",
+                            "marketSlug": "atp-paul-vallejo-2026-08-17",
+                            "eventSlug": "atp-paul-vallejo-2026-08-17",
+                            "outcomeIndex": 0,
+                            "outcome": "Tommy Paul",
+                            "outcomePrice": "1",
+                            "resolved": true
+                          },
+                          {
+                            "comboPositionId": "1466088136155411495486445580031077146305112146146209458958329510363605762049",
+                            "legIndex": 1,
+                            "legPositionId": "1111494095816933649408731174103301281720450587590830607175323072809909879041",
+                            "marketId": "3342139",
+                            "marketTitle": "Will CF Pachuca vs. Club Puebla end in a draw?",
+                            "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/mex.png",
+                            "marketSlug": "mex-pac-pue-2026-08-17-draw",
+                            "eventSlug": "mex-pac-pue-2026-08-17",
+                            "outcomeIndex": 1,
+                            "outcome": "No",
+                            "outcomePrice": "0.999",
+                            "resolved": false
+                          }
+                        ]
+                      }
+                    ],
+                    "nextCursor": null
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/trader/{address}/portfolio": {
+      "get": {
+        "operationId": "getPortfolio",
+        "summary": "Get portfolio summary",
+        "description": "Returns a high-level portfolio summary for a wallet — the total mark-to-market value of all open positions, the USDC balance, and the combined portfolio value.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "The wallet address to query.",
+            "schema": { "type": "string", "example": "0x4fdbdcf0ee06bc9ce6c8c972c4af8884202069fa" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "OK" },
+                    "status_code": { "type": "string", "example": "1" },
+                    "data": { "$ref": "#/components/schemas/Portfolio" }
+                  }
+                },
+                "example": {
+                  "message": "OK",
+                  "status_code": "1",
+                  "data": {
+                    "positionValue": "361.917627",
+                    "usdBalance": "700.306867",
+                    "portfolioValue": "1062.224494"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/trader/wallet-address/{address}": {
+      "get": {
+        "operationId": "getWalletAddress",
+        "summary": "Get wallet address mapping",
+        "description": "Resolves a wallet address to its canonical Polymarket proxy address. Useful for normalising addresses before querying other endpoints.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "The wallet address to resolve.",
+            "schema": { "type": "string", "example": "0x9319a045cdd0c2180e5eb7ad44374383db9a6410" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "OK" },
+                    "status_code": { "type": "string", "example": "1" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "walletAddress": { "type": "string", "description": "The resolved wallet address.", "example": "0x9319a045cdd0c2180e5eb7ad44374383db9a6410" }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "OK",
+                  "status_code": "1",
+                  "data": {
+                    "walletAddress": "0x9319a045cdd0c2180e5eb7ad44374383db9a6410"
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
     "/v1/tx/{txHash}": {
       "get": {
         "operationId": "getTransactionActions",
@@ -458,6 +716,83 @@
             "description": "Combined actions for multi-leg trades, or null when not applicable.",
             "items": { "type": "object" }
           }
+        }
+      },
+      "OpenPosition": {
+        "type": "object",
+        "properties": {
+          "marketId": { "type": "string" },
+          "marketSlug": { "type": "string" },
+          "eventSlug": { "type": "string" },
+          "conditionId": { "type": "string" },
+          "marketTitle": { "type": "string" },
+          "logo": { "type": "string", "description": "Market logo URL." },
+          "closed": { "type": "boolean", "description": "Whether the market has closed." },
+          "tokenId": { "type": "string", "description": "Polymarket outcome token ID." },
+          "positionSide": { "type": "string", "description": "Which outcome is held.", "example": "Yes" },
+          "outcomeIndex": { "type": "integer", "example": 0 },
+          "balance": { "type": "string", "description": "Current token balance (shares held)." },
+          "avgPrice": { "type": "string", "description": "Volume-weighted average entry price as a decimal (0–1)." },
+          "currentPrice": { "type": "string", "description": "Current market price as a decimal (0–1)." },
+          "avgExit": { "type": "string", "description": "Volume-weighted average exit price, or \"0\" if no exits yet." },
+          "totalInvested": { "type": "string", "description": "Total USDC spent on this position." },
+          "totalBought": { "type": "string", "description": "Total shares purchased (before any sells)." },
+          "value": { "type": "string", "description": "Current mark-to-market value in USDC (balance × currentPrice)." },
+          "unrealizedPnl": { "type": "string", "description": "Unrealized profit/loss in USDC." },
+          "realizedPnl": { "type": "string", "description": "Realized profit/loss in USDC from any sells." },
+          "totalPnl": { "type": "string", "description": "Total PnL (unrealized + realized) in USDC." },
+          "percentPnl": { "type": "string", "description": "Total PnL as a percentage of total invested." },
+          "closedAt": { "type": "integer", "format": "int64", "nullable": true, "description": "Unix timestamp when the market resolved, or null if still open." }
+        }
+      },
+      "ComboLeg": {
+        "type": "object",
+        "properties": {
+          "comboPositionId": { "type": "string" },
+          "legIndex": { "type": "integer", "description": "Zero-based index of this leg within the combo." },
+          "legPositionId": { "type": "string" },
+          "marketId": { "type": "string" },
+          "marketTitle": { "type": "string" },
+          "logo": { "type": "string" },
+          "marketSlug": { "type": "string" },
+          "eventSlug": { "type": "string" },
+          "outcomeIndex": { "type": "integer" },
+          "outcome": { "type": "string", "description": "Outcome label for this leg.", "example": "Yes" },
+          "outcomePrice": { "type": "string", "description": "Current price of this leg's outcome as a decimal (0–1)." },
+          "resolved": { "type": "boolean", "description": "Whether this leg has resolved." }
+        }
+      },
+      "ComboPosition": {
+        "type": "object",
+        "properties": {
+          "comboPositionId": { "type": "string", "description": "Unique identifier for the combo position." },
+          "comboConditionId": { "type": "string" },
+          "amount": { "type": "string", "description": "Number of combo shares held." },
+          "avgPrice": { "type": "string", "description": "Volume-weighted average entry price as a decimal (0–1)." },
+          "realizedPnl": { "type": "string", "description": "Realized profit/loss in USDC." },
+          "totalBought": { "type": "string", "description": "Total combo shares purchased." },
+          "balance": { "type": "string", "description": "Current balance of combo shares." },
+          "balanceTimestamp": { "type": "integer", "format": "int64", "description": "Unix timestamp of the last balance update." },
+          "totalFee": { "type": "string", "description": "Total fees paid in USDC." },
+          "recentTradeTime": { "type": "integer", "format": "int64", "description": "Unix timestamp of the most recent trade." },
+          "firstTradeTime": { "type": "integer", "format": "int64", "description": "Unix timestamp of the first trade." },
+          "currentPrice": { "type": "string", "description": "Current combo price as a decimal (0–1), calculated from all legs." },
+          "unrealizedPnl": { "type": "string", "description": "Unrealized profit/loss in USDC." },
+          "totalPnl": { "type": "string", "description": "Total PnL (unrealized + realized) in USDC." },
+          "percentPnl": { "type": "string", "description": "Total PnL as a percentage of total invested." },
+          "legs": {
+            "type": "array",
+            "description": "Individual market legs that make up this combo position.",
+            "items": { "$ref": "#/components/schemas/ComboLeg" }
+          }
+        }
+      },
+      "Portfolio": {
+        "type": "object",
+        "properties": {
+          "positionValue": { "type": "string", "description": "Total mark-to-market value of all open positions in USDC." },
+          "usdBalance": { "type": "string", "description": "Uninvested USDC balance in the wallet." },
+          "portfolioValue": { "type": "string", "description": "Combined portfolio value: positionValue + usdBalance." }
         }
       }
     }
