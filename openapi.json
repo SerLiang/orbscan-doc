@@ -188,31 +188,59 @@
       "get": {
         "operationId": "getDepositsWithdrawals",
         "summary": "Get deposits & withdrawals",
-        "description": "Returns the combined USDC deposit and withdrawal history for a wallet, ordered newest-first and paginated with a cursor. Each record's `type` is either `deposit` or `withdrawal`.",
+        "description": "Returns the trader's deposits and withdrawals, aggregated per transaction and ordered by time descending. Transfers from known reward / system addresses are excluded. Each record's `type` is either `deposit` (net inflow) or `withdrawal` (net outflow).",
         "parameters": [
           {
             "name": "address",
             "in": "path",
             "required": true,
-            "description": "The wallet address to query.",
+            "description": "Trader address, `0x` + 40 hex chars.",
             "schema": {
               "type": "string",
               "example": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
             }
           },
           {
-            "name": "cursor",
+            "name": "type",
             "in": "query",
             "required": false,
-            "description": "Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page.",
-            "schema": { "type": "string" }
+            "description": "Filter by transfer direction. Case-insensitive.",
+            "schema": { "type": "string", "enum": ["deposit", "withdrawal"] }
+          },
+          {
+            "name": "fromTimestamp",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive lower timestamp (Unix seconds).",
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "toTimestamp",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive upper timestamp (Unix seconds).",
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "minDeposit",
+            "in": "query",
+            "required": false,
+            "description": "Minimum deposit amount to include. Withdrawals are always included regardless of this filter.",
+            "schema": { "type": "number" }
           },
           {
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Number of records per page. Defaults to 50, maximum 100.",
-            "schema": { "type": "integer", "default": 50, "maximum": 100, "minimum": 1 }
+            "description": "Page size. Defaults to 20, maximum 100.",
+            "schema": { "type": "integer", "default": 20, "maximum": 100, "minimum": 1 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Pagination cursor from the previous response's `nextCursor`. Omit for the first page.",
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -349,28 +377,35 @@
       "get": {
         "operationId": "getClosedPositions",
         "summary": "Get closed positions",
-        "description": "Returns all closed positions for a wallet — outcome tokens the wallet previously held in markets that have since resolved. Positions here have `balance: \"0\"` and `closed: true`. Results are cursor-paginated.",
+        "description": "Returns the trader's closed positions — outcome tokens the wallet previously held in markets that have since resolved. Ordered by market / most recent trade descending. Positions here have `balance: \"0\"` and `closed: true`.",
         "parameters": [
           {
             "name": "address",
             "in": "path",
             "required": true,
-            "description": "The wallet address to query.",
+            "description": "Trader address, `0x` + 40 hex chars.",
             "schema": { "type": "string", "example": "0x0484e64092ba4108c2786b61e6fc052d3bf41b1a" }
           },
           {
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Number of results per page. Defaults to 50, maximum 100.",
-            "schema": { "type": "integer", "default": 50, "maximum": 100 }
+            "description": "Page size. Defaults to 20, maximum 100.",
+            "schema": { "type": "integer", "default": 20, "maximum": 100, "minimum": 1 }
           },
           {
             "name": "cursor",
             "in": "query",
             "required": false,
-            "description": "Opaque cursor returned by a previous response's `nextCursor` field. Omit for the first page.",
+            "description": "Pagination cursor from the previous response's `nextCursor`. Omit for the first page.",
             "schema": { "type": "string" }
+          },
+          {
+            "name": "marketIds",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated market IDs to filter to (e.g. `?marketIds=1,2`).",
+            "schema": { "type": "string", "example": "3658111,3657996" }
           }
         ],
         "responses": {
@@ -532,28 +567,35 @@
       "get": {
         "operationId": "getComboClosedPositions",
         "summary": "Get combo closed positions",
-        "description": "Returns all closed combo (parlay) positions for a wallet — positions where the combo has fully resolved or been sold. Results are cursor-paginated.",
+        "description": "Returns the trader's resolved / closed combo (parlay) positions, ordered by most recent trade descending.",
         "parameters": [
           {
             "name": "address",
             "in": "path",
             "required": true,
-            "description": "The wallet address to query.",
+            "description": "Trader address, `0x` + 40 hex chars.",
             "schema": { "type": "string", "example": "0xb88a7733e9abb384f64579970ae17cecb8588cce" }
           },
           {
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Number of results per page. Defaults to 50, maximum 100.",
-            "schema": { "type": "integer", "default": 50, "maximum": 100 }
+            "description": "Page size. Defaults to 20, maximum 100.",
+            "schema": { "type": "integer", "default": 20, "maximum": 100, "minimum": 1 }
           },
           {
             "name": "cursor",
             "in": "query",
             "required": false,
-            "description": "Opaque cursor returned by a previous response's `nextCursor` field. Omit for the first page.",
+            "description": "Pagination cursor from the previous response's `nextCursor`. Omit for the first page.",
             "schema": { "type": "string" }
+          },
+          {
+            "name": "marketIds",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated market IDs to filter to (e.g. `?marketIds=1,2`).",
+            "schema": { "type": "string", "example": "3619229,3671211" }
           }
         ],
         "responses": {
@@ -671,13 +713,13 @@
       "get": {
         "operationId": "getWalletAddress",
         "summary": "Get wallet address mapping",
-        "description": "Resolves a wallet address to its canonical Polymarket proxy address. Useful for normalising addresses before querying other endpoints.",
+        "description": "Resolves the wallet address for a given signer / trader address. Returns the resolved wallet address (lowercase) or `null` when no wallet is found.",
         "parameters": [
           {
             "name": "address",
             "in": "path",
             "required": true,
-            "description": "The wallet address to resolve.",
+            "description": "Signer / trader address, `0x` + 40 hex chars.",
             "schema": { "type": "string", "example": "0x9319a045cdd0c2180e5eb7ad44374383db9a6410" }
           }
         ],
@@ -694,7 +736,7 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "walletAddress": { "type": "string", "description": "The resolved wallet address.", "example": "0x9319a045cdd0c2180e5eb7ad44374383db9a6410" }
+                        "walletAddress": { "type": "string", "nullable": true, "description": "Resolved wallet address (lowercase), or `null` when no wallet is found.", "example": "0x9319a045cdd0c2180e5eb7ad44374383db9a6410" }
                       }
                     }
                   }
@@ -705,6 +747,113 @@
                   "data": {
                     "walletAddress": "0x9319a045cdd0c2180e5eb7ad44374383db9a6410"
                   }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/trader/{address}/rewards": {
+      "get": {
+        "operationId": "getTraderRewards",
+        "summary": "Get trader rewards",
+        "description": "Returns the trader's reward records (yield, maker/taker rebates, referral rewards, etc.), ordered by block time descending.",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "description": "Trader address, `0x` + 40 hex chars.",
+            "schema": { "type": "string", "example": "0x0484e64092ba4108c2786b61e6fc052d3bf41b1a" }
+          },
+          {
+            "name": "types",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated activity types (e.g. `?types=YIELD,MAKER_REBATE`). Case-insensitive. Supported values: `YIELD`, `MAKER_REBATE`, `TAKER_REBATE`, `REFERRAL_REWARD`, `REWARD`.",
+            "schema": { "type": "string", "example": "YIELD,MAKER_REBATE" }
+          },
+          {
+            "name": "fromTimestamp",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive lower timestamp (Unix seconds).",
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "toTimestamp",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive upper timestamp (Unix seconds).",
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size. Defaults to 20, maximum 100.",
+            "schema": { "type": "integer", "default": 20, "maximum": 100, "minimum": 1 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Pagination cursor from the previous response's `nextCursor`. Omit for the first page.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "OK" },
+                    "status_code": { "type": "string", "example": "1" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": { "type": "array", "items": { "$ref": "#/components/schemas/RewardItem" } },
+                        "nextCursor": { "type": "string", "nullable": true, "description": "Cursor for the next page, or `null` when there are no more results." }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "OK",
+                  "status_code": "1",
+                  "data": {
+                    "items": [
+                      {
+                        "txHash": "0x79818cc22503eb3771d4d9d78a374c9cd53e3d15d864f585390fbc74551177c5",
+                        "logIndex": 1267,
+                        "proxyWallet": "0x0484e64092ba4108c2786b61e6fc052d3bf41b1a",
+                        "fromAddress": "0x520bf77d9d34c34a6a9723f50e1dcb887ed238c5",
+                        "activityType": "TAKER_REBATE",
+                        "blockTimestamp": 1787011821,
+                        "usdcSize": "1082.4748",
+                        "blockNumber": 92204529,
+                        "createdAt": "2026-08-18T00:10:51.963Z"
+                      }
+                    ],
+                    "nextCursor": "1787011821_1267"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid `address`, unsupported `types` value, negative `limit`, or `fromTimestamp` > `toTimestamp`.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Invalid address format",
+                  "status_code": "0",
+                  "data": null
                 }
               }
             }
@@ -846,11 +995,25 @@
       "TransferItem": {
         "type": "object",
         "properties": {
-          "txHash": { "type": "string", "description": "On-chain transaction hash." },
-          "type": { "type": "string", "description": "Transfer direction.", "example": "deposit", "enum": ["deposit", "withdrawal"] },
-          "amount": { "type": "string", "description": "USDC amount transferred.", "example": "181038.379452" },
-          "blockTimestamp": { "type": "integer", "format": "int64", "description": "Unix timestamp (seconds)." },
-          "address": { "type": "string", "description": "Counterparty address. For deposits this may be the zero address when funds are bridged in." }
+          "txHash": { "type": "string", "description": "Transaction hash (records are aggregated per transaction)." },
+          "type": { "type": "string", "description": "`deposit` (net inflow) or `withdrawal` (net outflow).", "example": "deposit", "enum": ["deposit", "withdrawal"] },
+          "amount": { "type": "string", "description": "Amount, absolute value of the net flow (USDC).", "example": "181038.379452" },
+          "blockTimestamp": { "type": "integer", "format": "int64", "description": "Block timestamp (Unix seconds)." },
+          "address": { "type": "string", "description": "Counterparty address (sender for deposits, receiver for withdrawals). For bridged deposits this may be the zero address." }
+        }
+      },
+      "RewardItem": {
+        "type": "object",
+        "properties": {
+          "txHash": { "type": "string", "description": "Transaction hash." },
+          "logIndex": { "type": "integer", "description": "Log index." },
+          "proxyWallet": { "type": "string", "description": "The trader's proxy wallet (the reward recipient)." },
+          "fromAddress": { "type": "string", "description": "Address the reward was sent from." },
+          "activityType": { "type": "string", "description": "Reward type.", "enum": ["YIELD", "MAKER_REBATE", "TAKER_REBATE", "REFERRAL_REWARD", "REWARD"] },
+          "blockTimestamp": { "type": "integer", "format": "int64", "description": "Block timestamp (Unix seconds)." },
+          "usdcSize": { "type": "string", "description": "Reward amount, in USDC." },
+          "blockNumber": { "type": "integer", "format": "int64", "description": "Block number." },
+          "createdAt": { "type": "string", "format": "date-time", "description": "Record creation timestamp (ISO 8601)." }
         }
       },
       "TransactionAction": {
@@ -903,68 +1066,68 @@
       "OpenPosition": {
         "type": "object",
         "properties": {
-          "marketId": { "type": "string" },
-          "marketSlug": { "type": "string" },
-          "eventSlug": { "type": "string" },
-          "conditionId": { "type": "string" },
-          "marketTitle": { "type": "string" },
+          "marketId": { "type": "string", "description": "Market ID." },
+          "marketSlug": { "type": "string", "description": "Market slug." },
+          "eventSlug": { "type": "string", "description": "Event slug." },
+          "conditionId": { "type": "string", "description": "Condition ID." },
+          "marketTitle": { "type": "string", "description": "Market title." },
           "logo": { "type": "string", "description": "Market logo URL." },
-          "closed": { "type": "boolean", "description": "Whether the market has closed." },
-          "tokenId": { "type": "string", "description": "Polymarket outcome token ID." },
-          "positionSide": { "type": "string", "description": "Which outcome is held.", "example": "Yes" },
-          "outcomeIndex": { "type": "integer", "example": 0 },
-          "balance": { "type": "string", "description": "Current token balance (shares held)." },
-          "avgPrice": { "type": "string", "description": "Volume-weighted average entry price as a decimal (0–1)." },
-          "currentPrice": { "type": "string", "description": "Current market price as a decimal (0–1)." },
-          "avgExit": { "type": "string", "description": "Volume-weighted average exit price, or \"0\" if no exits yet." },
-          "totalInvested": { "type": "string", "description": "Total USDC spent on this position." },
-          "totalBought": { "type": "string", "description": "Total shares purchased (before any sells)." },
-          "value": { "type": "string", "description": "Current mark-to-market value in USDC (balance × currentPrice)." },
-          "unrealizedPnl": { "type": "string", "description": "Unrealized profit/loss in USDC." },
-          "realizedPnl": { "type": "string", "description": "Realized profit/loss in USDC from any sells." },
-          "totalPnl": { "type": "string", "description": "Total PnL (unrealized + realized) in USDC." },
-          "percentPnl": { "type": "string", "description": "Total PnL as a percentage of total invested." },
-          "closedAt": { "type": "integer", "format": "int64", "nullable": true, "description": "Unix timestamp when the market resolved, or null if still open." }
+          "closed": { "type": "boolean", "description": "Whether the position is closed." },
+          "tokenId": { "type": "string", "description": "Token ID." },
+          "positionSide": { "type": "string", "description": "Position side, e.g. `YES` / `NO`.", "example": "YES" },
+          "outcomeIndex": { "type": "integer", "description": "Outcome index.", "example": 0 },
+          "balance": { "type": "string", "description": "Remaining position balance (shares)." },
+          "avgPrice": { "type": "string", "description": "Average entry price, 0–1 scale." },
+          "currentPrice": { "type": "string", "description": "Current price, 0–1 scale." },
+          "avgExit": { "type": "string", "description": "Average exit price, 0–1 scale." },
+          "totalInvested": { "type": "string", "description": "Total invested, in USD." },
+          "totalBought": { "type": "string", "description": "Cumulative shares bought." },
+          "value": { "type": "string", "description": "Current position value, in USD." },
+          "unrealizedPnl": { "type": "string", "description": "Unrealized PnL, in USD." },
+          "realizedPnl": { "type": "string", "description": "Realized PnL, in USD." },
+          "totalPnl": { "type": "string", "description": "Realized + unrealized PnL, in USD." },
+          "percentPnl": { "type": "string", "nullable": true, "description": "PnL as a percentage of cost basis." },
+          "closedAt": { "type": "integer", "format": "int64", "nullable": true, "description": "Closing block timestamp (Unix seconds); `null` while open." }
         }
       },
       "ComboLeg": {
         "type": "object",
         "properties": {
-          "comboPositionId": { "type": "string" },
-          "legIndex": { "type": "integer", "description": "Zero-based index of this leg within the combo." },
-          "legPositionId": { "type": "string" },
-          "marketId": { "type": "string" },
-          "marketTitle": { "type": "string" },
-          "logo": { "type": "string" },
-          "marketSlug": { "type": "string" },
-          "eventSlug": { "type": "string" },
-          "outcomeIndex": { "type": "integer" },
-          "outcome": { "type": "string", "description": "Outcome label for this leg.", "example": "Yes" },
-          "outcomePrice": { "type": "string", "description": "Current price of this leg's outcome as a decimal (0–1)." },
-          "resolved": { "type": "boolean", "description": "Whether this leg has resolved." }
+          "comboPositionId": { "type": "string", "description": "Combo position ID." },
+          "legIndex": { "type": "integer", "description": "Leg index." },
+          "legPositionId": { "type": "string", "description": "Leg position ID." },
+          "marketId": { "type": "string", "description": "Market ID." },
+          "marketTitle": { "type": "string", "description": "Market title." },
+          "logo": { "type": "string", "description": "Market logo URL." },
+          "marketSlug": { "type": "string", "description": "Market slug." },
+          "eventSlug": { "type": "string", "description": "Event slug." },
+          "outcomeIndex": { "type": "integer", "description": "Outcome index." },
+          "outcome": { "type": "string", "description": "Outcome label, e.g. `YES` / `NO`.", "example": "YES" },
+          "outcomePrice": { "type": "string", "description": "Leg outcome price, 0–1 scale." },
+          "resolved": { "type": "boolean", "description": "Whether the leg market is resolved." }
         }
       },
       "ComboPosition": {
         "type": "object",
         "properties": {
-          "comboPositionId": { "type": "string", "description": "Unique identifier for the combo position." },
-          "comboConditionId": { "type": "string" },
-          "amount": { "type": "string", "description": "Number of combo shares held." },
-          "avgPrice": { "type": "string", "description": "Volume-weighted average entry price as a decimal (0–1)." },
-          "realizedPnl": { "type": "string", "description": "Realized profit/loss in USDC." },
-          "totalBought": { "type": "string", "description": "Total combo shares purchased." },
-          "balance": { "type": "string", "description": "Current balance of combo shares." },
-          "balanceTimestamp": { "type": "integer", "format": "int64", "description": "Unix timestamp of the last balance update." },
-          "totalFee": { "type": "string", "description": "Total fees paid in USDC." },
-          "recentTradeTime": { "type": "integer", "format": "int64", "description": "Unix timestamp of the most recent trade." },
-          "firstTradeTime": { "type": "integer", "format": "int64", "description": "Unix timestamp of the first trade." },
-          "currentPrice": { "type": "string", "description": "Current combo price as a decimal (0–1), calculated from all legs." },
-          "unrealizedPnl": { "type": "string", "description": "Unrealized profit/loss in USDC." },
-          "totalPnl": { "type": "string", "description": "Total PnL (unrealized + realized) in USDC." },
-          "percentPnl": { "type": "string", "description": "Total PnL as a percentage of total invested." },
+          "comboPositionId": { "type": "string", "description": "Combo position ID." },
+          "comboConditionId": { "type": "string", "description": "Combo condition ID." },
+          "amount": { "type": "string", "description": "Amount, in USDC." },
+          "avgPrice": { "type": "string", "description": "Average entry price, 0–1 scale." },
+          "realizedPnl": { "type": "string", "description": "Realized PnL, in USD." },
+          "totalBought": { "type": "string", "description": "Cumulative shares bought." },
+          "balance": { "type": "string", "description": "Remaining position balance (shares)." },
+          "balanceTimestamp": { "type": "integer", "format": "int64", "description": "Balance snapshot timestamp (Unix seconds)." },
+          "totalFee": { "type": "string", "description": "Total fees paid, in USDC." },
+          "recentTradeTime": { "type": "integer", "format": "int64", "description": "Most recent trade timestamp (Unix seconds)." },
+          "firstTradeTime": { "type": "integer", "format": "int64", "description": "First trade timestamp (Unix seconds)." },
+          "currentPrice": { "type": "string", "description": "Current combo price, 0–1 scale." },
+          "unrealizedPnl": { "type": "string", "description": "Unrealized PnL, in USD." },
+          "totalPnl": { "type": "string", "description": "Realized + unrealized PnL, in USD." },
+          "percentPnl": { "type": "string", "nullable": true, "description": "PnL as a percentage of cost basis." },
           "legs": {
             "type": "array",
-            "description": "Individual market legs that make up this combo position.",
+            "description": "Legs of the combo position.",
             "items": { "$ref": "#/components/schemas/ComboLeg" }
           }
         }
