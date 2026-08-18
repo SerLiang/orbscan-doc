@@ -351,9 +351,9 @@
     "securitySchemes": {
       "apiKey": {
         "type": "apiKey",
-        "in": "query",
+        "in": "header",
         "name": "apikey",
-        "description": "Pass your Orbscan API key as the `apikey` query parameter."
+        "description": "Pass your Orbscan API key in the `apikey` request header."
       }
     },
     "responses": {
