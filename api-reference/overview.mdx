@@ -11,17 +11,17 @@ The Orbscan Open API is a REST API that returns JSON. It gives you programmatic 
 All requests go to:
 
 ```text
-https://orbscan.com/open-api
+https://api.orbscan.com
 ```
 
-Every endpoint path in this reference is relative to that base — for example, `GET /v1/trader/{address}/activity` means `https://orbscan.com/open-api/v1/trader/{address}/activity`.
+Every endpoint path in this reference is relative to that base — for example, `GET /v1/trader/{address}/activity` means `https://api.orbscan.com/v1/trader/{address}/activity`.
 
 ## Authentication
 
 Every request must include your API key as a **Bearer token** in the `Authorization` header. Requests without a valid key return `401`.
 
 ```bash
-curl "https://orbscan.com/open-api/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=1" \
+curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=1" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -66,11 +66,11 @@ The list endpoints (activity, deposits & withdrawals) are cursor-paginated:
 
 ```bash
 # Page 1
-curl "https://orbscan.com/open-api/v1/trader/{address}/activity?limit=50" \
+curl "https://api.orbscan.com/v1/trader/{address}/activity?limit=50" \
   -H "Authorization: Bearer YOUR_API_KEY"
 
 # Page 2 — feed nextCursor back in
-curl "https://orbscan.com/open-api/v1/trader/{address}/activity?limit=50&cursor=NEXT_CURSOR" \
+curl "https://api.orbscan.com/v1/trader/{address}/activity?limit=50&cursor=NEXT_CURSOR" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
