@@ -6,16 +6,6 @@ description: "Understand Orbscan API rate limits by plan tier — requests per m
 
 The Orbscan API enforces rate limits to ensure consistent, reliable performance for all users. Limits are applied on a rolling per-minute window and a rolling 24-hour daily quota. If your application exceeds either limit, the API returns a `429 Too Many Requests` response until the relevant window resets. Understanding your limits — and designing your integration around them — will help you avoid disruptions.
 
-## Rate Limit Headers
-
-Every API response includes headers that tell you exactly where you stand within your current rate limit window. Read these headers proactively so your application can throttle itself before hitting a `429`.
-
-| Header | Description |
-|---|---|
-| `X-RateLimit-Limit` | The total number of requests your API key is allowed per minute |
-| `X-RateLimit-Remaining` | The number of requests remaining in the current one-minute window |
-| `X-RateLimit-Reset` | A Unix timestamp (seconds) indicating when the current window resets and your quota refills |
-
 <Note>
   Rate limits are enforced per API key, not per IP address. If you run multiple services or environments, each should use its own API key so their usage is tracked independently.
 </Note>
@@ -34,9 +24,7 @@ To upgrade your plan or inquire about Enterprise pricing, contact the Orbscan te
 
 ## Handling 429 Responses
 
-When you receive a `429` response, do not immediately retry the request — you will receive another `429` until the window resets. Instead, read the `X-RateLimit-Reset` header and pause your requests until that Unix timestamp has passed.
-
-The examples below show how to detect a `429` and wait for the correct reset time before retrying.
+When you receive a `429` response, do not immediately retry the request — you will receive another `429` until the window resets. Wait briefly and then retry with exponential backoff.
 
 <CodeGroup>
 
@@ -44,37 +32,33 @@ The examples below show how to detect a `429` and wait for the correct reset tim
 import time
 import requests
 
-def get_with_rate_limit_handling(url, headers):
-    while True:
+def get_with_rate_limit_handling(url, headers, max_retries=3):
+    wait = 5
+    for attempt in range(max_retries):
         response = requests.get(url, headers=headers)
-
         if response.status_code == 429:
-            reset_at = int(response.headers.get("X-RateLimit-Reset", time.time() + 60))
-            wait_seconds = max(reset_at - time.time(), 1)
-            print(f"Rate limited. Waiting {wait_seconds:.1f}s until window resets...")
-            time.sleep(wait_seconds)
-            continue  # retry after the window resets
-
+            print(f"Rate limited. Retrying in {wait}s...")
+            time.sleep(wait)
+            wait *= 2
+            continue
         return response
+    raise RuntimeError("Exceeded max retries due to rate limiting")
 ```
 
 ```javascript JavaScript
-async function getWithRateLimitHandling(url, headers) {
-  while (true) {
+async function getWithRateLimitHandling(url, headers, maxRetries = 3) {
+  let wait = 5000;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     const response = await fetch(url, { headers });
-
     if (response.status === 429) {
-      const resetAt = parseInt(response.headers.get("X-RateLimit-Reset"), 10);
-      const now = Math.floor(Date.now() / 1000);
-      const waitSeconds = Math.max(resetAt - now, 1);
-
-      console.log(`Rate limited. Waiting ${waitSeconds}s until window resets...`);
-      await new Promise((resolve) => setTimeout(resolve, waitSeconds * 1000));
-      continue; // retry after the window resets
+      console.log(`Rate limited. Retrying in ${wait / 1000}s...`);
+      await new Promise((resolve) => setTimeout(resolve, wait));
+      wait *= 2;
+      continue;
     }
-
     return response;
   }
+  throw new Error("Exceeded max retries due to rate limiting");
 }
 ```
 
@@ -88,6 +72,4 @@ Following these practices will help you stay within your limits and get the most
 
 - **Paginate, don't dump.** Use the `limit` and `offset` query parameters to fetch data in manageable pages rather than requesting the largest possible payload in a single call. This keeps individual responses fast and reduces the chance of timeouts.
 
-- **Poll the activities endpoint responsibly.** If you're building a real-time feed, poll `/v1/activities` at most once every 5 seconds. More frequent polling provides negligible freshness gains and burns through your rate limit quickly.
-
-- **Monitor your headers.** Check `X-RateLimit-Remaining` on each response and slow down proactively as it approaches zero, rather than waiting for a `429` to tell you to stop.
+- **Poll responsibly.** If you're building a real-time feed, poll at most once every 5 seconds. More frequent polling provides negligible freshness gains and burns through your rate limit quickly.

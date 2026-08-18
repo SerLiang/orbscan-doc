@@ -37,22 +37,20 @@ Every response — success or error — uses the same envelope:
 
 ```json
 {
-  "success": true,
-  "code": "0",
-  "message": "success",
+  "message": "OK",
+  "status_code": "1",
   "data": { }
 }
 ```
 
 | Field | Type | Description |
 |---|---|---|
-| `success` | boolean | `true` if the request succeeded, `false` otherwise. |
-| `code` | string | `"0"` on success. On failure this is the HTTP status as a string (e.g. `"401"`, `"400"`, `"404"`). |
-| `message` | string | `"success"`, or a human-readable error message. |
+| `message` | string | `"OK"` on success, or a human-readable error description on failure. |
+| `status_code` | string | `"1"` on success, `"0"` on error. Use the HTTP status code to identify the error type. |
 | `data` | object / null | The requested payload. `null` when a request fails, or when a valid lookup simply has no result. |
 
 <Note>
-  A successful lookup that finds nothing still returns `200` with `success: true`. For list endpoints, `data.items` is an empty array; for single-record lookups, `data` is `null`. Check the shape of `data` rather than relying on the HTTP status alone.
+  A successful lookup that finds nothing still returns `200` with `status_code: "1"`. For list endpoints, `data.items` is an empty array. Check the shape of `data` rather than relying on the HTTP status alone.
 </Note>
 
 ## Pagination
@@ -83,5 +81,5 @@ curl "https://api.orbscan.com/v1/trader/{address}/activity?limit=50&cursor=NEXT_
 | [Get Actions by Hash](/api-reference/endpoints/get-transaction) | `/v1/tx/{txHash}` | Decoded summary and fills for a single transaction |
 
 <Tip>
-  Prices in activity and transaction responses are expressed in **cents** (0–100). A `price` of `78.0` means 78¢ per share.
+  Prices in activity and transaction responses are expressed as **decimals** (0–1). A `price` of `"0.78"` means 78¢ per share.
 </Tip>

@@ -51,24 +51,22 @@ console.log(body);
 
 ## Verifying Authentication
 
-A successful, authenticated request returns `success: true`:
+A successful, authenticated request returns `status_code: "1"`:
 
 ```json
 {
-  "success": true,
-  "code": "0",
-  "message": "success",
+  "message": "OK",
+  "status_code": "1",
   "data": { }
 }
 ```
 
-A missing or invalid key returns `401`:
+A missing or invalid key returns HTTP `401`:
 
 ```json
 {
-  "success": false,
-  "code": "401",
   "message": "Missing or invalid API key",
+  "status_code": "0",
   "data": null
 }
 ```

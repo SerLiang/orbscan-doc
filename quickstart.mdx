@@ -17,12 +17,12 @@ This guide gets you from zero to a live API response in under five minutes. You'
     ```
   </Step>
 
-  <Step title="Fetch a trader profile">
-    The trader profile endpoint returns performance metrics and account details for any Polymarket wallet address. Make the following request, replacing the example address with any wallet you want to inspect.
+  <Step title="Fetch trader activity">
+    The trader activity endpoint returns paginated buy, sell, and redeem history for any Polymarket wallet address. Make the following request, replacing the example address with any wallet you want to inspect.
 
     <CodeGroup>
       ```bash curl
-      curl -X GET "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/profile" \
+      curl -X GET "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=5" \
         -H "Authorization: Bearer $ORBSCAN_API_KEY" \
         -H "Accept: application/json"
       ```
@@ -35,50 +35,50 @@ This guide gets you from zero to a live API response in under five minutes. You'
       address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
 
       response = requests.get(
-          f"https://api.orbscan.com/v1/trader/{address}/profile",
+          f"https://api.orbscan.com/v1/trader/{address}/activity",
           headers={
               "Authorization": f"Bearer {api_key}",
               "Accept": "application/json",
           },
+          params={"limit": 5},
       )
 
-      profile = response.json()
-      print(profile)
+      data = response.json()
+      print(data)
       ```
     </CodeGroup>
 
     <Tip>
-      You can use any valid Polymarket wallet address. To find interesting wallets to explore, check the [leaderboard endpoint](/api-reference/leaderboard/get-leaderboard) or browse the top traders on [orbscan.com](https://orbscan.com).
+      You can use any valid Polymarket wallet address. Browse the top traders on [orbscan.com](https://orbscan.com) to find interesting wallets to explore.
     </Tip>
   </Step>
 
   <Step title="Inspect the response">
-    A successful request returns a JSON object with the trader's account details and computed performance metrics. Here's an example response for the wallet used above:
+    A successful request returns a JSON object with a paginated list of trades. Here's an example response:
 
     ```json
     {
-      "address": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
-      "username": "sharpbetter",
-      "pnl_30d": 18420.55,
-      "positions_count": 12,
-      "win_rate": 0.67,
-      "sharpe_ratio": 2.14,
-      "active_markets": [
-        {
-          "market_id": "0xabc123",
-          "title": "Will the Fed cut rates in September 2025?",
-          "side": "YES",
-          "current_value_usd": 3200.00,
-          "unrealized_pnl": 540.00
-        },
-        {
-          "market_id": "0xdef456",
-          "title": "Will Bitcoin exceed $120k before July 2025?",
-          "side": "NO",
-          "current_value_usd": 1750.00,
-          "unrealized_pnl": -210.00
-        }
-      ]
+      "message": "OK",
+      "status_code": "1",
+      "data": {
+        "items": [
+          {
+            "blockTimestamp": 1782861128,
+            "actionType": "Redeem",
+            "price": "1",
+            "size": "5",
+            "fee": "0",
+            "usdcSize": "5",
+            "netSharesTransferred": "-5",
+            "txHash": "0x71bf46c3089e2349a62ec6b93638522e8cc635a9836f1308ac7621ce1ecbb609",
+            "marketTitle": "Will France win on 2026-06-30?",
+            "positionSide": "Yes",
+            "traderAddress": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
+            "liquidityRole": null
+          }
+        ],
+        "nextCursor": "MTc4Mjg2MTEyOH..."
+      }
     }
     ```
 
@@ -86,13 +86,13 @@ This guide gets you from zero to a live API response in under five minutes. You'
 
     | Field | Description |
     |---|---|
-    | `address` | The on-chain wallet address queried. |
-    | `username` | Display name associated with the wallet, if set. |
-    | `pnl_30d` | Realized + unrealized profit and loss over the last 30 days, in USD. |
-    | `positions_count` | Number of open positions currently held by this wallet. |
-    | `win_rate` | Fraction of resolved trades where the trader selected the correct outcome. |
-    | `sharpe_ratio` | Risk-adjusted return metric computed over the trailing 30 days. |
-    | `active_markets` | List of markets the wallet currently holds positions in, with mark-to-market values. |
+    | `blockTimestamp` | Unix timestamp (seconds) of the trade. |
+    | `actionType` | Action label: `Buy`, `Sell`, or `Redeem`. |
+    | `price` | Price per share as a decimal (0–1). `"0.78"` means 78¢ per share. |
+    | `size` | Number of shares. |
+    | `usdcSize` | Gross USDC value of the trade. |
+    | `netSharesTransferred` | Shares received (positive) or sent (negative). |
+    | `nextCursor` | Pass this back as `cursor` to fetch the next page. `null` when no more results. |
   </Step>
 
   <Step title="Next steps">
