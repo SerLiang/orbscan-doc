@@ -64,13 +64,13 @@ The trader profile endpoint returns a `copy_pnl_7d` field — the hypothetical P
 
 ```bash curl
 curl --request GET \
-  --url https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile \
+  --url https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/profile \
   --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 ```json
 {
-  "address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+  "address": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
   "username": "swisstony",
   "pnl_30d": 10418044.50,
   "pnl_total": 24500000.00,
@@ -93,10 +93,10 @@ Before mirroring a trader, inspect the markets they are currently active in. Thi
 import os
 import requests
 
-address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
 
 response = requests.get(
-    f"https://api.orbscan.com/v1/traders/{address}/positions",
+    f"https://api.orbscan.com/v1/trader/{address}/positions",
     headers={"Authorization": f"Bearer {os.environ['ORBSCAN_API_KEY']}"},
 )
 
@@ -165,7 +165,7 @@ def get_copy_candidates(min_sharpe=1.0, min_win_rate=0.55, min_resolved=50):
 
 def get_positions(address):
     resp = requests.get(
-        f"{BASE_URL}/traders/{address}/positions",
+        f"{BASE_URL}/trader/{address}/positions",
         headers=HEADERS,
     )
     return resp.json()["data"]

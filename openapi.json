@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://orbscan.com/open-api",
+      "url": "https://api.orbscan.com",
       "description": "Production"
     }
   ],

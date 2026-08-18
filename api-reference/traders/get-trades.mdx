@@ -1,12 +1,12 @@
 ---
-title: "GET /v1/traders/{address}/trades — Trade History"
+title: "GET /v1/trader/{address}/trades — Trade History"
 sidebarTitle: "GET Trades"
 description: "Fetch the full trade history for a Polymarket wallet — buy/sell transactions, prices, sizes, and Polygon transaction hashes."
 ---
 
 The trades endpoint returns the complete on-chain trade history for a Polymarket wallet, ordered from newest to oldest. Each record includes the market traded, the side and size of the transaction, the price at execution, and the Polygon transaction hash you can use for independent on-chain verification.
 
-`GET https://api.orbscan.com/v1/traders/{address}/trades`
+`GET https://api.orbscan.com/v1/trader/{address}/trades`
 
 ## Path Parameters
 
@@ -46,14 +46,14 @@ The trades endpoint returns the complete on-chain trade history for a Polymarket
 
 ```bash curl
 curl --request GET \
-  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/trades?limit=50&side=BUY&start_date=2024-01-01&end_date=2024-03-31' \
+  --url 'https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/trades?limit=50&side=BUY&start_date=2024-01-01&end_date=2024-03-31' \
   --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 ```python Python
 import requests
 
-address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
 
 params = {
     "limit": 50,
@@ -63,7 +63,7 @@ params = {
 }
 
 response = requests.get(
-    f"https://api.orbscan.com/v1/traders/{address}/trades",
+    f"https://api.orbscan.com/v1/trader/{address}/trades",
     headers={"Authorization": "Bearer $ORBSCAN_API_KEY"},
     params=params,
 )

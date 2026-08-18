@@ -1,12 +1,12 @@
 ---
-title: "GET /v1/traders/{address}/positions — Open Positions"
+title: "GET /v1/trader/{address}/positions — Open Positions"
 sidebarTitle: "GET Positions"
 description: "List all open Polymarket positions for a wallet — market, outcome, shares held, cost basis, current value, and unrealized PnL."
 ---
 
 The positions endpoint returns every currently open position held by a Polymarket trader. Each entry tells you which market and outcome the trader is exposed to, how many shares they hold, what they paid, and how that position is marked at current prices — giving you everything needed to display a live portfolio view or calculate risk exposure.
 
-`GET https://api.orbscan.com/v1/traders/{address}/positions`
+`GET https://api.orbscan.com/v1/trader/{address}/positions`
 
 ## Path Parameters
 
@@ -34,14 +34,14 @@ The positions endpoint returns every currently open position held by a Polymarke
 
 ```bash curl
 curl --request GET \
-  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/positions?category=politics&limit=50&offset=0' \
+  --url 'https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/positions?category=politics&limit=50&offset=0' \
   --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 ```python Python
 import requests
 
-address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
 
 params = {
     "category": "politics",
@@ -50,7 +50,7 @@ params = {
 }
 
 response = requests.get(
-    f"https://api.orbscan.com/v1/traders/{address}/positions",
+    f"https://api.orbscan.com/v1/trader/{address}/positions",
     headers={"Authorization": "Bearer $ORBSCAN_API_KEY"},
     params=params,
 )
@@ -59,12 +59,12 @@ print(response.json())
 ```
 
 ```javascript JavaScript
-const address = "0x204f72f35326db932158cba6adff0b9a1da95e14";
+const address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee";
 
 const params = new URLSearchParams({ category: "politics", limit: 50, offset: 0 });
 
 const response = await fetch(
-  `https://api.orbscan.com/v1/traders/${address}/positions?${params}`,
+  `https://api.orbscan.com/v1/trader/${address}/positions?${params}`,
   {
     headers: {
       Authorization: `Bearer ${process.env.ORBSCAN_API_KEY}`,

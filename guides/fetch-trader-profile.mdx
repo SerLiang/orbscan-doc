@@ -12,7 +12,7 @@ The Traders API gives you complete analytics for any Polymarket wallet address �
 
 Every Polymarket trader is identified by their Ethereum wallet address. There are two easy ways to find one:
 
-- **Browse orbscan.com** — search by username or explore the leaderboard, then copy the address from the trader's profile URL. For example: `orbscan.com/profile/0x204f72f35326db932158cba6adff0b9a1da95e14`
+- **Browse orbscan.com** — search by username or explore the leaderboard, then copy the address from the trader's profile URL. For example: `orbscan.com/profile/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee`
 - **From Polymarket directly** — navigate to a trader's public profile on polymarket.com and grab the address from the URL or the connected wallet display.
 
 <Tip>
@@ -23,13 +23,13 @@ Wallet addresses are case-insensitive. `0x204F72...` and `0x204f72...` resolve t
 
 <Step title="Fetch their profile">
 
-Call `GET /v1/traders/{address}/profile` to retrieve a full summary of the trader's performance metrics, including 30-day PnL, total PnL, win rate, Sharpe ratio, and portfolio size.
+Call `GET /v1/trader/{address}/profile` to retrieve a full summary of the trader's performance metrics, including 30-day PnL, total PnL, win rate, Sharpe ratio, and portfolio size.
 
 <CodeGroup>
 
 ```bash curl
 curl --request GET \
-  --url https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile \
+  --url https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/profile \
   --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
@@ -37,10 +37,10 @@ curl --request GET \
 import os
 import requests
 
-address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
 
 response = requests.get(
-    f"https://api.orbscan.com/v1/traders/{address}/profile",
+    f"https://api.orbscan.com/v1/trader/{address}/profile",
     headers={"Authorization": f"Bearer {os.environ['ORBSCAN_API_KEY']}"},
 )
 
@@ -51,10 +51,10 @@ print(f"Win rate: {profile['win_rate'] * 100:.1f}%")
 ```
 
 ```javascript JavaScript
-const address = "0x204f72f35326db932158cba6adff0b9a1da95e14";
+const address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee";
 
 const response = await fetch(
-  `https://api.orbscan.com/v1/traders/${address}/profile`,
+  `https://api.orbscan.com/v1/trader/${address}/profile`,
   {
     headers: {
       Authorization: `Bearer ${process.env.ORBSCAN_API_KEY}`,
@@ -74,7 +74,7 @@ console.log(`Win rate: ${(profile.win_rate * 100).toFixed(1)}%`);
 
 ```json
 {
-  "address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+  "address": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
   "username": "swisstony",
   "pnl_30d": 10418044.50,
   "pnl_total": 24500000.00,
@@ -100,11 +100,11 @@ console.log(`Win rate: ${(profile.win_rate * 100).toFixed(1)}%`);
 
 <Step title="Fetch open positions">
 
-Call `GET /v1/traders/{address}/positions` to see every market the trader is currently active in, along with their cost basis, current value, and unrealized PnL.
+Call `GET /v1/trader/{address}/positions` to see every market the trader is currently active in, along with their cost basis, current value, and unrealized PnL.
 
 ```bash curl
 curl --request GET \
-  --url https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/positions \
+  --url https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/positions \
   --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
@@ -131,17 +131,17 @@ curl --request GET \
 
 <Step title="Fetch trade history">
 
-Call `GET /v1/traders/{address}/trades` to retrieve a chronological log of every buy and sell the trader has made. Use the `limit` and `offset` query parameters to paginate through large histories.
+Call `GET /v1/trader/{address}/trades` to retrieve a chronological log of every buy and sell the trader has made. Use the `limit` and `offset` query parameters to paginate through large histories.
 
 ```bash curl
 # Fetch the first 50 trades
 curl --request GET \
-  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/trades?limit=50&offset=0' \
+  --url 'https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/trades?limit=50&offset=0' \
   --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 
 # Fetch the next page
 curl --request GET \
-  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/trades?limit=50&offset=50' \
+  --url 'https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/trades?limit=50&offset=50' \
   --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
@@ -165,7 +165,7 @@ Pass a `category` query parameter to `/positions` to narrow results to a specifi
 ```bash curl
 # Fetch only the trader's crypto market positions
 curl --request GET \
-  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/positions?category=Crypto' \
+  --url 'https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/positions?category=Crypto' \
   --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 

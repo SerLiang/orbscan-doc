@@ -1,12 +1,12 @@
 ---
-title: "GET /v1/traders/{address}/profile — Trader Analytics"
+title: "GET /v1/trader/{address}/profile — Trader Analytics"
 sidebarTitle: "GET Profile"
 description: "Fetch a Polymarket wallet's profile — username, 30-day PnL, win rate, Sharpe ratio, active markets, and copy PnL metrics."
 ---
 
 The profile endpoint returns a comprehensive analytics snapshot for a single Polymarket trader identified by their Ethereum wallet address. Use it to surface leaderboard stats, power copy-trading features, or build trader profile pages — all resolved from on-chain and Polymarket activity data.
 
-`GET https://api.orbscan.com/v1/traders/{address}/profile`
+`GET https://api.orbscan.com/v1/trader/{address}/profile`
 
 ## Path Parameters
 
@@ -20,17 +20,17 @@ The profile endpoint returns a comprehensive analytics snapshot for a single Pol
 
 ```bash curl
 curl --request GET \
-  --url https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile \
+  --url https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/profile \
   --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 ```python Python
 import requests
 
-address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
 
 response = requests.get(
-    f"https://api.orbscan.com/v1/traders/{address}/profile",
+    f"https://api.orbscan.com/v1/trader/{address}/profile",
     headers={"Authorization": "Bearer $ORBSCAN_API_KEY"},
 )
 
@@ -38,10 +38,10 @@ print(response.json())
 ```
 
 ```javascript JavaScript
-const address = "0x204f72f35326db932158cba6adff0b9a1da95e14";
+const address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee";
 
 const response = await fetch(
-  `https://api.orbscan.com/v1/traders/${address}/profile`,
+  `https://api.orbscan.com/v1/trader/${address}/profile`,
   {
     headers: {
       Authorization: `Bearer ${process.env.ORBSCAN_API_KEY}`,
@@ -105,7 +105,7 @@ console.log(data);
 
 ```json
 {
-  "address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+  "address": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
   "username": "sharptrader",
   "pnl_30d": 4821.53,
   "pnl_total": 31047.18,

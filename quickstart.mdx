@@ -22,7 +22,7 @@ This guide gets you from zero to a live API response in under five minutes. You'
 
     <CodeGroup>
       ```bash curl
-      curl -X GET "https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/profile" \
+      curl -X GET "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/profile" \
         -H "Authorization: Bearer $ORBSCAN_API_KEY" \
         -H "Accept: application/json"
       ```
@@ -32,10 +32,10 @@ This guide gets you from zero to a live API response in under five minutes. You'
       import requests
 
       api_key = os.environ["ORBSCAN_API_KEY"]
-      address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+      address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
 
       response = requests.get(
-          f"https://api.orbscan.com/v1/traders/{address}/profile",
+          f"https://api.orbscan.com/v1/trader/{address}/profile",
           headers={
               "Authorization": f"Bearer {api_key}",
               "Accept": "application/json",
@@ -57,7 +57,7 @@ This guide gets you from zero to a live API response in under five minutes. You'
 
     ```json
     {
-      "address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+      "address": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
       "username": "sharpbetter",
       "pnl_30d": 18420.55,
       "positions_count": 12,

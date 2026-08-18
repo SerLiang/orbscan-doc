@@ -1,21 +1,21 @@
 ---
-title: "GET /v1/traders/{address}/withdrawals — Withdrawal History"
+title: "GET /v1/trader/{address}/withdrawals — Withdrawal History"
 sidebarTitle: "Get Withdrawals"
 description: "Fetch the full USDC withdrawal history for a Polymarket wallet on Polygon — amount, destination address, timestamp, and on-chain transaction hash."
 ---
 
-The `/v1/traders/{address}/withdrawals` endpoint returns the full USDC withdrawal history for a given Polymarket wallet address on Polygon. Each record captures the amount withdrawn, the destination address, a confirmed on-chain timestamp, and the transaction hash. You can filter by date range and paginate through large histories using `limit` and `offset`.
+The `/v1/trader/{address}/withdrawals` endpoint returns the full USDC withdrawal history for a given Polymarket wallet address on Polygon. Each record captures the amount withdrawn, the destination address, a confirmed on-chain timestamp, and the transaction hash. You can filter by date range and paginate through large histories using `limit` and `offset`.
 
 ## Endpoint
 
 ```
-GET https://api.orbscan.com/v1/traders/{address}/withdrawals
+GET https://api.orbscan.com/v1/trader/{address}/withdrawals
 ```
 
 ## Path Parameters
 
 <ParamField path="address" type="string" required>
-  The Polygon wallet address of the trader whose withdrawal history you want to retrieve (e.g. `0xA1B2c3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0`).
+  The Polygon wallet address of the trader whose withdrawal history you want to retrieve (e.g. `0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee`).
 </ParamField>
 
 ## Query Parameters
@@ -40,7 +40,7 @@ GET https://api.orbscan.com/v1/traders/{address}/withdrawals
 
 ```bash curl
 curl --request GET \
-  --url "https://api.orbscan.com/v1/traders/0xA1B2c3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0/withdrawals?limit=50&start_date=2025-01-01&end_date=2025-06-30" \
+  --url "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/withdrawals?limit=50&start_date=2025-01-01&end_date=2025-06-30" \
   --header "Authorization: Bearer $ORBSCAN_API_KEY"
 ```
 

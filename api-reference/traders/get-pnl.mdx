@@ -1,12 +1,12 @@
 ---
-title: "GET /v1/traders/{address}/pnl — PnL Timeseries Data"
+title: "GET /v1/trader/{address}/pnl — PnL Timeseries Data"
 sidebarTitle: "GET PnL"
 description: "Fetch daily PnL timeseries data for a Polymarket wallet, with realized and unrealized breakdowns and configurable time windows."
 ---
 
 The PnL endpoint returns a day-by-day profit and loss timeseries for a Polymarket trader, making it straightforward to chart performance curves, calculate drawdowns, or compare returns across time windows. You can request a high-level daily total or enable the breakdown flag to receive separate realized and unrealized components for each day.
 
-`GET https://api.orbscan.com/v1/traders/{address}/pnl`
+`GET https://api.orbscan.com/v1/trader/{address}/pnl`
 
 ## Path Parameters
 
@@ -30,14 +30,14 @@ The PnL endpoint returns a day-by-day profit and loss timeseries for a Polymarke
 
 ```bash curl
 curl --request GET \
-  --url 'https://api.orbscan.com/v1/traders/0x204f72f35326db932158cba6adff0b9a1da95e14/pnl?period=30d&breakdown=true' \
+  --url 'https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/pnl?period=30d&breakdown=true' \
   --header 'Authorization: Bearer $ORBSCAN_API_KEY'
 ```
 
 ```python Python
 import requests
 
-address = "0x204f72f35326db932158cba6adff0b9a1da95e14"
+address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
 
 params = {
     "period": "30d",
@@ -45,7 +45,7 @@ params = {
 }
 
 response = requests.get(
-    f"https://api.orbscan.com/v1/traders/{address}/pnl",
+    f"https://api.orbscan.com/v1/trader/{address}/pnl",
     headers={"Authorization": "Bearer $ORBSCAN_API_KEY"},
     params=params,
 )
@@ -103,7 +103,7 @@ print(response.json())
 
 ```json
 {
-  "address": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+  "address": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
   "period": "30d",
   "total_pnl": 1243.77,
   "realized_pnl": 890.40,
