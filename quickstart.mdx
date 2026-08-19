@@ -2,6 +2,7 @@
 title: "Orbscan API Quickstart: First Request in 5 Minutes"
 sidebarTitle: "Quickstart"
 description: "Make your first Orbscan API call in under 5 minutes. Fetch a live trader profile by wallet address and inspect the full JSON response."
+public: true
 ---
 
 This guide gets you from zero to a live API response in under five minutes. You'll obtain an API key, call the trader profile endpoint with a real wallet address, and inspect the JSON response — giving you a working template you can adapt for any other Orbscan endpoint.
@@ -16,43 +17,43 @@ This guide gets you from zero to a live API response in under five minutes. You'
     export ORBSCAN_API_KEY="your_api_key_here"
     ```
   </Step>
-
   <Step title="Fetch trader activity">
     The trader activity endpoint returns paginated buy, sell, and redeem history for any Polymarket wallet address. Make the following request, replacing the example address with any wallet you want to inspect.
 
     <CodeGroup>
-      ```bash curl
-      curl -X GET "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=5" \
-        -H "Authorization: Bearer $ORBSCAN_API_KEY" \
-        -H "Accept: application/json"
-      ```
 
-      ```python Python
-      import os
-      import requests
+    ```bash curl
+    curl -X GET "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=5" \
+      -H "Authorization: Bearer $ORBSCAN_API_KEY" \
+      -H "Accept: application/json"
+    ```
 
-      api_key = os.environ["ORBSCAN_API_KEY"]
-      address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
+    ```python Python
+    import os
+    import requests
+    
+    api_key = os.environ["ORBSCAN_API_KEY"]
+    address = "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee"
+    
+    response = requests.get(
+        f"https://api.orbscan.com/v1/trader/{address}/activity",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Accept": "application/json",
+        },
+        params={"limit": 5},
+    )
+    
+    data = response.json()
+    print(data)
+    ```
 
-      response = requests.get(
-          f"https://api.orbscan.com/v1/trader/{address}/activity",
-          headers={
-              "Authorization": f"Bearer {api_key}",
-              "Accept": "application/json",
-          },
-          params={"limit": 5},
-      )
-
-      data = response.json()
-      print(data)
-      ```
     </CodeGroup>
 
     <Tip>
       You can use any valid Polymarket wallet address. Browse the top traders on [orbscan.com](https://orbscan.com) to find interesting wallets to explore.
     </Tip>
   </Step>
-
   <Step title="Inspect the response">
     A successful request returns a JSON object with a paginated list of trades. Here's an example response:
 
@@ -85,7 +86,7 @@ This guide gets you from zero to a live API response in under five minutes. You'
     Key fields to note:
 
     | Field | Description |
-    |---|---|
+    | --- | --- |
     | `blockTimestamp` | Unix timestamp (seconds) of the trade. |
     | `actionType` | Action label: `Buy`, `Sell`, or `Redeem`. |
     | `price` | Price per share as a decimal (0–1). `"0.78"` means 78¢ per share. |
@@ -94,7 +95,6 @@ This guide gets you from zero to a live API response in under five minutes. You'
     | `netSharesTransferred` | Shares received (positive) or sent (negative). |
     | `nextCursor` | Pass this back as `cursor` to fetch the next page. `null` when no more results. |
   </Step>
-
   <Step title="Next steps">
     You've made your first successful Orbscan API call. Here's where to go next:
 
@@ -102,6 +102,7 @@ This guide gets you from zero to a live API response in under five minutes. You'
       <Card title="API Reference" icon="code" href="/api-reference/overview">
         Base URL, authentication, response envelope, and cursor-based pagination.
       </Card>
+
       <Card title="Browse Endpoints" icon="list" href="/api-reference/endpoints/get-wallet-address">
         Positions, portfolio, activity, rewards, deposits & withdrawals, and per-transaction lookups.
       </Card>
