@@ -360,7 +360,7 @@
                         "realizedPnl": "0",
                         "totalPnl": "-7.449975",
                         "percentPnl": "-94.303779",
-                        "closedAt": 1787031184
+                        "recentTradeTime": 1787031184
                       }
                     ],
                     "nextCursor": null
@@ -454,7 +454,7 @@
                         "realizedPnl": "31.45004",
                         "totalPnl": "31.45004",
                         "percentPnl": null,
-                        "closedAt": 1787036472
+                        "recentTradeTime": 1787036472
                       }
                     ],
                     "nextCursor": "3657217|1787033766|417536012314..."
@@ -1088,7 +1088,7 @@
           "realizedPnl": { "type": "string", "description": "Realized PnL, in USD." },
           "totalPnl": { "type": "string", "description": "Realized + unrealized PnL, in USD." },
           "percentPnl": { "type": "string", "nullable": true, "description": "PnL as a percentage of cost basis." },
-          "closedAt": { "type": "integer", "format": "int64", "nullable": true, "description": "Closing block timestamp (Unix seconds); `null` while open." }
+          "recentTradeTime": { "type": "integer", "format": "int64", "nullable": true, "description": "Closing block timestamp (Unix seconds); `null` while open." }
         }
       },
       "ComboLeg": {
