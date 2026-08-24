@@ -940,9 +940,8 @@
   "components": {
     "securitySchemes": {
       "bearerAuth": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
+        "type": "http",
+        "scheme": "bearer",
         "description": "Pass your Orbscan API key as a Bearer token, formatted as `Bearer <your_api_key>`."
       }
     },
