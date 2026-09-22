@@ -64,6 +64,14 @@
               "api-reference/endpoints/get-deposits-withdrawals",
               "api-reference/endpoints/get-transaction"
             ]
+          },
+          {
+            "group": "Market",
+            "pages": [
+              "api-reference/market/orderbook-markets",
+              "api-reference/market/orderbook-events",
+              "api-reference/market/orderbook-coverage"
+            ]
           }
         ]
       }

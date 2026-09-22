@@ -1,10 +1,10 @@
 ---
 title: "Orbscan Open API Errors"
 sidebarTitle: "Errors"
-description: "How the Orbscan Open API signals errors — the response envelope, the status codes you'll actually see (400, 401, 404, 429), and how to handle empty results."
+description: "Learn how the Orbscan Open API reports errors, which HTTP status codes to expect, and how to handle empty results."
 ---
 
-Every response — success or failure — uses the same envelope with three fields: `message`, `status_code`, and `data`.
+Every response uses the same three fields: `message`, `status_code`, and `data`.
 
 - On **success**: `status_code` is `"1"`, `message` is `"OK"`, and `data` holds the result.
 - On **error**: `status_code` is `"0"`, `message` describes the problem, and `data` is `null`.
@@ -19,17 +19,19 @@ Use the **HTTP status code** to determine the type of error.
 }
 ```
 
-## Status Codes
+## Status codes
 
 | HTTP | `message` (example) | Cause & fix |
 |---|---|---|
-| `401` | `Missing or invalid API key` | The `Authorization: Bearer` header is missing or the key is wrong. Check the key you're sending. |
-| `400` | `Invalid address format` / `Invalid txHash format` | A path or query value is malformed — for example an `address` that isn't a valid `0x…` hex address, or a `txHash` that isn't a 32-byte hex hash. |
-| `404` | `Not found` | The API endpoint does not exist. Check the path and spelling. A well-formed request for a resource that simply isn't indexed returns `200`, not `404` — see below. |
-| `429` | — | Rate limit exceeded. Wait for the window to reset, then retry with exponential backoff. See [Rate Limits](/api-reference/rate-limits). |
-| `5xx` | — | A transient server or gateway error. Retry with backoff. |
+| `400` | `Invalid address format` / `Invalid txHash format` | A path or query value is malformed. This covers an `address` that isn't a valid `0x...` hex address, a `txHash` that isn't a 32-byte hex hash, and an order book `limit` outside its allowed range. |
+| `401` | `Missing or invalid API key` | The API key is missing or wrong. Check the `Authorization: Bearer` header, or the `apikey` query parameter. |
+| `403` | Varies | The API key is valid but not allowed to use this resource. Check your plan, or contact Orbscan. |
+| `404` | `Not found` | The API endpoint does not exist. Check the path and spelling. A query that simply finds nothing returns `200` instead, as explained in [Empty results are not errors](#empty-results-are-not-errors). |
+| `429` | `Rate limit exceeded` | You have sent too many requests. Wait for the limit window to reset, then retry with exponential backoff. See [Rate limits](/api-reference/rate-limits). |
+| `500` | Varies | Something failed on our side. Retry with backoff. |
+| `503` | Varies | A dependent service is temporarily unavailable. For example, order book coverage may have no cached value to return. Retry shortly. |
 
-## Empty Results Are Not Errors
+## Empty results are not errors
 
 A valid request that finds nothing is not an error: it still succeeds with HTTP `200` and `status_code` `"1"`. The shape of `data` depends on the endpoint:
 
@@ -57,7 +59,7 @@ A valid request that finds nothing is not an error: it still succeeds with HTTP 
   Don't treat a `200` with empty `data` as a failure. An empty `items` array or a `null` `data` means "no results," not "error."
 </Warning>
 
-## Handling Errors in Code
+## Handling errors in code
 
 <CodeGroup>
 

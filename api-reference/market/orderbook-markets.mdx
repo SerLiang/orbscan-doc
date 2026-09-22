@@ -1,0 +1,18 @@
+---
+title: "Get Order Book Markets"
+sidebarTitle: "Get Order Book Markets"
+description: "List the Polymarket crypto markets and outcome tokens covered by the Order Book API."
+openapi: "openapi.json GET /v1/orderbook/markets"
+---
+
+Use this endpoint to discover the markets and outcome tokens covered by the Order Book API. It returns Polymarket markets tagged as Crypto (Gamma `tag_id=21`). Each market includes its `conditionId` and the `tokenId` for every outcome. Results are ordered by `marketId` in ascending order.
+
+Take a `tokenId` from here and pass it to [Get Order Book Events](/api-reference/market/orderbook-events) to fetch the `book` snapshots and `price_change` deltas for that outcome.
+
+<Note>
+  `status` is Orbscan's availability status. `active` means Orbscan tracks the market as active. Otherwise, the value is `closed`. This differs from Gamma's `closed` field.
+</Note>
+
+<Tip>
+  Results are cursor-paginated. When the response includes a `nextCursor`, pass it back as the `cursor` query parameter. Reuse the cursor with the same filters.
+</Tip>

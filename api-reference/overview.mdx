@@ -1,10 +1,10 @@
 ---
 title: "Orbscan Open API Overview"
 sidebarTitle: "Overview"
-description: "Base URL, authentication, response envelope, and pagination for the Orbscan Open API — REST access to Polymarket trader activity, transfers, and transaction details."
+description: "Learn about the Orbscan Open API base URL, authentication, response format, pagination, and available endpoints."
 ---
 
-The Orbscan Open API is a REST API that returns JSON. It gives you programmatic access to on-chain Polymarket data: a wallet's trading activity, its deposits and withdrawals, and a decoded breakdown of any single transaction.
+The Orbscan Open API is a REST API that returns JSON. It provides Polymarket wallet activity, positions, deposits and withdrawals, decoded transactions, and L2 order book history.
 
 ## Base URL
 
@@ -14,11 +14,11 @@ All requests go to:
 https://api.orbscan.com
 ```
 
-Every endpoint path in this reference is relative to that base — for example, `GET /v1/trader/{address}/activity` means `https://api.orbscan.com/v1/trader/{address}/activity`.
+Every endpoint path in this reference is relative to that base. For example, `GET /v1/trader/{address}/activity` means `https://api.orbscan.com/v1/trader/{address}/activity`.
 
 ## Authentication
 
-Every request must include your API key as a **Bearer token** in the `Authorization` header. Requests without a valid key return `401`.
+Authenticate every request with an API key. Send it as a **Bearer token** in the `Authorization` header. You can also use the `apikey` query parameter, but the header is safer. Requests without a valid key return `401`.
 
 ```bash
 curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=1" \
@@ -31,9 +31,9 @@ See [Authentication](/api-reference/authentication) for full details and code sa
   Your API key is a secret. Keep it server-side and never commit it to a public repository or expose it in client-side code.
 </Warning>
 
-## Response Format
+## Response format
 
-Every response — success or error — uses the same envelope:
+Success and error responses use the same envelope:
 
 ```json
 {
@@ -50,14 +50,14 @@ Every response — success or error — uses the same envelope:
 | `data` | object / null | The requested payload. `null` when a request fails, or when a valid lookup simply has no result. |
 
 <Note>
-  A successful lookup that finds nothing still returns `200` with `status_code: "1"` — list endpoints return an empty `data.items` array, while single-object endpoints return `data: null`. Check the shape of `data` rather than relying on the HTTP status alone.
+  A successful lookup that finds nothing still returns `200` with `status_code: "1"`. List endpoints return an empty `data.items` array. Single-object endpoints return `data: null`. Check the shape of `data` rather than relying on the HTTP status alone.
 </Note>
 
 ## Pagination
 
-The list endpoints (activity, deposits & withdrawals, positions, rewards) are cursor-paginated:
+List endpoints use cursor pagination. Limits and defaults vary by endpoint, so check the endpoint reference before choosing a page size.
 
-1. Request a page, optionally setting `limit` (max `100`; the per-endpoint default is `20` — see each endpoint reference).
+1. Request a page and optionally set `limit`.
 2. Read `data.nextCursor` from the response.
 3. If it is **not** `null`, pass it back as the `cursor` query parameter to fetch the next page.
 4. When `nextCursor` is `null`, you've reached the end.
@@ -67,12 +67,12 @@ The list endpoints (activity, deposits & withdrawals, positions, rewards) are cu
 curl "https://api.orbscan.com/v1/trader/{address}/activity?limit=50" \
   -H "Authorization: Bearer <your_api_key>"
 
-# Page 2 — feed nextCursor back in
+# Page 2: pass nextCursor back in
 curl "https://api.orbscan.com/v1/trader/{address}/activity?limit=50&cursor=NEXT_CURSOR" \
   -H "Authorization: Bearer <your_api_key>"
 ```
 
-## Available Endpoints
+## Available endpoints
 
 | Endpoint | Path | Description |
 |---|---|---|
@@ -86,7 +86,14 @@ curl "https://api.orbscan.com/v1/trader/{address}/activity?limit=50&cursor=NEXT_
 | [Get Trader Rewards](/api-reference/endpoints/get-rewards) | `/v1/trader/{address}/rewards` | Yield, maker/taker rebates, and referral rewards |
 | [Get Deposits & Withdrawals](/api-reference/endpoints/get-deposits-withdrawals) | `/v1/trader/{address}/deposits-withdrawals` | Combined USDC transfer history for a wallet |
 | [Get Actions by Hash](/api-reference/endpoints/get-transaction) | `/v1/tx/{txHash}` | Decoded summary and fills for a single transaction |
+| [Get Order Book Markets](/api-reference/market/orderbook-markets) | `/v1/orderbook/markets` | Crypto markets and outcome tokens covered by the Order Book API |
+| [Get Order Book Events](/api-reference/market/orderbook-events) | `/v1/orderbook/events` | L2 book snapshots and price-change deltas for outcome tokens |
+| [Get Order Book Coverage](/api-reference/market/orderbook-coverage) | `/v1/orderbook/coverage` | Earliest and latest source timestamps available for order book data |
+
+<Note>
+  Two Order Book conventions differ from the rest of the API. Order book timestamps use **Unix milliseconds**, while other endpoints use seconds. Every endpoint also accepts your key in the `apikey` query parameter, but you should prefer the header. See [Authentication](/api-reference/authentication).
+</Note>
 
 <Tip>
-  Prices in activity and transaction responses are expressed as **decimals** (0–1). A `price` of `"0.78"` means 78¢ per share.
+  Prices in activity and transaction responses are expressed as **decimals** from 0 to 1. A `price` of `"0.78"` means 78 cents per share.
 </Tip>

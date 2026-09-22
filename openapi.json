@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orbscan Open API",
-    "description": "REST endpoints for Polymarket trader activity, deposits & withdrawals, and per-transaction action details, sourced directly from on-chain data.",
+    "description": "REST endpoints for Polymarket wallet activity, positions, transfers, transaction details, and L2 order book data.",
     "version": "1.0.0"
   },
   "servers": [
@@ -903,7 +903,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Returns the decoded transaction. A well-formed hash that is not indexed returns `data: null`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -920,41 +920,100 @@
                     }
                   }
                 },
-                "example": {
-                  "message": "OK",
-                  "status_code": "1",
-                  "data": {
-                    "txHash": "0x66dc87fb47faf587002b89d183dbb9505fc7ef80da5e6ec49e271278e8d95fad",
-                    "blockNumber": 88229726,
-                    "blockTimestamp": 1781049574,
-                    "traderAddress": "0xaac2469db4c243a2931acc252967b171bd97e8ce",
-                    "sourceType": "TRADE",
-                    "actionType": "Buy",
-                    "sentence": "Buy 3604.58 No for $3546.12269 in Will Bitcoin dip to $59,000 on June 9?",
-                    "marketSlug": "will-bitcoin-dip-to-59k-on-june-9",
-                    "marketId": "2475928",
-                    "actions": [
-                      {
-                        "actionType": "Buy",
-                        "tokenId": "38163660360188728397792916713023875464787138529265352624189549073473314732690",
-                        "size": "3604.58",
-                        "price": "0.983782",
-                        "usdcSize": "3546.12269",
-                        "traderAddress": "0xaac2469db4c243a2931acc252967b171bd97e8ce",
+                "examples": {
+                  "trade": {
+                    "summary": "Regular trade",
+                    "value": {
+                      "message": "OK",
+                      "status_code": "1",
+                      "data": {
                         "txHash": "0x66dc87fb47faf587002b89d183dbb9505fc7ef80da5e6ec49e271278e8d95fad",
+                        "blockNumber": 88229726,
                         "blockTimestamp": 1781049574,
-                        "fee": "4.02564",
-                        "marketId": "2475928",
+                        "traderAddress": "0xaac2469db4c243a2931acc252967b171bd97e8ce",
+                        "sourceType": "TRADE",
+                        "actionType": "Buy",
+                        "sentence": "Buy 3604.58 No for $3546.12269 in Will Bitcoin dip to $59,000 on June 9?",
                         "marketSlug": "will-bitcoin-dip-to-59k-on-june-9",
-                        "eventSlug": "what-price-will-bitcoin-hit-on-june-9",
-                        "marketTitle": "Will Bitcoin dip to $59,000 on June 9?",
-                        "positionSide": "No",
-                        "outcomeIndex": 1,
-                        "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/BTC-fullsize.png",
-                        "liquidityRole": "TAKER"
+                        "marketId": "2475928",
+                        "actions": [
+                          {
+                            "actionType": "Buy",
+                            "tokenId": "38163660360188728397792916713023875464787138529265352624189549073473314732690",
+                            "size": "3604.58",
+                            "price": "0.983782",
+                            "usdcSize": "3546.12269",
+                            "traderAddress": "0xaac2469db4c243a2931acc252967b171bd97e8ce",
+                            "txHash": "0x66dc87fb47faf587002b89d183dbb9505fc7ef80da5e6ec49e271278e8d95fad",
+                            "blockTimestamp": 1781049574,
+                            "fee": "4.02564",
+                            "marketId": "2475928",
+                            "marketSlug": "will-bitcoin-dip-to-59k-on-june-9",
+                            "eventSlug": "what-price-will-bitcoin-hit-on-june-9",
+                            "marketTitle": "Will Bitcoin dip to $59,000 on June 9?",
+                            "positionSide": "No",
+                            "outcomeIndex": 1,
+                            "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/BTC-fullsize.png",
+                            "liquidityRole": "TAKER"
+                          }
+                        ],
+                        "comboActions": null
                       }
-                    ],
-                    "comboActions": null
+                    }
+                  },
+                  "combo": {
+                    "summary": "Combo trade",
+                    "value": {
+                      "message": "OK",
+                      "status_code": "1",
+                      "data": {
+                        "txHash": "0x4a0e9050d8747ce2ea3ffc4ec40e7dd2419807cea5ef1ec6eab7d5e0761505fe",
+                        "blockNumber": 94181256,
+                        "blockTimestamp": 1789976967,
+                        "traderAddress": "0x0284e1c5b93a6fe07aa5e83e8543d6e33f8a97f6",
+                        "sourceType": "COMBO",
+                        "actionType": "Buy",
+                        "sentence": "Buy Combo position for $4.83699",
+                        "marketSlug": null,
+                        "marketId": null,
+                        "actions": null,
+                        "comboActions": [
+                          {
+                            "actionType": "Buy",
+                            "comboPositionId": "1709891758942759112419793424834979456496472902357002820659325405013387247616",
+                            "size": "14.839314",
+                            "price": "0.325958",
+                            "usdcSize": "4.83699",
+                            "traderAddress": "0x0284e1c5b93a6fe07aa5e83e8543d6e33f8a97f6",
+                            "txHash": "0x4a0e9050d8747ce2ea3ffc4ec40e7dd2419807cea5ef1ec6eab7d5e0761505fe",
+                            "blockTimestamp": 1789976967,
+                            "fee": "0.16301",
+                            "legs": [
+                              {
+                                "marketId": "4777327",
+                                "marketTitle": "Counter-Strike: Leo Team vs G2 Ares (BO3)",
+                                "marketSlug": "cs2-leo2-g2a-2026-09-21",
+                                "eventSlug": "cs2-leo2-g2a-2026-09-21",
+                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/counter-strike-image-16c415c538.png",
+                                "outcomeIndex": 1,
+                                "outcome": "G2 Ares",
+                                "outcomePrice": "0.695"
+                              },
+                              {
+                                "marketId": "4760565",
+                                "marketTitle": "Counter-Strike: Leo Team vs UNiTY esports (BO3)",
+                                "marketSlug": "cs2-leo2-unity-2026-09-21",
+                                "eventSlug": "cs2-leo2-unity-2026-09-21",
+                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/counter-strike-image-16c415c538.png",
+                                "outcomeIndex": 1,
+                                "outcome": "UNiTY esports",
+                                "outcomePrice": "0.84"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
                   }
                 }
               }
@@ -975,6 +1034,311 @@
           "401": { "$ref": "#/components/responses/Unauthorized" }
         }
       }
+    },
+    "/v1/orderbook/markets": {
+      "get": {
+        "operationId": "getOrderBookMarkets",
+        "summary": "List order book markets",
+        "description": "Returns Polymarket markets tagged as Crypto (Gamma `tag_id=21`) and their outcome tokens. Results are ordered by `marketId` in ascending order. Pass a returned `tokenId` to the order book events endpoint to reconstruct that token's book.",
+        "parameters": [
+          {
+            "name": "marketId",
+            "in": "query",
+            "required": false,
+            "description": "Exact Gamma market ID.",
+            "schema": { "type": "string", "example": "12345" }
+          },
+          {
+            "name": "conditionId",
+            "in": "query",
+            "required": false,
+            "description": "Exact condition ID. It must start with `0x` followed by 64 hexadecimal characters. Input is case-insensitive and normalized to lowercase.",
+            "schema": { "type": "string", "example": "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" }
+          },
+          {
+            "name": "tokenId",
+            "in": "query",
+            "required": false,
+            "description": "Return the market that contains this outcome token.",
+            "schema": { "type": "string", "example": "123456789" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Orbscan availability status. `active` means Orbscan tracks the market as active. `closed` means it does not. This differs from the Gamma `closed` field. Input is case-insensitive.",
+            "schema": { "type": "string", "enum": ["active", "closed"], "example": "active" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size. Defaults to 100. Values outside 1 to 1,000 return `400`.",
+            "schema": { "type": "integer", "default": 100, "minimum": 1, "maximum": 1000 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor from the previous response's `nextCursor`. Reuse it with the same filters.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "OK" },
+                    "status_code": { "type": "string", "example": "1" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": { "type": "array", "items": { "$ref": "#/components/schemas/OrderBookMarket" } },
+                        "nextCursor": { "type": "string", "nullable": true }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "OK",
+                  "status_code": "1",
+                  "data": {
+                    "items": [
+                      {
+                        "marketId": "248851",
+                        "conditionId": "0x3784ea734e3886a167bf3d8de6b79290e2dcf57e71812f9db5cfe165936d3215",
+                        "question": "Will the FDV of OpenSea's token be above $5b 1 week after launch?",
+                        "slug": "will-the-fdv-of-openseas-token-be-above-5b-1-week-after-launch",
+                        "status": "closed",
+                        "openAt": 1677095132413,
+                        "closeAt": 1703894400000,
+                        "outcomes": [
+                          { "name": "Yes", "tokenId": "100299615833860717861695156210002025817496421474264537699755386813000932190489" },
+                          { "name": "No", "tokenId": "9444964418353784846201878646812530954474648898197532093004406084519216761243" }
+                        ]
+                      }
+                    ],
+                    "nextCursor": "AAAAAAADzBQ"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An ID, `status`, or `limit` value is invalid.",
+            "content": {
+              "application/json": {
+                "example": { "message": "limit must be between 1 and 1000", "status_code": "0", "data": null }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/v1/orderbook/events": {
+      "get": {
+        "operationId": "getOrderBookEvents",
+        "summary": "Get order book events",
+        "description": "Returns the stored L2 events needed to reconstruct an outcome token's order book. Provide at least one of `marketId`, `conditionId`, or `tokenId`. The API combines values in the same parameter with OR and different parameters with AND.",
+        "parameters": [
+          {
+            "name": "marketId",
+            "in": "query",
+            "required": false,
+            "description": "Market IDs to include. You can provide up to 20 as comma-separated values, repeated parameters, or both.",
+            "style": "form",
+            "explode": true,
+            "schema": { "type": "array", "items": { "type": "string" }, "maxItems": 20, "example": ["12345"] }
+          },
+          {
+            "name": "conditionId",
+            "in": "query",
+            "required": false,
+            "description": "Condition IDs to include. You can provide up to 20 as comma-separated values, repeated parameters, or both. Input is case-insensitive.",
+            "style": "form",
+            "explode": true,
+            "schema": { "type": "array", "items": { "type": "string" }, "maxItems": 20, "example": ["0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"] }
+          },
+          {
+            "name": "tokenId",
+            "in": "query",
+            "required": false,
+            "description": "Outcome token IDs to include. You can provide up to 50 as comma-separated values, repeated parameters, or both.",
+            "style": "form",
+            "explode": true,
+            "schema": { "type": "array", "items": { "type": "string" }, "maxItems": 50, "example": ["123456789"] }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "required": false,
+            "description": "Event types to include: `book`, `price_change`, or both. The endpoint returns both when you omit this parameter.",
+            "style": "form",
+            "explode": true,
+            "schema": { "type": "array", "items": { "type": "string", "enum": ["book", "price_change"] }, "maxItems": 2 }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive lower bound on source time, Unix milliseconds.",
+            "schema": { "type": "integer", "format": "int64", "example": 1788852000000 }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive upper bound on source time, Unix milliseconds. Must be greater than or equal to `from`.",
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort by source time. Defaults to `asc`. Case-insensitive.",
+            "schema": { "type": "string", "enum": ["asc", "desc"], "default": "asc" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size. Defaults to 1,000. Values outside 1 to 10,000 return `400`.",
+            "schema": { "type": "integer", "default": 1000, "minimum": 1, "maximum": 10000 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor from the last item's `cursor` or the response's `nextCursor`. Keep the filters and `order` unchanged while paging one result set. To reconstruct a book, you can use a snapshot cursor to start a new ascending `price_change` query.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "OK" },
+                    "status_code": { "type": "string", "example": "1" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": { "type": "array", "items": { "$ref": "#/components/schemas/OrderBookEvent" } },
+                        "nextCursor": { "type": "string", "nullable": true }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "OK",
+                  "status_code": "1",
+                  "data": {
+                    "items": [
+                      {
+                        "cursor": "AAABoMfIdTSZ95XfHI2JY3xDPBEiM-NgpOm-DblE2HiRi5Ny98xn0g",
+                        "marketId": "573656",
+                        "conditionId": "0x02deb9538f5c123373adaa4ee6217b01745f1662bc902e46ac92f3fe6f8741e8",
+                        "tokenId": "93694900555669388759405753550770573998169287228984912881955464376232163096213",
+                        "outcome": "Yes",
+                        "eventType": "book",
+                        "timestamp": 1790058198324,
+                        "indexedTimestamp": 1790058204527,
+                        "side": null,
+                        "price": null,
+                        "sizeAfter": null,
+                        "bids": [["0.48", "12500"], ["0.47", "20000"]],
+                        "asks": [["0.49", "8000"], ["0.5", "15000"]],
+                        "sourceHash": "db60d216be1f61bfe63c4c9a92a2d42fd30e319c"
+                      },
+                      {
+                        "cursor": "AAABoIUSUAm3qt444MRDsUeszsPPlC2V4ijGB4PrCvlQPcNHl9XYGg",
+                        "marketId": "573656",
+                        "conditionId": "0x02deb9538f5c123373adaa4ee6217b01745f1662bc902e46ac92f3fe6f8741e8",
+                        "tokenId": "93694900555669388759405753550770573998169287228984912881955464376232163096213",
+                        "outcome": "Yes",
+                        "eventType": "price_change",
+                        "timestamp": 1788938965001,
+                        "indexedTimestamp": 1788938967881,
+                        "side": "SELL",
+                        "price": "0.79",
+                        "sizeAfter": "6",
+                        "bids": null,
+                        "asks": null,
+                        "sourceHash": "7bbd3aff3cc9a5b22c69a6a4f3c2ce8c2fb4b6ab"
+                      }
+                    ],
+                    "nextCursor": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A filter, `eventType`, `order`, `limit`, timestamp, or time range is invalid; or no `marketId`, `conditionId`, or `tokenId` was supplied.",
+            "content": {
+              "application/json": {
+                "example": { "message": "tokenId, marketId, or conditionId is required", "status_code": "0", "data": null }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/v1/orderbook/coverage": {
+      "get": {
+        "operationId": "getOrderBookCoverage",
+        "summary": "Get order book coverage",
+        "description": "Returns the earliest and latest source timestamps across the full stored order book table. These timestamps do not guarantee that every time or market is available through the events endpoint. The result is cached for 10 minutes.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "OK" },
+                    "status_code": { "type": "string", "example": "1" },
+                    "data": { "$ref": "#/components/schemas/OrderBookCoverage" }
+                  }
+                },
+                "example": {
+                  "message": "OK",
+                  "status_code": "1",
+                  "data": {
+                    "polymarket": {
+                      "orderbook": {
+                        "availableFrom": 1788199076322,
+                        "availableTo": 1790062682461
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/ServerError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        }
+      }
     }
   },
   "components": {
@@ -982,7 +1346,7 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Paste your Orbscan API key here — the `Bearer` prefix is added automatically."
+        "description": "Paste your Orbscan API key here. The `Bearer` prefix is added automatically."
       }
     },
     "responses": {
@@ -1005,9 +1369,94 @@
             }
           }
         }
+      },
+      "Forbidden": {
+        "description": "The API key is valid but not allowed to use this resource."
+      },
+      "TooManyRequests": {
+        "description": "The rate limit for your credential was exceeded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string", "example": "Rate limit exceeded" },
+                "status_code": { "type": "string", "example": "0" },
+                "data": { "type": "null" }
+              }
+            },
+            "example": {
+              "message": "Rate limit exceeded",
+              "status_code": "0",
+              "data": null
+            }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Unexpected server failure."
+      },
+      "ServiceUnavailable": {
+        "description": "Coverage is temporarily unavailable and no cached value can be returned."
       }
     },
     "schemas": {
+      "OrderBookOutcome": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Outcome label.", "example": "Yes" },
+          "tokenId": { "type": "string", "description": "Outcome token ID, a positive uint256 as a decimal string (up to 78 digits).", "example": "123456789" }
+        }
+      },
+      "OrderBookMarket": {
+        "type": "object",
+        "properties": {
+          "marketId": { "type": "string", "description": "Gamma market ID as a decimal string (up to 19 digits, signed 64-bit range).", "example": "12345" },
+          "conditionId": { "type": "string", "description": "Condition ID, `0x` + 64 hex (lowercase)." },
+          "question": { "type": "string", "description": "Market question." },
+          "slug": { "type": "string", "description": "Market slug." },
+          "status": { "type": "string", "description": "Orbscan availability status. `active` means Orbscan tracks the market as active. Otherwise, the value is `closed`. This differs from the Gamma `closed` field.", "enum": ["active", "closed"] },
+          "openAt": { "type": "integer", "format": "int64", "description": "Market open time, Unix milliseconds." },
+          "closeAt": { "type": "integer", "format": "int64", "description": "Market close time, Unix milliseconds." },
+          "outcomes": { "type": "array", "description": "Outcome tokens for the market.", "items": { "$ref": "#/components/schemas/OrderBookOutcome" } }
+        }
+      },
+      "OrderBookEvent": {
+        "type": "object",
+        "properties": {
+          "cursor": { "type": "string", "description": "Stable opaque boundary for this logical event; pass it back as the `cursor` query parameter." },
+          "marketId": { "type": "string", "description": "Gamma market ID." },
+          "conditionId": { "type": "string", "description": "Condition ID." },
+          "tokenId": { "type": "string", "description": "Outcome token whose independent book changed." },
+          "outcome": { "type": "string", "nullable": true, "description": "Outcome label resolved from metadata." },
+          "eventType": { "type": "string", "enum": ["book", "price_change"], "description": "Event type." },
+          "timestamp": { "type": "integer", "format": "int64", "description": "Polymarket source time, Unix milliseconds." },
+          "indexedTimestamp": { "type": "integer", "format": "int64", "description": "Earliest ingestion time for the logical event, in Unix milliseconds. Subtract `timestamp` from this value to estimate total indexing latency." },
+          "side": { "type": "string", "nullable": true, "description": "Source side, normally `BUY` or `SELL`. Set only for `price_change`." },
+          "price": { "type": "string", "nullable": true, "description": "Price on a 0 to 1 scale. Set only for `price_change`." },
+          "sizeAfter": { "type": "string", "nullable": true, "description": "Remaining size after the update; `0` removes the level, any other value replaces the level size. Set only for `price_change`." },
+          "bids": { "type": "array", "nullable": true, "description": "Bid levels as `[price, size]` decimal-string pairs. Set only for `book`.", "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string" } } },
+          "asks": { "type": "array", "nullable": true, "description": "Ask levels as `[price, size]` decimal-string pairs. Set only for `book`.", "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string" } } },
+          "sourceHash": { "type": "string", "nullable": true, "description": "Hash supplied by Polymarket for integrity checks." }
+        }
+      },
+      "OrderBookCoverage": {
+        "type": "object",
+        "properties": {
+          "polymarket": {
+            "type": "object",
+            "properties": {
+              "orderbook": {
+                "type": "object",
+                "properties": {
+                  "availableFrom": { "type": "integer", "format": "int64", "description": "Earliest source timestamp across the order book table, Unix milliseconds." },
+                  "availableTo": { "type": "integer", "format": "int64", "description": "Latest source timestamp across the order book table, Unix milliseconds." }
+                }
+              }
+            }
+          }
+        }
+      },
       "ActivityItem": {
         "type": "object",
         "properties": {
@@ -1087,8 +1536,8 @@
           "eventSlug": { "type": "string", "description": "Event slug of the leg." },
           "logo": { "type": "string", "description": "Market logo URL." },
           "outcomeIndex": { "type": "integer", "description": "Outcome index the leg is on.", "example": 1 },
-          "outcome": { "type": "string", "description": "Outcome label the leg is on. Varies by market — e.g. `Yes` / `No`, `Up` / `Down`, or an outcome name.", "example": "G2 Ares" },
-          "outcomePrice": { "type": "string", "description": "Leg outcome price at the time of the trade, 0–1 scale.", "example": "0.695" }
+          "outcome": { "type": "string", "description": "Outcome label for the leg. Depending on the market, this may be `Yes`, `No`, `Up`, `Down`, or a named outcome.", "example": "G2 Ares" },
+          "outcomePrice": { "type": "string", "description": "Leg outcome price at the time of the trade, on a 0 to 1 scale.", "example": "0.695" }
         }
       },
       "ComboAction": {
@@ -1097,7 +1546,7 @@
           "actionType": { "type": "string", "description": "Action label for this combo fill.", "example": "Buy", "enum": ["Buy", "Sell"] },
           "comboPositionId": { "type": "string", "description": "Combo position ID this fill belongs to." },
           "size": { "type": "string", "description": "Number of combo shares in this fill.", "example": "6.07015" },
-          "price": { "type": "string", "description": "Price per combo share as a decimal (0–1). Multiply by 100 to get cents.", "example": "0.659345" },
+          "price": { "type": "string", "description": "Price per combo share as a decimal from 0 to 1. Multiply by 100 to get cents.", "example": "0.659345" },
           "usdcSize": { "type": "string", "description": "USDC value of this fill.", "example": "4.002324" },
           "traderAddress": { "type": "string", "description": "Address that performed this fill." },
           "txHash": { "type": "string", "description": "On-chain transaction hash." },
@@ -1117,7 +1566,7 @@
           "blockNumber": { "type": "integer", "format": "int64" },
           "blockTimestamp": { "type": "integer", "format": "int64" },
           "traderAddress": { "type": "string", "description": "The primary wallet this transaction is attributed to." },
-          "sourceType": { "type": "string", "description": "How the transaction was categorised — `TRADE` for a regular order fill, `COMBO` for a combo (parlay) trade.", "example": "TRADE" },
+          "sourceType": { "type": "string", "description": "How the transaction was categorized. `TRADE` is a regular order fill. `COMBO` is a combo (parlay) trade.", "example": "TRADE" },
           "actionType": { "type": "string", "description": "Top-level action for the transaction (the trade direction, e.g. `Buy` or `Sell`).", "example": "Buy" },
           "sentence": { "type": "string", "description": "Plain-English summary of the transaction.", "example": "Buy 3604.58 No for $3546.12269 in Will Bitcoin dip to $59,000 on June 9?" },
           "marketSlug": { "type": "string", "nullable": true, "description": "Market slug. `null` for combo transactions, where the trade spans several markets." },

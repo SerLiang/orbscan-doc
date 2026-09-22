@@ -8,7 +8,7 @@ Authenticate to the Orbscan Open API with your **API key**, passed as a Bearer t
 
 ## Getting an API Key
 
-Request an API key by filling out the [sign-up form](https://orbscan.com/contactus). Once approved, your key provides access to all available endpoints.
+Request an API key by filling out the [sign-up form](https://orbscan.com/contactus). Once approved, your key provides access to the endpoints enabled for your credential.
 
 <Warning>
   Your API key is a secret. Keep it server-side, never commit it to a public repository, and never expose it in client-side code. If a key is leaked, rotate it.
@@ -49,6 +49,18 @@ const resp = await fetch(
 const body = await resp.json();
 console.log(body);
 ```
+
+## Alternative: query parameter
+
+Every endpoint also accepts your key as the `apikey` query parameter:
+
+```bash
+curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=5&apikey=<your_api_key>"
+```
+
+<Warning>
+  Prefer the `Authorization` header. Putting the key in the URL exposes it in logs, browser history, and referrer headers.
+</Warning>
 
 ## Verifying Authentication
 
