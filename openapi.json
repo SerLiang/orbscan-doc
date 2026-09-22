@@ -89,8 +89,8 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Number of records per page. Defaults to 50, maximum 100. Values above 100 are capped at 100.",
-            "schema": { "type": "integer", "default": 50, "maximum": 100, "minimum": 1 }
+            "description": "Number of records per page. Defaults to 20, maximum 100. Values above 100 are capped at 100.",
+            "schema": { "type": "integer", "default": 20, "maximum": 100, "minimum": 1 }
           }
         ],
         "responses": {
@@ -298,7 +298,7 @@
       "get": {
         "operationId": "getOpenPositions",
         "summary": "Get open positions",
-        "description": "Returns all currently open positions for a wallet — every outcome token the wallet holds with a non-zero balance, along with pricing, PnL, and market metadata.",
+        "description": "Returns the wallet's currently open positions — every outcome token held with a non-zero balance, along with pricing, PnL, and market metadata. Results are cursor-paginated.",
         "parameters": [
           {
             "name": "address",
@@ -306,6 +306,20 @@
             "required": true,
             "description": "The wallet address to query.",
             "schema": { "type": "string", "example": "0x0484e64092ba4108c2786b61e6fc052d3bf41b1a" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size. Defaults to 20, maximum 100.",
+            "schema": { "type": "integer", "default": 20, "maximum": 100, "minimum": 1 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Pagination cursor from the previous response's `nextCursor`. Omit for the first page.",
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -371,7 +385,7 @@
       "get": {
         "operationId": "getClosedPositions",
         "summary": "Get closed positions",
-        "description": "Returns the trader's closed positions — outcome tokens the wallet previously held in markets that have since resolved. Ordered by market / most recent trade descending. Positions here have `balance: \"0\"` and `closed: true`.",
+        "description": "Returns the trader's closed positions — outcome tokens the wallet previously held in markets that have since resolved or positions it has since sold. Ordered by market / most recent trade descending. Positions here have `balance: \"0\"` and `closed: true`.",
         "parameters": [
           {
             "name": "address",
@@ -465,7 +479,7 @@
       "get": {
         "operationId": "getComboOpenPositions",
         "summary": "Get combo open positions",
-        "description": "Returns all currently open combo (parlay) positions for a wallet. Each combo position contains multiple legs, each representing a single market outcome. The overall position is valued based on all legs resolving correctly.",
+        "description": "Returns the wallet's currently open combo (parlay) positions. Each combo position contains multiple legs, each representing a single market outcome. The overall position is valued based on all legs resolving correctly. Results are cursor-paginated.",
         "parameters": [
           {
             "name": "address",
@@ -473,6 +487,20 @@
             "required": true,
             "description": "The wallet address to query.",
             "schema": { "type": "string", "example": "0xb88a7733e9abb384f64579970ae17cecb8588cce" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size. Defaults to 20, maximum 100.",
+            "schema": { "type": "integer", "default": 20, "maximum": 100, "minimum": 1 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Pagination cursor from the previous response's `nextCursor`. Omit for the first page.",
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -714,7 +742,7 @@
             "in": "path",
             "required": true,
             "description": "Signer / trader address, `0x` + 40 hex chars.",
-            "schema": { "type": "string", "example": "0x9319a045cdd0c2180e5eb7ad44374383db9a6410" }
+            "schema": { "type": "string", "example": "0x1234567890abcdef1234567890abcdef12345678" }
           }
         ],
         "responses": {
@@ -730,7 +758,7 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "walletAddress": { "type": "string", "nullable": true, "description": "Resolved wallet address (lowercase), or `null` when no wallet is found.", "example": "0x9319a045cdd0c2180e5eb7ad44374383db9a6410" }
+                        "walletAddress": { "type": "string", "nullable": true, "description": "Resolved wallet address (lowercase), or `null` when no wallet is found.", "example": "0x170ffd53bbcf2515d9f31e9285c63d3d0e1341ad" }
                       }
                     }
                   }
@@ -739,7 +767,7 @@
                   "message": "OK",
                   "status_code": "1",
                   "data": {
-                    "walletAddress": "0x9319a045cdd0c2180e5eb7ad44374383db9a6410"
+                    "walletAddress": "0x170ffd53bbcf2515d9f31e9285c63d3d0e1341ad"
                   }
                 }
               }
@@ -1163,7 +1191,7 @@
           "totalBought": { "type": "string", "description": "Cumulative shares bought." },
           "balance": { "type": "string", "description": "Remaining position balance (shares)." },
           "balanceTimestamp": { "type": "integer", "format": "int64", "description": "Balance snapshot timestamp (Unix seconds)." },
-          "totalFee": { "type": "string", "description": "Total fees paid, in USDC." },
+          "totalFee": { "type": "string", "nullable": true, "description": "Total fees paid, in USDC." },
           "recentTradeTime": { "type": "integer", "format": "int64", "description": "Most recent trade timestamp (Unix seconds)." },
           "firstTradeTime": { "type": "integer", "format": "int64", "description": "First trade timestamp (Unix seconds)." },
           "currentPrice": { "type": "string", "description": "Current combo price, 0–1 scale." },
