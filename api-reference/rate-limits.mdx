@@ -70,6 +70,6 @@ Following these practices will help you stay within your limits and get the most
 
 - **Cache infrequently changing data.** Market metadata — names, descriptions, outcomes — rarely changes. Cache it locally rather than fetching it on every request. Reserve your quota for time-sensitive data like prices and activity.
 
-- **Paginate, don't dump.** Use the `limit` and `offset` query parameters to fetch data in manageable pages rather than requesting the largest possible payload in a single call. This keeps individual responses fast and reduces the chance of timeouts.
+- **Paginate, don't dump.** Use the `limit` query parameter and the `nextCursor` cursor to fetch data in manageable pages rather than requesting the largest possible payload in a single call. This keeps individual responses fast and reduces the chance of timeouts.
 
 - **Poll responsibly.** If you're building a real-time feed, poll at most once every 5 seconds. More frequent polling provides negligible freshness gains and burns through your rate limit quickly.

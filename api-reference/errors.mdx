@@ -1,7 +1,7 @@
 ---
 title: "Orbscan Open API Errors"
 sidebarTitle: "Errors"
-description: "How the Orbscan Open API signals errors — the response envelope, the status codes you'll actually see (400, 401, 404), and how to handle empty results."
+description: "How the Orbscan Open API signals errors — the response envelope, the status codes you'll actually see (400, 401, 404, 429), and how to handle empty results."
 ---
 
 Every response — success or failure — uses the same envelope with three fields: `message`, `status_code`, and `data`.
@@ -26,6 +26,7 @@ Use the **HTTP status code** to determine the type of error.
 | `401` | `Missing or invalid API key` | The `Authorization: Bearer` header is missing or the key is wrong. Check the key you're sending. |
 | `400` | `Invalid address format` / `Invalid txHash format` | A path or query value is malformed — for example an `address` that isn't a valid `0x…` hex address, or a `txHash` that isn't a 32-byte hex hash. |
 | `404` | `Not found` | The API endpoint does not exist. Check the path and spelling. A well-formed request for a resource that simply isn't indexed returns `200`, not `404` — see below. |
+| `429` | — | Rate limit exceeded. Wait for the window to reset, then retry with exponential backoff. See [Rate Limits](/api-reference/rate-limits). |
 | `5xx` | — | A transient server or gateway error. Retry with backoff. |
 
 ## Empty Results Are Not Errors

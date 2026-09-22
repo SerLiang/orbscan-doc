@@ -46,7 +46,8 @@
               "quickstart",
               "api-reference/overview",
               "api-reference/authentication",
-              "api-reference/errors"
+              "api-reference/errors",
+              "api-reference/rate-limits"
             ]
           },
           {
