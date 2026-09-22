@@ -50,7 +50,7 @@ Every response — success or error — uses the same envelope:
 | `data` | object / null | The requested payload. `null` when a request fails, or when a valid lookup simply has no result. |
 
 <Note>
-  A successful lookup that finds nothing still returns `200` with `status_code: "1"`. For list endpoints, `data.items` is an empty array. Check the shape of `data` rather than relying on the HTTP status alone.
+  A successful lookup that finds nothing still returns `200` with `status_code: "1"` — list endpoints return an empty `data.items` array, while single-object endpoints return `data: null`. Check the shape of `data` rather than relying on the HTTP status alone.
 </Note>
 
 ## Pagination
@@ -76,7 +76,14 @@ curl "https://api.orbscan.com/v1/trader/{address}/activity?limit=50&cursor=NEXT_
 
 | Endpoint | Path | Description |
 |---|---|---|
+| [Get Wallet Address](/api-reference/endpoints/get-wallet-address) | `/v1/trader/wallet-address/{address}` | Resolve a signer address to its Polymarket wallet address |
+| [Get Portfolio](/api-reference/endpoints/get-portfolio) | `/v1/trader/{address}/portfolio` | Open position value, USDC balance, and total portfolio value |
+| [Get Open Positions](/api-reference/endpoints/get-open-positions) | `/v1/trader/{address}/positions/open` | Open outcome-token positions with pricing and PnL |
+| [Get Closed Positions](/api-reference/endpoints/get-closed-positions) | `/v1/trader/{address}/positions/closed` | Resolved positions with final PnL and market metadata |
+| [Get Combo Open Positions](/api-reference/endpoints/get-combo-open-positions) | `/v1/trader/{address}/combo-positions/open` | Open combo (parlay) positions with their legs |
+| [Get Combo Closed Positions](/api-reference/endpoints/get-combo-closed-positions) | `/v1/trader/{address}/combo-positions/closed` | Closed combo positions with their legs |
 | [Get Trader Activity](/api-reference/endpoints/get-trader-activity) | `/v1/trader/{address}/activity` | Paginated buy, sell, and redeem history for a wallet |
+| [Get Trader Rewards](/api-reference/endpoints/get-rewards) | `/v1/trader/{address}/rewards` | Yield, maker/taker rebates, and referral rewards |
 | [Get Deposits & Withdrawals](/api-reference/endpoints/get-deposits-withdrawals) | `/v1/trader/{address}/deposits-withdrawals` | Combined USDC transfer history for a wallet |
 | [Get Actions by Hash](/api-reference/endpoints/get-transaction) | `/v1/tx/{txHash}` | Decoded summary and fills for a single transaction |
 

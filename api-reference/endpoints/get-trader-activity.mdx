@@ -17,7 +17,7 @@ Each item tells you *what* happened (`actionType`), *in which market* (`marketTi
 
 You can narrow results with any combination of:
 
-- **`marketIds`** — one or more market IDs. Repeat the parameter to pass several: `?marketIds=2707644&marketIds=2682268`.
+- **`marketIds`** — comma-separated market IDs to filter to: `?marketIds=2707644,2682268`.
 - **`txHash`** — a single transaction hash (auto-lowercased).
 - **`fromBlock` / `toBlock`** — a block-height range.
 - **`fromTimestamp` / `toTimestamp`** — a time range, in **Unix seconds**.

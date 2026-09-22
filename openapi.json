@@ -37,14 +37,8 @@
             "name": "marketIds",
             "in": "query",
             "required": false,
-            "description": "Filter to one or more market IDs. Repeat the parameter to pass multiple IDs (e.g. `marketIds=2707644&marketIds=2682268`).",
-            "style": "form",
-            "explode": true,
-            "schema": {
-              "type": "array",
-              "items": { "type": "string" },
-              "example": ["2707644"]
-            }
+            "description": "Comma-separated market IDs to filter to (e.g. `?marketIds=1,2`).",
+            "schema": { "type": "string", "example": "2707644,2682268" }
           },
           {
             "name": "txHash",
@@ -889,7 +883,13 @@
                   "properties": {
                     "message": { "type": "string", "example": "OK" },
                     "status_code": { "type": "string", "example": "1" },
-                    "data": { "$ref": "#/components/schemas/TransactionDetail" }
+                    "data": {
+                      "description": "The decoded transaction, or `null` when the hash is well-formed but no indexed action matches it.",
+                      "anyOf": [
+                        { "$ref": "#/components/schemas/TransactionDetail" },
+                        { "type": "null" }
+                      ]
+                    }
                   }
                 },
                 "example": {
@@ -928,6 +928,18 @@
                     ],
                     "comboActions": null
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The `txHash` is not a valid 32-byte hex hash.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Invalid txHash format",
+                  "status_code": "0",
+                  "data": null
                 }
               }
             }
@@ -1038,6 +1050,38 @@
           "liquidityRole": { "type": "string", "nullable": true, "example": "TAKER", "enum": ["MAKER", "TAKER"] }
         }
       },
+      "ComboActionLeg": {
+        "type": "object",
+        "properties": {
+          "marketId": { "type": "string", "description": "Market ID of the leg." },
+          "marketTitle": { "type": "string", "description": "Market title of the leg." },
+          "marketSlug": { "type": "string", "description": "Market slug of the leg." },
+          "eventSlug": { "type": "string", "description": "Event slug of the leg." },
+          "logo": { "type": "string", "description": "Market logo URL." },
+          "outcomeIndex": { "type": "integer", "description": "Outcome index the leg is on.", "example": 1 },
+          "outcome": { "type": "string", "description": "Outcome label the leg is on. Varies by market — e.g. `Yes` / `No`, `Up` / `Down`, or an outcome name.", "example": "G2 Ares" },
+          "outcomePrice": { "type": "string", "description": "Leg outcome price at the time of the trade, 0–1 scale.", "example": "0.695" }
+        }
+      },
+      "ComboAction": {
+        "type": "object",
+        "properties": {
+          "actionType": { "type": "string", "description": "Action label for this combo fill.", "example": "Buy", "enum": ["Buy", "Sell"] },
+          "comboPositionId": { "type": "string", "description": "Combo position ID this fill belongs to." },
+          "size": { "type": "string", "description": "Number of combo shares in this fill.", "example": "6.07015" },
+          "price": { "type": "string", "description": "Price per combo share as a decimal (0–1). Multiply by 100 to get cents.", "example": "0.659345" },
+          "usdcSize": { "type": "string", "description": "USDC value of this fill.", "example": "4.002324" },
+          "traderAddress": { "type": "string", "description": "Address that performed this fill." },
+          "txHash": { "type": "string", "description": "On-chain transaction hash." },
+          "blockTimestamp": { "type": "integer", "format": "int64", "description": "Block timestamp (Unix seconds)." },
+          "fee": { "type": "string", "description": "Fee charged for this fill, in USDC.", "example": "0.16301" },
+          "legs": {
+            "type": "array",
+            "description": "The underlying market outcomes that make up this combo position.",
+            "items": { "$ref": "#/components/schemas/ComboActionLeg" }
+          }
+        }
+      },
       "TransactionDetail": {
         "type": "object",
         "properties": {
@@ -1045,21 +1089,22 @@
           "blockNumber": { "type": "integer", "format": "int64" },
           "blockTimestamp": { "type": "integer", "format": "int64" },
           "traderAddress": { "type": "string", "description": "The primary wallet this transaction is attributed to." },
-          "sourceType": { "type": "string", "example": "TRADE" },
-          "actionType": { "type": "string", "description": "Top-level action for the transaction.", "example": "Buy" },
+          "sourceType": { "type": "string", "description": "How the transaction was categorised — `TRADE` for a regular order fill, `COMBO` for a combo (parlay) trade.", "example": "TRADE" },
+          "actionType": { "type": "string", "description": "Top-level action for the transaction (the trade direction, e.g. `Buy` or `Sell`).", "example": "Buy" },
           "sentence": { "type": "string", "description": "Plain-English summary of the transaction.", "example": "Buy 3604.58 No for $3546.12269 in Will Bitcoin dip to $59,000 on June 9?" },
-          "marketSlug": { "type": "string" },
-          "marketId": { "type": "string" },
+          "marketSlug": { "type": "string", "nullable": true, "description": "Market slug. `null` for combo transactions, where the trade spans several markets." },
+          "marketId": { "type": "string", "nullable": true, "description": "Market ID. `null` for combo transactions, where the trade spans several markets." },
           "actions": {
             "type": "array",
-            "description": "Every individual on-chain fill contained in this transaction.",
+            "nullable": true,
+            "description": "Every individual on-chain fill contained in this transaction. `null` for combo transactions, which report their fills in `comboActions` instead.",
             "items": { "$ref": "#/components/schemas/TransactionAction" }
           },
           "comboActions": {
             "type": "array",
             "nullable": true,
-            "description": "Combined actions for multi-leg trades, or null when not applicable.",
-            "items": { "type": "object" }
+            "description": "Combo (parlay) fills contained in this transaction, one per trader. `null` for regular trades, whose fills appear in `actions` instead.",
+            "items": { "$ref": "#/components/schemas/ComboAction" }
           }
         }
       },
@@ -1087,7 +1132,7 @@
           "realizedPnl": { "type": "string", "description": "Realized PnL, in USD." },
           "totalPnl": { "type": "string", "description": "Realized + unrealized PnL, in USD." },
           "percentPnl": { "type": "string", "nullable": true, "description": "PnL as a percentage of cost basis." },
-          "recentTradeTime": { "type": "integer", "format": "int64", "nullable": true, "description": "Closing block timestamp (Unix seconds); `null` while open." }
+          "recentTradeTime": { "type": "integer", "format": "int64", "description": "Most recent trade timestamp (Unix seconds) for this position — set for both open and closed positions." }
         }
       },
       "ComboLeg": {
