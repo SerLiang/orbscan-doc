@@ -1,0 +1,29 @@
+---
+title: "Get Order Book Events"
+sidebarTitle: "Get Order Book Events"
+description: "Get the L2 snapshots and price changes needed to reconstruct an outcome token's order book over time."
+openapi: "openapi.json GET /v1/orderbook/events"
+---
+
+Use this endpoint to pull the L2 events for one or more outcome tokens. Each event is either a `book` snapshot (full `bids` and `asks`) or a `price_change` delta (a single `side`, `price`, and `sizeAfter`).
+
+Provide at least one of `marketId`, `conditionId`, or `tokenId`. The API combines values in the same parameter with OR. It combines different parameters with AND.
+
+## Reconstructing a book
+
+To rebuild a token's book at a target time:
+
+1. For one `tokenId`, fetch the latest `book` at or before the target time with `eventType=book`, `to=<target_time>`, `order=desc`, and `limit=1`.
+2. Start a new query from that event's `cursor`. Set `eventType=price_change`, keep `to=<target_time>`, and use `order=asc`.
+3. Page through the results with the same filters and `order`, passing each `nextCursor` into the next request.
+4. Apply `BUY` deltas to bids and `SELL` deltas to asks. A `sizeAfter` value of `0` removes the price level. Any other value replaces its size.
+
+You need a `book` snapshot to start reconstruction. If none exists at or before the target time, the later price changes are not enough to rebuild the book.
+
+<Note>
+  Events use **Unix milliseconds**. Other API endpoints use seconds. Subtract `timestamp` from `indexedTimestamp` to estimate total indexing latency, including WebSocket delivery, queueing, batching, and insertion. Historical rows created before `timestamp_ingested` do not have a reliable original ingestion timestamp.
+</Note>
+
+<Warning>
+  Cursors are opaque. Keep the filters and `order` unchanged while paging through one result set. When reconstructing a book, you can use the snapshot cursor to start the new ascending `price_change` query described above.
+</Warning>
