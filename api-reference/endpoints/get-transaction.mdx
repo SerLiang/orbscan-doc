@@ -16,3 +16,116 @@ The `actions` array then lists each individual fill — one transaction often co
 <Tip>
   You can get a transaction hash from the [Get Trader Activity](/api-reference/endpoints/get-trader-activity) endpoint — every activity item includes a `txHash` you can feed straight into this endpoint.
 </Tip>
+
+<Note>
+  The `txHash` must be a 32-byte hex hash. A malformed value returns HTTP `400` with `"Invalid txHash format"`, while a well-formed hash that isn't indexed returns HTTP `200` with `data: null`. See [Errors](/api-reference/errors).
+</Note>
+
+## Regular trades vs combo trades
+
+The top-level `sourceType` tells you which kind of transaction you're looking at:
+
+- **`TRADE`** — a regular order fill. The individual fills are in `actions`, and `comboActions` is `null`.
+- **`COMBO`** — a combo (parlay) trade that bundles several market outcomes into a single position. The fills are in `comboActions`, and `actions` is `null`. Because a combo spans more than one market, the top-level `marketId` and `marketSlug` are also `null`, and the `sentence` reads like `Buy Combo position for $4.83699`.
+
+## The `comboActions` array
+
+Each entry in `comboActions` is a single trader's fill of a combo position. Alongside the usual trade fields it carries a `comboPositionId` and a `legs` array describing every market outcome the combo covers.
+
+<Expandable title="comboActions object fields">
+  <ResponseField name="actionType" type="string">
+    Action label for this fill — `Buy` or `Sell`.
+  </ResponseField>
+
+  <ResponseField name="comboPositionId" type="string">
+    Identifier of the combo position this fill belongs to.
+  </ResponseField>
+
+  <ResponseField name="size" type="string">
+    Number of combo shares in this fill.
+  </ResponseField>
+
+  <ResponseField name="price" type="string">
+    Price per combo share as a decimal (0–1).
+  </ResponseField>
+
+  <ResponseField name="usdcSize" type="string">
+    USDC value of this fill.
+  </ResponseField>
+
+  <ResponseField name="traderAddress" type="string">
+    Address that performed this fill.
+  </ResponseField>
+
+  <ResponseField name="txHash" type="string">
+    On-chain transaction hash.
+  </ResponseField>
+
+  <ResponseField name="blockTimestamp" type="integer">
+    Block timestamp (Unix seconds).
+  </ResponseField>
+
+  <ResponseField name="fee" type="string">
+    Fee charged for this fill, in USDC.
+  </ResponseField>
+
+  <ResponseField name="legs" type="array">
+    The market outcomes that make up the combo. Each leg has `marketId`, `marketTitle`, `marketSlug`, `eventSlug`, `logo`, `outcomeIndex`, `outcome`, and `outcomePrice` (0–1 scale).
+  </ResponseField>
+</Expandable>
+
+A decoded combo transaction looks like this:
+
+```json
+{
+  "message": "OK",
+  "status_code": "1",
+  "data": {
+    "txHash": "0x4a0e9050d8747ce2ea3ffc4ec40e7dd2419807cea5ef1ec6eab7d5e0761505fe",
+    "blockNumber": 94181256,
+    "blockTimestamp": 1789976967,
+    "traderAddress": "0x0284e1c5b93a6fe07aa5e83e8543d6e33f8a97f6",
+    "sourceType": "COMBO",
+    "actionType": "Buy",
+    "sentence": "Buy Combo position for $4.83699",
+    "marketSlug": null,
+    "marketId": null,
+    "actions": null,
+    "comboActions": [
+      {
+        "actionType": "Buy",
+        "comboPositionId": "1709891758942759112419793424834979456496472902357002820659325405013387247616",
+        "size": "14.839314",
+        "price": "0.325958",
+        "usdcSize": "4.83699",
+        "traderAddress": "0x0284e1c5b93a6fe07aa5e83e8543d6e33f8a97f6",
+        "txHash": "0x4a0e9050d8747ce2ea3ffc4ec40e7dd2419807cea5ef1ec6eab7d5e0761505fe",
+        "blockTimestamp": 1789976967,
+        "fee": "0.16301",
+        "legs": [
+          {
+            "marketId": "4777327",
+            "marketTitle": "Counter-Strike: Leo Team vs G2 Ares (BO3)",
+            "marketSlug": "cs2-leo2-g2a-2026-09-21",
+            "eventSlug": "cs2-leo2-g2a-2026-09-21",
+            "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/counter-strike-image-16c415c538.png",
+            "outcomeIndex": 1,
+            "outcome": "G2 Ares",
+            "outcomePrice": "0.695"
+          },
+          {
+            "marketId": "4760565",
+            "marketTitle": "Counter-Strike: Leo Team vs UNiTY esports (BO3)",
+            "marketSlug": "cs2-leo2-unity-2026-09-21",
+            "eventSlug": "cs2-leo2-unity-2026-09-21",
+            "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/counter-strike-image-16c415c538.png",
+            "outcomeIndex": 1,
+            "outcome": "UNiTY esports",
+            "outcomePrice": "0.84"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
