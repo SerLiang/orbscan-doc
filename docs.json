@@ -51,7 +51,7 @@
             ]
           },
           {
-            "group": "Trade",
+            "group": "Trader & transactions",
             "pages": [
               "api-reference/endpoints/get-wallet-address",
               "api-reference/endpoints/get-portfolio",
@@ -66,7 +66,7 @@
             ]
           },
           {
-            "group": "Market",
+            "group": "Order Book",
             "pages": [
               "api-reference/market/orderbook-markets",
               "api-reference/market/orderbook-events",
