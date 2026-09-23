@@ -1,20 +1,20 @@
 ---
 title: "Authentication"
 sidebarTitle: "Authentication"
-description: "Authenticate to the Orbscan Open API with your API key, passed as a Bearer token in the Authorization header."
+description: "Authenticate to the Orbscan Open API with your API key as a Bearer token."
 ---
 
 Authenticate to the Orbscan Open API with your **API key**, passed as a Bearer token in the Authorization header. Requests without a valid key are rejected with a `401` response.
 
-## Getting an API Key
+## Getting an API key
 
-Request an API key by filling out the [sign-up form](https://orbscan.com/contactus). Once approved, your key provides access to the endpoints enabled for your credential.
+Request an API key through the [Orbscan contact form](https://orbscan.com/contactus). Once approved, your key provides access to the endpoints enabled for your credential.
 
 <Warning>
   Your API key is a secret. Keep it server-side, never commit it to a public repository, and never expose it in client-side code. If a key is leaked, rotate it.
 </Warning>
 
-## Using Your API Key
+## Using your API key
 
 Pass your key as a **Bearer token** in the `Authorization` header on every request:
 
@@ -50,19 +50,7 @@ const body = await resp.json();
 console.log(body);
 ```
 
-## Alternative: query parameter
-
-Every endpoint also accepts your key as the `apikey` query parameter:
-
-```bash
-curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=5&apikey=<your_api_key>"
-```
-
-<Warning>
-  Prefer the `Authorization` header. Putting the key in the URL exposes it in logs, browser history, and referrer headers.
-</Warning>
-
-## Verifying Authentication
+## Verifying authentication
 
 A successful, authenticated request returns `status_code: "1"`:
 

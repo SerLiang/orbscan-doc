@@ -1,11 +1,11 @@
 ---
-title: "Get Order Book Coverage"
-sidebarTitle: "Get Order Book Coverage"
+title: "Get order book coverage"
+sidebarTitle: "Get order book coverage"
 description: "Get the earliest and latest source timestamps stored for order book data."
 openapi: "openapi.json GET /v1/orderbook/coverage"
 ---
 
-Use this endpoint to find the time window covered by the order book data before you page through events. It returns the earliest and latest source timestamps across the whole table.
+Use this endpoint to find the time window covered by the order book data before you page through events. `availableFrom` and `availableTo` are Unix timestamps in milliseconds.
 
 <Warning>
   These timestamps cover the full stored table. They do not guarantee that every timestamp or market is available through [Get Order Book Events](/api-reference/market/orderbook-events). The result is cached for 10 minutes.

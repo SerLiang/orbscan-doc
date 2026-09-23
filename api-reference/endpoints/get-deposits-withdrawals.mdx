@@ -1,11 +1,11 @@
 ---
-title: "Get Deposits & Withdrawals"
-sidebarTitle: "Get Deposits & Withdrawals"
+title: "Get deposits and withdrawals"
+sidebarTitle: "Get deposits and withdrawals"
 description: "Return the combined USDC deposit and withdrawal history for a Polymarket wallet, newest first."
 openapi: "openapi.json GET /v1/trader/{address}/deposits-withdrawals"
 ---
 
-Use this endpoint to see the money going **in and out** of a wallet. It returns one combined, newest-first list of USDC transfers, where each record's `type` is either `deposit` or `withdrawal`.
+Use this endpoint to retrieve indexed USDC deposits and withdrawals for a wallet. It returns one combined, newest-first list where each record's `type` is either `deposit` or `withdrawal`. Transfers from known reward and system addresses are excluded.
 
 Every item includes the `amount` (in USDC, as a string), the `blockTimestamp` (Unix seconds), the on-chain `txHash`, and the counterparty `address`.
 

@@ -1,30 +1,18 @@
 ---
-title: "Orbscan API Rate Limits, Plan Tiers, and Request Quotas"
-sidebarTitle: "Rate Limits"
-description: "Understand Orbscan API rate limits by plan tier — requests per minute, daily quotas, and how to handle 429 Too Many Requests responses."
+title: "Orbscan API rate limits"
+sidebarTitle: "Rate limits"
+description: "Handle 429 Too Many Requests responses and reduce unnecessary API calls."
 ---
 
-The Orbscan API enforces rate limits to ensure consistent, reliable performance for all users. Limits are applied on a rolling per-minute window and a rolling 24-hour daily quota. If your application exceeds either limit, the API returns a `429 Too Many Requests` response until the relevant window resets. Understanding your limits — and designing your integration around them — will help you avoid disruptions.
+The Orbscan API applies limits per API credential. Your exact limits may depend on your access agreement and production configuration. Contact Orbscan if you need the limits for your credential.
 
 <Note>
-  Rate limits are enforced per API key, not per IP address. If you run multiple services or environments, each should use its own API key so their usage is tracked independently.
+  A rate-limited request returns HTTP `429` with `message: "Rate limit exceeded"`, `status_code: "0"`, and `data: null`.
 </Note>
 
-## Plan Tiers
+## Handling 429 responses
 
-Your rate limits depend on the plan your API key is associated with. The table below summarises the limits for each tier.
-
-| Plan | Requests / min | Daily Quota |
-|---|---|---|
-| Free | 30 | 10,000 / day |
-| Pro | 120 | 100,000 / day |
-| Enterprise | Custom | Contact Orbscan |
-
-To upgrade your plan or inquire about Enterprise pricing, contact the Orbscan team.
-
-## Handling 429 Responses
-
-When you receive a `429` response, do not immediately retry the request — you will receive another `429` until the window resets. Wait briefly and then retry with exponential backoff.
+When you receive a `429` response, wait before trying again. Use exponential backoff and cap the number of retries. If repeated retries still return `429`, stop and wait longer rather than continuing to send requests.
 
 <CodeGroup>
 
@@ -64,12 +52,12 @@ async function getWithRateLimitHandling(url, headers, maxRetries = 3) {
 
 </CodeGroup>
 
-## Best Practices
+## Best practices
 
-Following these practices will help you stay within your limits and get the most out of your quota:
+These practices reduce unnecessary requests:
 
-- **Cache infrequently changing data.** Market metadata — names, descriptions, outcomes — rarely changes. Cache it locally rather than fetching it on every request. Reserve your quota for time-sensitive data like prices and activity.
+- **Cache infrequently changing data.** Market names, descriptions, and outcomes rarely change. Cache them locally and reserve requests for time-sensitive data.
 
 - **Paginate, don't dump.** Use the `limit` query parameter and the `nextCursor` cursor to fetch data in manageable pages rather than requesting the largest possible payload in a single call. This keeps individual responses fast and reduces the chance of timeouts.
 
-- **Poll responsibly.** If you're building a real-time feed, poll at most once every 5 seconds. More frequent polling provides negligible freshness gains and burns through your rate limit quickly.
+- **Poll responsibly.** Choose a polling interval that matches your credential limits and freshness requirements.

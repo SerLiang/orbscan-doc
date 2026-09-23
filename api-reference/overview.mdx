@@ -1,10 +1,10 @@
 ---
-title: "Orbscan Open API Overview"
+title: "Orbscan Open API overview"
 sidebarTitle: "Overview"
 description: "Learn about the Orbscan Open API base URL, authentication, response format, pagination, and available endpoints."
 ---
 
-The Orbscan Open API is a REST API that returns JSON. It provides Polymarket wallet activity, positions, deposits and withdrawals, decoded transactions, and L2 order book history.
+The Orbscan Open API is a REST API that returns JSON. It provides Polymarket wallet activity, positions, deposits and withdrawals, indexed transaction details, and L2 order book history for Crypto-tagged markets.
 
 ## Base URL
 
@@ -18,7 +18,7 @@ Every endpoint path in this reference is relative to that base. For example, `GE
 
 ## Authentication
 
-Authenticate every request with an API key. Send it as a **Bearer token** in the `Authorization` header. You can also use the `apikey` query parameter, but the header is safer. Requests without a valid key return `401`.
+Authenticate every request with an API key. Send it as a **Bearer token** in the `Authorization` header. Requests without a valid key return `401`.
 
 ```bash
 curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=1" \
@@ -50,7 +50,7 @@ Success and error responses use the same envelope:
 | `data` | object / null | The requested payload. `null` when a request fails, or when a valid lookup simply has no result. |
 
 <Note>
-  A successful lookup that finds nothing still returns `200` with `status_code: "1"`. List endpoints return an empty `data.items` array. Single-object endpoints return `data: null`. Check the shape of `data` rather than relying on the HTTP status alone.
+  A successful lookup that finds nothing still returns `200` with `status_code: "1"`. List endpoints return an empty `data.items` array. Transaction lookups return `data: null`. Wallet resolution returns `data.walletAddress: null`. Check the endpoint's `data` shape rather than relying on the HTTP status alone.
 </Note>
 
 ## Pagination
@@ -79,19 +79,19 @@ curl "https://api.orbscan.com/v1/trader/{address}/activity?limit=50&cursor=NEXT_
 | [Get Wallet Address](/api-reference/endpoints/get-wallet-address) | `/v1/trader/wallet-address/{address}` | Resolve a signer address to its Polymarket wallet address |
 | [Get Portfolio](/api-reference/endpoints/get-portfolio) | `/v1/trader/{address}/portfolio` | Open position value, USDC balance, and total portfolio value |
 | [Get Open Positions](/api-reference/endpoints/get-open-positions) | `/v1/trader/{address}/positions/open` | Open outcome-token positions with pricing and PnL |
-| [Get Closed Positions](/api-reference/endpoints/get-closed-positions) | `/v1/trader/{address}/positions/closed` | Resolved positions with final PnL and market metadata |
+| [Get Closed Positions](/api-reference/endpoints/get-closed-positions) | `/v1/trader/{address}/positions/closed` | Resolved or sold positions with final PnL and market metadata |
 | [Get Combo Open Positions](/api-reference/endpoints/get-combo-open-positions) | `/v1/trader/{address}/combo-positions/open` | Open combo (parlay) positions with their legs |
 | [Get Combo Closed Positions](/api-reference/endpoints/get-combo-closed-positions) | `/v1/trader/{address}/combo-positions/closed` | Closed combo positions with their legs |
 | [Get Trader Activity](/api-reference/endpoints/get-trader-activity) | `/v1/trader/{address}/activity` | Paginated buy, sell, and redeem history for a wallet |
 | [Get Trader Rewards](/api-reference/endpoints/get-rewards) | `/v1/trader/{address}/rewards` | Yield, maker/taker rebates, and referral rewards |
 | [Get Deposits & Withdrawals](/api-reference/endpoints/get-deposits-withdrawals) | `/v1/trader/{address}/deposits-withdrawals` | Combined USDC transfer history for a wallet |
-| [Get Actions by Hash](/api-reference/endpoints/get-transaction) | `/v1/tx/{txHash}` | Decoded summary and fills for a single transaction |
+| [Get Actions by Hash](/api-reference/endpoints/get-transaction) | `/v1/tx/{txHash}` | Decoded summary and fills for an indexed trade or combo transaction |
 | [Get Order Book Markets](/api-reference/market/orderbook-markets) | `/v1/orderbook/markets` | Crypto markets and outcome tokens covered by the Order Book API |
 | [Get Order Book Events](/api-reference/market/orderbook-events) | `/v1/orderbook/events` | L2 book snapshots and price-change deltas for outcome tokens |
 | [Get Order Book Coverage](/api-reference/market/orderbook-coverage) | `/v1/orderbook/coverage` | Earliest and latest source timestamps available for order book data |
 
 <Note>
-  Two Order Book conventions differ from the rest of the API. Order book timestamps use **Unix milliseconds**, while other endpoints use seconds. Every endpoint also accepts your key in the `apikey` query parameter, but you should prefer the header. See [Authentication](/api-reference/authentication).
+  Numeric Order Book timestamps use **Unix milliseconds**. Numeric block and trade timestamps use seconds. Fields such as reward `createdAt` use ISO 8601 strings. See [Authentication](/api-reference/authentication).
 </Note>
 
 <Tip>
