@@ -1,6 +1,6 @@
 ---
-title: "Get Order Book Events"
-sidebarTitle: "Get Order Book Events"
+title: "Get order book events"
+sidebarTitle: "Get order book events"
 description: "Get the L2 snapshots and price changes needed to reconstruct an outcome token's order book over time."
 openapi: "openapi.json GET /v1/orderbook/events"
 ---
@@ -20,8 +20,10 @@ To rebuild a token's book at a target time:
 
 You need a `book` snapshot to start reconstruction. If none exists at or before the target time, the later price changes are not enough to rebuild the book.
 
+Snapshot levels use `[price, source order size]` decimal-string pairs. The API contract does not guarantee the order of the arrays. Sort bids from highest to lowest and asks from lowest to highest if your application depends on that ordering.
+
 <Note>
-  Events use **Unix milliseconds**. Other API endpoints use seconds. Subtract `timestamp` from `indexedTimestamp` to estimate total indexing latency, including WebSocket delivery, queueing, batching, and insertion. Historical rows created before `timestamp_ingested` do not have a reliable original ingestion timestamp.
+  Order Book event timestamps use Unix milliseconds. Numeric block and trade timestamps use seconds. Subtract `timestamp` from `indexedTimestamp` to estimate total indexing latency, including WebSocket delivery, queueing, batching, and insertion. Some historical rows do not have a reliable original ingestion timestamp.
 </Note>
 
 <Warning>

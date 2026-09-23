@@ -1,14 +1,14 @@
 ---
-title: "Orbscan API Quickstart: First Request in 5 Minutes"
+title: "Orbscan API quickstart: First request in 5 minutes"
 sidebarTitle: "Quickstart"
 description: "Make your first Orbscan API call in under 5 minutes. Fetch a live trader's activity by wallet address and inspect the full JSON response."
 ---
 
-This guide gets you from zero to a live API response in under five minutes. You'll obtain an API key, call the trader activity endpoint with a real wallet address, and inspect the JSON response — giving you a working template you can adapt for any other Orbscan endpoint.
+This guide gets you from zero to a live API response in under five minutes. You'll obtain an API key, call the trader activity endpoint with a real wallet address, and inspect the JSON response. You can adapt the same request pattern for any other Orbscan endpoint.
 
 <Steps>
   <Step title="Get your API key">
-    Every request to the Orbscan API requires a valid API key in the `Authorization` header. If you don't have one yet, follow the steps in the [Authentication](/api-reference/authentication) guide to create an account and generate a key.
+    Every request to the Orbscan API requires a valid API key. If you don't have one, use the [Orbscan contact form](https://orbscan.com/contactus) to request access. See [Authentication](/api-reference/authentication) for details.
 
     Once you have your key, store it in an environment variable so you can reference it easily:
 
@@ -22,7 +22,7 @@ This guide gets you from zero to a live API response in under five minutes. You'
     <CodeGroup>
 
     ```bash curl
-    curl -X GET "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=5" \
+    curl -X GET "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=1&toTimestamp=1782861128" \
       -H "Authorization: Bearer $ORBSCAN_API_KEY" \
       -H "Accept: application/json"
     ```
@@ -40,7 +40,7 @@ This guide gets you from zero to a live API response in under five minutes. You'
             "Authorization": f"Bearer {api_key}",
             "Accept": "application/json",
         },
-        params={"limit": 5},
+        params={"limit": 1, "toTimestamp": 1782861128},
     )
     
     data = response.json()
@@ -54,7 +54,7 @@ This guide gets you from zero to a live API response in under five minutes. You'
     </Tip>
   </Step>
   <Step title="Inspect the response">
-    A successful request returns a JSON object with a paginated list of trades. Here's an example response:
+    A successful request returns a paginated list of activity records. This response was verified against the request above:
 
     ```json
     {
@@ -71,13 +71,20 @@ This guide gets you from zero to a live API response in under five minutes. You'
             "usdcSize": "5",
             "netSharesTransferred": "-5",
             "txHash": "0x71bf46c3089e2349a62ec6b93638522e8cc635a9836f1308ac7621ce1ecbb609",
+            "tokenId": "91355094557016369228768123360298492968992168419338047915199416797057852525950",
+            "marketId": "2707644",
+            "marketSlug": "fifwc-fra-swe-2026-06-30-fra",
+            "eventSlug": "fifwc-fra-swe-2026-06-30",
+            "conditionId": "0x378f7b5c668014d9f6c42c305ec83902f3c8f6c770b336363aed0076ce6ce1c9",
             "marketTitle": "Will France win on 2026-06-30?",
             "positionSide": "Yes",
+            "outcomeIndex": 0,
+            "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/soccer ball-bba4025f77.png",
             "traderAddress": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
             "liquidityRole": null
           }
         ],
-        "nextCursor": "MTc4Mjg2MTEyOH..."
+        "nextCursor": "MTc4Mjg2MTEyOHw4OTQzNzQyMnwzMTY4fDB4NzFiZjQ2YzMwODllMjM0OWE2MmVjNmI5MzYzODUyMmU4Y2M2MzVhOTgzNmYxMzA4YWM3NjIxY2UxZWNiYjYwOTozNDMxOjkxMzU1MDk0NTU3MDE2MzY5MjI4NzY4MTIzMzYwMjk4NDkyOTY4OTkyMTY4NDE5MzM4MDQ3OTE1MTk5NDE2Nzk3MDU3ODUyNTI1OTUwOjB4NmE3MmY2MTgyMGIyNmIxZmU0ZDk1NmUxN2I2ZGMyYTFlYTMwMzNlZQ=="
       }
     }
     ```
@@ -86,11 +93,11 @@ This guide gets you from zero to a live API response in under five minutes. You'
 
     | Field | Description |
     | --- | --- |
-    | `blockTimestamp` | Unix timestamp (seconds) of the trade. |
+    | `blockTimestamp` | Unix timestamp, in seconds, of the action. |
     | `actionType` | Action label: `Buy`, `Sell`, or `Redeem`. |
-    | `price` | Price per share as a decimal (0–1). `"0.78"` means 78¢ per share. |
+    | `price` | Price per share as a decimal from 0 to 1. `"0.78"` means 78 cents per share. |
     | `size` | Number of shares. |
-    | `usdcSize` | Gross USDC value of the trade. |
+    | `usdcSize` | Gross USDC value of the action. |
     | `netSharesTransferred` | Shares received (positive) or sent (negative). |
     | `nextCursor` | Pass this back as `cursor` to fetch the next page. `null` when no more results. |
   </Step>
@@ -98,11 +105,11 @@ This guide gets you from zero to a live API response in under five minutes. You'
     You've made your first successful Orbscan API call. Here's where to go next:
 
     <CardGroup cols={2}>
-      <Card title="API Reference" icon="code" href="/api-reference/overview">
+      <Card title="API reference" icon="code" href="/api-reference/overview">
         Base URL, authentication, response envelope, and cursor-based pagination.
       </Card>
 
-      <Card title="Browse Endpoints" icon="list" href="/api-reference/endpoints/get-wallet-address">
+      <Card title="Browse endpoints" icon="list" href="/api-reference/endpoints/get-wallet-address">
         Positions, portfolio, activity, rewards, deposits & withdrawals, and per-transaction lookups.
       </Card>
     </CardGroup>

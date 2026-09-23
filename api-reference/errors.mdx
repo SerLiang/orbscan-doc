@@ -1,10 +1,10 @@
 ---
-title: "Orbscan Open API Errors"
+title: "Orbscan Open API errors"
 sidebarTitle: "Errors"
 description: "Learn how the Orbscan Open API reports errors, which HTTP status codes to expect, and how to handle empty results."
 ---
 
-Every response uses the same three fields: `message`, `status_code`, and `data`.
+Successful responses and documented JSON error bodies use the same three fields: `message`, `status_code`, and `data`.
 
 - On **success**: `status_code` is `"1"`, `message` is `"OK"`, and `data` holds the result.
 - On **error**: `status_code` is `"0"`, `message` describes the problem, and `data` is `null`.
@@ -24,16 +24,16 @@ Use the **HTTP status code** to determine the type of error.
 | HTTP | `message` (example) | Cause & fix |
 |---|---|---|
 | `400` | `Invalid address format` / `Invalid txHash format` | A path or query value is malformed. This covers an `address` that isn't a valid `0x...` hex address, a `txHash` that isn't a 32-byte hex hash, and an order book `limit` outside its allowed range. |
-| `401` | `Missing or invalid API key` | The API key is missing or wrong. Check the `Authorization: Bearer` header, or the `apikey` query parameter. |
+| `401` | `Missing or invalid API key` | The API key is missing or wrong. Check the `Authorization: Bearer` header. |
 | `403` | Varies | The API key is valid but not allowed to use this resource. Check your plan, or contact Orbscan. |
-| `404` | `Not found` | The API endpoint does not exist. Check the path and spelling. A query that simply finds nothing returns `200` instead, as explained in [Empty results are not errors](#empty-results-are-not-errors). |
-| `429` | `Rate limit exceeded` | You have sent too many requests. Wait for the limit window to reset, then retry with exponential backoff. See [Rate limits](/api-reference/rate-limits). |
+| `404` | Varies | The API endpoint does not exist. Check the path and spelling. A query that simply finds nothing returns `200` instead, as explained in [Empty results are not errors](#empty-results-are-not-errors). |
+| `429` | `Rate limit exceeded` | You have sent too many requests. Wait before retrying with exponential backoff. See [Rate limits](/api-reference/rate-limits). |
 | `500` | Varies | Something failed on our side. Retry with backoff. |
 | `503` | Varies | A dependent service is temporarily unavailable. For example, order book coverage may have no cached value to return. Retry shortly. |
 
 ## Empty results are not errors
 
-A valid request that finds nothing is not an error: it still succeeds with HTTP `200` and `status_code` `"1"`. The shape of `data` depends on the endpoint:
+A valid request that finds nothing is not an error. It still succeeds with HTTP `200` and `status_code` `"1"`. The empty shape depends on the endpoint:
 
 - **List endpoints** (activity, deposits & withdrawals, positions, rewards) return an empty `items` array:
 
@@ -45,7 +45,7 @@ A valid request that finds nothing is not an error: it still succeeds with HTTP 
 }
 ```
 
-- **Single-object endpoints** (for example [Get Actions by Hash](/api-reference/endpoints/get-transaction)) return `data: null`:
+- [Get Actions by Hash](/api-reference/endpoints/get-transaction) returns `data: null` when the hash is valid but has no indexed action:
 
 ```json
 {
@@ -55,8 +55,18 @@ A valid request that finds nothing is not an error: it still succeeds with HTTP 
 }
 ```
 
+- [Get Wallet Address](/api-reference/endpoints/get-wallet-address) keeps the `data` object and returns `data.walletAddress: null` when no mapping exists:
+
+```json
+{
+  "message": "OK",
+  "status_code": "1",
+  "data": { "walletAddress": null }
+}
+```
+
 <Warning>
-  Don't treat a `200` with empty `data` as a failure. An empty `items` array or a `null` `data` means "no results," not "error."
+  Don't treat these `200` responses as failures. Check the endpoint's documented `data` shape to detect an empty result.
 </Warning>
 
 ## Handling errors in code
@@ -74,7 +84,8 @@ if body["status_code"] != "1":
 
 data = body["data"]
 empty_list = isinstance(data, dict) and data.get("items") == []
-if data is None or empty_list:
+empty_wallet = isinstance(data, dict) and "walletAddress" in data and data["walletAddress"] is None
+if data is None or empty_list or empty_wallet:
     print("No results")
 else:
     print(data)
@@ -89,7 +100,9 @@ if (body.status_code !== "1") {
 }
 
 const { data } = body;
-if (!data || (Array.isArray(data.items) && data.items.length === 0)) {
+const emptyList = Array.isArray(data?.items) && data.items.length === 0;
+const emptyWallet = data && "walletAddress" in data && data.walletAddress === null;
+if (!data || emptyList || emptyWallet) {
   console.log("No results");
 } else {
   console.log(data);

@@ -1,15 +1,17 @@
 ---
-title: "Get Actions by Transaction Hash"
-sidebarTitle: "Get Actions by Hash"
-description: "Decode a single transaction into a plain-English summary plus every individual on-chain fill it contains."
+title: "Get actions by transaction hash"
+sidebarTitle: "Get actions by hash"
+description: "Decode an indexed Polymarket trade or combo transaction into a summary and its individual fills."
 openapi: "openapi.json GET /v1/tx/{txHash}"
 ---
 
-Use this endpoint to look **inside a single transaction**. Given a transaction hash, it returns a decoded summary and a breakdown of every on-chain action (fill) that happened within it.
+Use this endpoint to inspect an indexed Polymarket trade or combo transaction. Given a transaction hash, it returns a decoded summary and every fill recorded for that transaction.
 
 The top-level `sentence` field gives you a ready-to-read description, for example:
 
-> Buy 3604.58 No for $3546.12269 in Will Bitcoin dip to $59,000 on June 9?
+> Buy 5 Yes for $3.9 in Will France win on 2026-06-30?
+
+Treat `sentence` as display text. Use `actions` or `comboActions` for calculations.
 
 The `actions` array then lists each individual fill. One transaction often contains several, because a single trade can be matched against multiple counterparties. Each fill shows who acted (`traderAddress`), the `size` (shares), the `price` (decimal 0 to 1), the `usdcSize` (USDC value), and whether they were the `MAKER` or `TAKER` (`liquidityRole`).
 
@@ -26,6 +28,6 @@ The `actions` array then lists each individual fill. One transaction often conta
 The top-level `sourceType` tells you which kind of transaction you're looking at:
 
 - **`TRADE`**: a regular order fill. The individual fills are in `actions`, and `comboActions` is `null`.
-- **`COMBO`**: a combo (parlay) trade that bundles several market outcomes into one position. The fills are in `comboActions`, and `actions` is `null`. Since a combo spans more than one market, the top-level `marketId` and `marketSlug` are also `null`, and the `sentence` reads like `Buy Combo position for $4.83699`.
+- **`COMBO`**: a combo (parlay) trade that bundles several market outcomes into one position. The fills are in `comboActions`, and `actions` is `null`. Since a combo spans more than one market, the top-level `marketId` and `marketSlug` are also `null`. The `sentence` reads like `Buy Combo position for $4.999993`.
 
 Each entry in `comboActions` is one trader's fill of a combo position. It carries a `comboPositionId` and a `legs` array listing the market outcomes in the parlay. The response schema on this page describes every field. To see both shapes, switch the sample response between **Regular trade** and **Combo trade**.

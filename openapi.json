@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orbscan Open API",
-    "description": "REST endpoints for Polymarket wallet activity, positions, transfers, transaction details, and L2 order book data.",
+    "description": "REST endpoints for Polymarket wallet activity, positions, transfers, indexed trade and combo transactions, and L2 order book data.",
     "version": "1.0.0"
   },
   "servers": [
@@ -90,7 +90,7 @@
             "in": "query",
             "required": false,
             "description": "Number of records per page. Defaults to 20, maximum 100. Values above 100 are capped at 100.",
-            "schema": { "type": "integer", "default": 20, "maximum": 100, "minimum": 1 }
+            "schema": { "type": "integer", "default": 20, "minimum": 1 }
           }
         ],
         "responses": {
@@ -100,21 +100,22 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "type": "object",
+                      "required": ["items", "nextCursor"],
                       "properties": {
                         "items": {
                           "type": "array",
                           "items": { "$ref": "#/components/schemas/ActivityItem" }
                         },
                         "nextCursor": {
-                          "type": "string",
+                          "type": ["string", "null"],
                           "description": "Opaque base64 cursor for the next page, or null when there are no more results.",
-                          "nullable": true,
-                          "example": "MTc4Mjc2NTk1Nnw4OTM3Mzk3NHwxNzR8MHhiZjE1..."
+                          "example": "MTc4Mjg2MTEyOHw4OTQzNzQyMnwzMTY4fDB4NzFiZjQ2YzMwODllMjM0OWE2MmVjNmI5MzYzODUyMmU4Y2M2MzVhOTgzNmYxMzA4YWM3NjIxY2UxZWNiYjYwOTozNDMxOjkxMzU1MDk0NTU3MDE2MzY5MjI4NzY4MTIzMzYwMjk4NDkyOTY4OTkyMTY4NDE5MzM4MDQ3OTE1MTk5NDE2Nzk3MDU3ODUyNTI1OTUwOjB4NmE3MmY2MTgyMGIyNmIxZmU0ZDk1NmUxN2I2ZGMyYTFlYTMwMzNlZQ=="
                         }
                       }
                     }
@@ -142,39 +143,20 @@
                         "marketTitle": "Will France win on 2026-06-30?",
                         "positionSide": "Yes",
                         "outcomeIndex": 0,
-                        "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/soccer-ball.png",
+                        "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/soccer ball-bba4025f77.png",
                         "traderAddress": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
                         "liquidityRole": null
-                      },
-                      {
-                        "blockTimestamp": 1782765956,
-                        "actionType": "Buy",
-                        "price": "0.78",
-                        "size": "5",
-                        "fee": "0.02574",
-                        "usdcSize": "3.9",
-                        "netSharesTransferred": "5",
-                        "txHash": "0xbf15dbfb9d3b8b1f5210a582ca78deb73bf77372cb43d8e15edb323750461b1c",
-                        "tokenId": "91355094557016369228768123360298492968992168419338047915199416797057852525950",
-                        "marketId": "2707644",
-                        "marketSlug": "fifwc-fra-swe-2026-06-30-fra",
-                        "eventSlug": "fifwc-fra-swe-2026-06-30",
-                        "conditionId": "0x378f7b5c668014d9f6c42c305ec83902f3c8f6c770b336363aed0076ce6ce1c9",
-                        "marketTitle": "Will France win on 2026-06-30?",
-                        "positionSide": "Yes",
-                        "outcomeIndex": 0,
-                        "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/soccer-ball.png",
-                        "traderAddress": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
-                        "liquidityRole": "TAKER"
                       }
                     ],
-                    "nextCursor": "MTc4Mjc2NTk1Nnw4OTM3Mzk3NHwxNzR8MHhiZjE1..."
+                    "nextCursor": "MTc4Mjg2MTEyOHw4OTQzNzQyMnwzMTY4fDB4NzFiZjQ2YzMwODllMjM0OWE2MmVjNmI5MzYzODUyMmU4Y2M2MzVhOTgzNmYxMzA4YWM3NjIxY2UxZWNiYjYwOTozNDMxOjkxMzU1MDk0NTU3MDE2MzY5MjI4NzY4MTIzMzYwMjk4NDkyOTY4OTkyMTY4NDE5MzM4MDQ3OTE1MTk5NDE2Nzk3MDU3ODUyNTI1OTUwOjB4NmE3MmY2MTgyMGIyNmIxZmU0ZDk1NmUxN2I2ZGMyYTFlYTMwMzNlZQ=="
                   }
                 }
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
         }
       }
     },
@@ -244,20 +226,21 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "type": "object",
+                      "required": ["items", "nextCursor"],
                       "properties": {
                         "items": {
                           "type": "array",
                           "items": { "$ref": "#/components/schemas/TransferItem" }
                         },
                         "nextCursor": {
-                          "type": "string",
+                          "type": ["string", "null"],
                           "description": "Cursor for the next page, or null when there are no more results.",
-                          "nullable": true,
                           "example": "1780204248_1085068690"
                         }
                       }
@@ -290,7 +273,9 @@
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
         }
       }
     },
@@ -298,7 +283,7 @@
       "get": {
         "operationId": "getOpenPositions",
         "summary": "Get open positions",
-        "description": "Returns the wallet's currently open positions — every outcome token held with a non-zero balance, along with pricing, PnL, and market metadata. Results are cursor-paginated.",
+        "description": "Returns the wallet's open outcome-token positions with balances, prices, PnL, and market metadata. Results are cursor-paginated.",
         "parameters": [
           {
             "name": "address",
@@ -329,14 +314,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "type": "object",
+                      "required": ["items", "nextCursor"],
                       "properties": {
                         "items": { "type": "array", "items": { "$ref": "#/components/schemas/OpenPosition" } },
-                        "nextCursor": { "type": "string", "nullable": true }
+                        "nextCursor": { "type": ["string", "null"] }
                       }
                     }
                   }
@@ -377,7 +364,9 @@
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
         }
       }
     },
@@ -385,7 +374,7 @@
       "get": {
         "operationId": "getClosedPositions",
         "summary": "Get closed positions",
-        "description": "Returns the trader's closed positions — outcome tokens the wallet previously held in markets that have since resolved or positions it has since sold. Ordered by market / most recent trade descending. Positions here have `balance: \"0\"` and `closed: true`.",
+        "description": "Returns outcome-token positions from resolved markets and positions the wallet has sold. Results are ordered by market and most recent trade descending. Positions here have `balance: \"0\"` and `closed: true`.",
         "parameters": [
           {
             "name": "address",
@@ -423,14 +412,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "type": "object",
+                      "required": ["items", "nextCursor"],
                       "properties": {
                         "items": { "type": "array", "items": { "$ref": "#/components/schemas/OpenPosition" } },
-                        "nextCursor": { "type": "string", "nullable": true }
+                        "nextCursor": { "type": ["string", "null"] }
                       }
                     }
                   }
@@ -471,7 +462,9 @@
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
         }
       }
     },
@@ -510,14 +503,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "type": "object",
+                      "required": ["items", "nextCursor"],
                       "properties": {
                         "items": { "type": "array", "items": { "$ref": "#/components/schemas/ComboPosition" } },
-                        "nextCursor": { "type": "string", "nullable": true }
+                        "nextCursor": { "type": ["string", "null"] }
                       }
                     }
                   }
@@ -581,7 +576,9 @@
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
         }
       }
     },
@@ -627,14 +624,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "type": "object",
+                      "required": ["items", "nextCursor"],
                       "properties": {
                         "items": { "type": "array", "items": { "$ref": "#/components/schemas/ComboPosition" } },
-                        "nextCursor": { "type": "string", "nullable": true }
+                        "nextCursor": { "type": ["string", "null"] }
                       }
                     }
                   }
@@ -684,7 +683,9 @@
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
         }
       }
     },
@@ -692,7 +693,7 @@
       "get": {
         "operationId": "getPortfolio",
         "summary": "Get portfolio summary",
-        "description": "Returns a high-level portfolio summary for a wallet — the total mark-to-market value of all open positions, the USDC balance, and the combined portfolio value.",
+        "description": "Returns a wallet's total open-position value, USDC balance, and combined portfolio value.",
         "parameters": [
           {
             "name": "address",
@@ -709,9 +710,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": { "$ref": "#/components/schemas/Portfolio" }
                   }
                 },
@@ -727,7 +729,9 @@
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
         }
       }
     },
@@ -752,13 +756,15 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "type": "object",
+                      "required": ["walletAddress"],
                       "properties": {
-                        "walletAddress": { "type": "string", "nullable": true, "description": "Resolved wallet address (lowercase), or `null` when no wallet is found.", "example": "0x170ffd53bbcf2515d9f31e9285c63d3d0e1341ad" }
+                        "walletAddress": { "type": ["string", "null"], "description": "Resolved wallet address (lowercase), or `null` when no wallet is found.", "example": "0x170ffd53bbcf2515d9f31e9285c63d3d0e1341ad" }
                       }
                     }
                   }
@@ -773,7 +779,9 @@
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
         }
       }
     },
@@ -833,14 +841,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "type": "object",
+                      "required": ["items", "nextCursor"],
                       "properties": {
                         "items": { "type": "array", "items": { "$ref": "#/components/schemas/RewardItem" } },
-                        "nextCursor": { "type": "string", "nullable": true, "description": "Cursor for the next page, or `null` when there are no more results." }
+                        "nextCursor": { "type": ["string", "null"], "description": "Cursor for the next page, or `null` when there are no more results." }
                       }
                     }
                   }
@@ -869,9 +879,10 @@
             }
           },
           "400": {
-            "description": "Invalid `address`, unsupported `types` value, negative `limit`, or `fromTimestamp` > `toTimestamp`.",
+            "description": "Invalid `address`, unsupported `types` value, `limit` outside 1 to 100, or `fromTimestamp` > `toTimestamp`.",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
                 "example": {
                   "message": "Invalid address format",
                   "status_code": "0",
@@ -880,7 +891,8 @@
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
         }
       }
     },
@@ -888,7 +900,7 @@
       "get": {
         "operationId": "getTransactionActions",
         "summary": "Get actions by transaction hash",
-        "description": "Returns a decoded, human-readable summary of a single transaction plus every individual on-chain action (fills) it contains. Useful for inspecting exactly what happened inside one trade.",
+        "description": "Returns a decoded summary of an indexed Polymarket trade or combo transaction and every recorded fill it contains. A valid hash with no indexed action returns `data: null`.",
         "parameters": [
           {
             "name": "txHash",
@@ -897,7 +909,7 @@
             "description": "The transaction hash to decode.",
             "schema": {
               "type": "string",
-              "example": "0x66dc87fb47faf587002b89d183dbb9505fc7ef80da5e6ec49e271278e8d95fad"
+              "example": "0xbf15dbfb9d3b8b1f5210a582ca78deb73bf77372cb43d8e15edb323750461b1c"
             }
           }
         ],
@@ -908,9 +920,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "description": "The decoded transaction, or `null` when the hash is well-formed but no indexed action matches it.",
                       "anyOf": [
@@ -927,34 +940,53 @@
                       "message": "OK",
                       "status_code": "1",
                       "data": {
-                        "txHash": "0x66dc87fb47faf587002b89d183dbb9505fc7ef80da5e6ec49e271278e8d95fad",
-                        "blockNumber": 88229726,
-                        "blockTimestamp": 1781049574,
-                        "traderAddress": "0xaac2469db4c243a2931acc252967b171bd97e8ce",
+                        "txHash": "0xbf15dbfb9d3b8b1f5210a582ca78deb73bf77372cb43d8e15edb323750461b1c",
+                        "blockNumber": 89373974,
+                        "blockTimestamp": 1782765956,
+                        "traderAddress": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
                         "sourceType": "TRADE",
                         "actionType": "Buy",
-                        "sentence": "Buy 3604.58 No for $3546.12269 in Will Bitcoin dip to $59,000 on June 9?",
-                        "marketSlug": "will-bitcoin-dip-to-59k-on-june-9",
-                        "marketId": "2475928",
+                        "sentence": "Buy 5 Yes for $3.9 in Will France win on 2026-06-30?",
+                        "marketSlug": "fifwc-fra-swe-2026-06-30-fra",
+                        "marketId": "2707644",
                         "actions": [
                           {
                             "actionType": "Buy",
-                            "tokenId": "38163660360188728397792916713023875464787138529265352624189549073473314732690",
-                            "size": "3604.58",
-                            "price": "0.983782",
-                            "usdcSize": "3546.12269",
-                            "traderAddress": "0xaac2469db4c243a2931acc252967b171bd97e8ce",
-                            "txHash": "0x66dc87fb47faf587002b89d183dbb9505fc7ef80da5e6ec49e271278e8d95fad",
-                            "blockTimestamp": 1781049574,
-                            "fee": "4.02564",
-                            "marketId": "2475928",
-                            "marketSlug": "will-bitcoin-dip-to-59k-on-june-9",
-                            "eventSlug": "what-price-will-bitcoin-hit-on-june-9",
-                            "marketTitle": "Will Bitcoin dip to $59,000 on June 9?",
-                            "positionSide": "No",
-                            "outcomeIndex": 1,
-                            "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/BTC-fullsize.png",
+                            "tokenId": "91355094557016369228768123360298492968992168419338047915199416797057852525950",
+                            "size": "5",
+                            "price": "0.78",
+                            "usdcSize": "3.9",
+                            "traderAddress": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
+                            "txHash": "0xbf15dbfb9d3b8b1f5210a582ca78deb73bf77372cb43d8e15edb323750461b1c",
+                            "blockTimestamp": 1782765956,
+                            "fee": "0.02574",
+                            "marketId": "2707644",
+                            "marketSlug": "fifwc-fra-swe-2026-06-30-fra",
+                            "eventSlug": "fifwc-fra-swe-2026-06-30",
+                            "marketTitle": "Will France win on 2026-06-30?",
+                            "positionSide": "Yes",
+                            "outcomeIndex": 0,
+                            "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/soccer ball-bba4025f77.png",
                             "liquidityRole": "TAKER"
+                          },
+                          {
+                            "actionType": "Buy",
+                            "tokenId": "91355094557016369228768123360298492968992168419338047915199416797057852525950",
+                            "size": "5",
+                            "price": "0.78",
+                            "usdcSize": "3.9",
+                            "traderAddress": "0x2850e15d54af56b2ab28e6586098c4a4b5de7d80",
+                            "txHash": "0xbf15dbfb9d3b8b1f5210a582ca78deb73bf77372cb43d8e15edb323750461b1c",
+                            "blockTimestamp": 1782765956,
+                            "fee": "0.02574",
+                            "marketId": "2707644",
+                            "marketSlug": "fifwc-fra-swe-2026-06-30-fra",
+                            "eventSlug": "fifwc-fra-swe-2026-06-30",
+                            "marketTitle": "Will France win on 2026-06-30?",
+                            "positionSide": "Yes",
+                            "outcomeIndex": 0,
+                            "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/soccer ball-bba4025f77.png",
+                            "liquidityRole": "MAKER"
                           }
                         ],
                         "comboActions": null
@@ -967,47 +999,146 @@
                       "message": "OK",
                       "status_code": "1",
                       "data": {
-                        "txHash": "0x4a0e9050d8747ce2ea3ffc4ec40e7dd2419807cea5ef1ec6eab7d5e0761505fe",
-                        "blockNumber": 94181256,
-                        "blockTimestamp": 1789976967,
-                        "traderAddress": "0x0284e1c5b93a6fe07aa5e83e8543d6e33f8a97f6",
+                        "txHash": "0xd23b4cf8c835d8481987d901f9ee287f319196449b853788e025af9b9fccba5b",
+                        "blockNumber": 89350552,
+                        "blockTimestamp": 1782689331,
+                        "traderAddress": "0x2c827d136cae8662375333207d7bddf5250a9e89",
                         "sourceType": "COMBO",
                         "actionType": "Buy",
-                        "sentence": "Buy Combo position for $4.83699",
+                        "sentence": "Buy Combo position for $4.999993",
                         "marketSlug": null,
                         "marketId": null,
                         "actions": null,
                         "comboActions": [
                           {
                             "actionType": "Buy",
-                            "comboPositionId": "1709891758942759112419793424834979456496472902357002820659325405013387247616",
-                            "size": "14.839314",
-                            "price": "0.325958",
-                            "usdcSize": "4.83699",
-                            "traderAddress": "0x0284e1c5b93a6fe07aa5e83e8543d6e33f8a97f6",
-                            "txHash": "0x4a0e9050d8747ce2ea3ffc4ec40e7dd2419807cea5ef1ec6eab7d5e0761505fe",
-                            "blockTimestamp": 1789976967,
-                            "fee": "0.16301",
+                            "comboPositionId": "9977182660627358827367889475149212356976800817407494838491029985609689309184",
+                            "size": "3.734462",
+                            "price": "0.267776",
+                            "usdcSize": "0.999998",
+                            "traderAddress": "0x2c827d136cae8662375333207d7bddf5250a9e89",
+                            "txHash": "0xd23b4cf8c835d8481987d901f9ee287f319196449b853788e025af9b9fccba5b",
+                            "blockTimestamp": 1782689331,
+                            "fee": "0.010723",
                             "legs": [
                               {
-                                "marketId": "4777327",
-                                "marketTitle": "Counter-Strike: Leo Team vs G2 Ares (BO3)",
-                                "marketSlug": "cs2-leo2-g2a-2026-09-21",
-                                "eventSlug": "cs2-leo2-g2a-2026-09-21",
-                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/counter-strike-image-16c415c538.png",
+                                "marketId": "3472332",
+                                "marketTitle": "Total: Over/Under 2.5",
+                                "marketSlug": "r6-wldf-kk-2026-06-20-total-2pt5",
+                                "eventSlug": "r6-wldf-kk-2026-06-20",
+                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/rainbow-six-0c9a396ebe.png",
                                 "outcomeIndex": 1,
-                                "outcome": "G2 Ares",
-                                "outcomePrice": "0.695"
+                                "outcome": "Under",
+                                "outcomePrice": "1"
                               },
                               {
-                                "marketId": "4760565",
-                                "marketTitle": "Counter-Strike: Leo Team vs UNiTY esports (BO3)",
-                                "marketSlug": "cs2-leo2-unity-2026-09-21",
-                                "eventSlug": "cs2-leo2-unity-2026-09-21",
-                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/counter-strike-image-16c415c538.png",
+                                "marketId": "3472188",
+                                "marketTitle": "Valorant: Eintracht Frankfurt vs CGN Esports (BO3) - Challengers 2026 DACH: Evolution Stage 2",
+                                "marketSlug": "val-fra-cgn-2026-06-20",
+                                "eventSlug": "val-fra-cgn-2026-06-20",
+                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/valorant-a543b19234.png",
+                                "outcomeIndex": 0,
+                                "outcome": "Eintracht Frankfurt",
+                                "outcomePrice": "1"
+                              }
+                            ]
+                          },
+                          {
+                            "actionType": "Buy",
+                            "comboPositionId": "9977182660627358827367889475149212356976800817407494838491029985609689309184",
+                            "size": "112.033872",
+                            "price": "0.267776",
+                            "usdcSize": "29.999998",
+                            "traderAddress": "0x797c35e509c0457240657b823b1d6db38efe913c",
+                            "txHash": "0xd23b4cf8c835d8481987d901f9ee287f319196449b853788e025af9b9fccba5b",
+                            "blockTimestamp": 1782689331,
+                            "fee": "0.321708",
+                            "legs": [
+                              {
+                                "marketId": "3472332",
+                                "marketTitle": "Total: Over/Under 2.5",
+                                "marketSlug": "r6-wldf-kk-2026-06-20-total-2pt5",
+                                "eventSlug": "r6-wldf-kk-2026-06-20",
+                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/rainbow-six-0c9a396ebe.png",
                                 "outcomeIndex": 1,
-                                "outcome": "UNiTY esports",
-                                "outcomePrice": "0.84"
+                                "outcome": "Under",
+                                "outcomePrice": "1"
+                              },
+                              {
+                                "marketId": "3472188",
+                                "marketTitle": "Valorant: Eintracht Frankfurt vs CGN Esports (BO3) - Challengers 2026 DACH: Evolution Stage 2",
+                                "marketSlug": "val-fra-cgn-2026-06-20",
+                                "eventSlug": "val-fra-cgn-2026-06-20",
+                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/valorant-a543b19234.png",
+                                "outcomeIndex": 0,
+                                "outcome": "Eintracht Frankfurt",
+                                "outcomePrice": "1"
+                              }
+                            ]
+                          },
+                          {
+                            "actionType": "Buy",
+                            "comboPositionId": "9977182660627358827367889475149212356976800817407494838491029985609689309184",
+                            "size": "3.734462",
+                            "price": "0.267776",
+                            "usdcSize": "0.999998",
+                            "traderAddress": "0xf4dfb4c21c29900ccf10158ccb941b0bbb953449",
+                            "txHash": "0xd23b4cf8c835d8481987d901f9ee287f319196449b853788e025af9b9fccba5b",
+                            "blockTimestamp": 1782689331,
+                            "fee": "0.010723",
+                            "legs": [
+                              {
+                                "marketId": "3472332",
+                                "marketTitle": "Total: Over/Under 2.5",
+                                "marketSlug": "r6-wldf-kk-2026-06-20-total-2pt5",
+                                "eventSlug": "r6-wldf-kk-2026-06-20",
+                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/rainbow-six-0c9a396ebe.png",
+                                "outcomeIndex": 1,
+                                "outcome": "Under",
+                                "outcomePrice": "1"
+                              },
+                              {
+                                "marketId": "3472188",
+                                "marketTitle": "Valorant: Eintracht Frankfurt vs CGN Esports (BO3) - Challengers 2026 DACH: Evolution Stage 2",
+                                "marketSlug": "val-fra-cgn-2026-06-20",
+                                "eventSlug": "val-fra-cgn-2026-06-20",
+                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/valorant-a543b19234.png",
+                                "outcomeIndex": 0,
+                                "outcome": "Eintracht Frankfurt",
+                                "outcomePrice": "1"
+                              }
+                            ]
+                          },
+                          {
+                            "actionType": "Buy",
+                            "comboPositionId": "9977182660627358827367889475149212356976800817407494838491029985609689309184",
+                            "size": "3.734462",
+                            "price": "0.267776",
+                            "usdcSize": "0.999998",
+                            "traderAddress": "0x2fd0debb8386588ac8c2f8a558310ff33ba98e63",
+                            "txHash": "0xd23b4cf8c835d8481987d901f9ee287f319196449b853788e025af9b9fccba5b",
+                            "blockTimestamp": 1782689331,
+                            "fee": "0.010723",
+                            "legs": [
+                              {
+                                "marketId": "3472332",
+                                "marketTitle": "Total: Over/Under 2.5",
+                                "marketSlug": "r6-wldf-kk-2026-06-20-total-2pt5",
+                                "eventSlug": "r6-wldf-kk-2026-06-20",
+                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/rainbow-six-0c9a396ebe.png",
+                                "outcomeIndex": 1,
+                                "outcome": "Under",
+                                "outcomePrice": "1"
+                              },
+                              {
+                                "marketId": "3472188",
+                                "marketTitle": "Valorant: Eintracht Frankfurt vs CGN Esports (BO3) - Challengers 2026 DACH: Evolution Stage 2",
+                                "marketSlug": "val-fra-cgn-2026-06-20",
+                                "eventSlug": "val-fra-cgn-2026-06-20",
+                                "logo": "https://polymarket-upload.s3.us-east-2.amazonaws.com/valorant-a543b19234.png",
+                                "outcomeIndex": 0,
+                                "outcome": "Eintracht Frankfurt",
+                                "outcomePrice": "1"
                               }
                             ]
                           }
@@ -1023,6 +1154,7 @@
             "description": "The `txHash` is not a valid 32-byte hex hash.",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
                 "example": {
                   "message": "Invalid txHash format",
                   "status_code": "0",
@@ -1031,7 +1163,8 @@
               }
             }
           },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
         }
       }
     },
@@ -1091,14 +1224,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "type": "object",
+                      "required": ["items", "nextCursor"],
                       "properties": {
                         "items": { "type": "array", "items": { "$ref": "#/components/schemas/OrderBookMarket" } },
-                        "nextCursor": { "type": "string", "nullable": true }
+                        "nextCursor": { "type": ["string", "null"] }
                       }
                     }
                   }
@@ -1132,6 +1267,7 @@
             "description": "An ID, `status`, or `limit` value is invalid.",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
                 "example": { "message": "limit must be between 1 and 1000", "status_code": "0", "data": null }
               }
             }
@@ -1228,14 +1364,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": {
                       "type": "object",
+                      "required": ["items", "nextCursor"],
                       "properties": {
                         "items": { "type": "array", "items": { "$ref": "#/components/schemas/OrderBookEvent" } },
-                        "nextCursor": { "type": "string", "nullable": true }
+                        "nextCursor": { "type": ["string", "null"] }
                       }
                     }
                   }
@@ -1245,22 +1383,6 @@
                   "status_code": "1",
                   "data": {
                     "items": [
-                      {
-                        "cursor": "AAABoMfIdTSZ95XfHI2JY3xDPBEiM-NgpOm-DblE2HiRi5Ny98xn0g",
-                        "marketId": "573656",
-                        "conditionId": "0x02deb9538f5c123373adaa4ee6217b01745f1662bc902e46ac92f3fe6f8741e8",
-                        "tokenId": "93694900555669388759405753550770573998169287228984912881955464376232163096213",
-                        "outcome": "Yes",
-                        "eventType": "book",
-                        "timestamp": 1790058198324,
-                        "indexedTimestamp": 1790058204527,
-                        "side": null,
-                        "price": null,
-                        "sizeAfter": null,
-                        "bids": [["0.48", "12500"], ["0.47", "20000"]],
-                        "asks": [["0.49", "8000"], ["0.5", "15000"]],
-                        "sourceHash": "db60d216be1f61bfe63c4c9a92a2d42fd30e319c"
-                      },
                       {
                         "cursor": "AAABoIUSUAm3qt444MRDsUeszsPPlC2V4ijGB4PrCvlQPcNHl9XYGg",
                         "marketId": "573656",
@@ -1276,6 +1398,22 @@
                         "bids": null,
                         "asks": null,
                         "sourceHash": "7bbd3aff3cc9a5b22c69a6a4f3c2ce8c2fb4b6ab"
+                      },
+                      {
+                        "cursor": "AAABoMfIdTSZ95XfHI2JY3xDPBEiM-NgpOm-DblE2HiRi5Ny98xn0g",
+                        "marketId": "573656",
+                        "conditionId": "0x02deb9538f5c123373adaa4ee6217b01745f1662bc902e46ac92f3fe6f8741e8",
+                        "tokenId": "93694900555669388759405753550770573998169287228984912881955464376232163096213",
+                        "outcome": "Yes",
+                        "eventType": "book",
+                        "timestamp": 1790058198324,
+                        "indexedTimestamp": 1790058204527,
+                        "side": null,
+                        "price": null,
+                        "sizeAfter": null,
+                        "bids": [["0.48", "12500"], ["0.47", "20000"]],
+                        "asks": [["0.49", "8000"], ["0.5", "15000"]],
+                        "sourceHash": "db60d216be1f61bfe63c4c9a92a2d42fd30e319c"
                       }
                     ],
                     "nextCursor": null
@@ -1288,6 +1426,7 @@
             "description": "A filter, `eventType`, `order`, `limit`, timestamp, or time range is invalid; or no `marketId`, `conditionId`, or `tokenId` was supplied.",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
                 "example": { "message": "tokenId, marketId, or conditionId is required", "status_code": "0", "data": null }
               }
             }
@@ -1311,9 +1450,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": ["message", "status_code", "data"],
                   "properties": {
-                    "message": { "type": "string", "example": "OK" },
-                    "status_code": { "type": "string", "example": "1" },
+                    "message": { "type": "string", "enum": ["OK"], "example": "OK" },
+                    "status_code": { "type": "string", "enum": ["1"], "example": "1" },
                     "data": { "$ref": "#/components/schemas/OrderBookCoverage" }
                   }
                 },
@@ -1350,18 +1490,24 @@
       }
     },
     "responses": {
+      "BadRequest": {
+        "description": "One or more path or query parameters are invalid.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+            "example": {
+              "message": "Invalid address format",
+              "status_code": "0",
+              "data": null
+            }
+          }
+        }
+      },
       "Unauthorized": {
         "description": "The API key is missing or invalid.",
         "content": {
           "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string", "example": "Missing or invalid API key" },
-                "status_code": { "type": "string", "example": "0" },
-                "data": { "type": "null" }
-              }
-            },
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" },
             "example": {
               "message": "Missing or invalid API key",
               "status_code": "0",
@@ -1371,20 +1517,13 @@
         }
       },
       "Forbidden": {
-        "description": "The API key is valid but not allowed to use this resource."
+        "description": "The API key is valid but not allowed to use this resource. The response body is not specified."
       },
       "TooManyRequests": {
         "description": "The rate limit for your credential was exceeded.",
         "content": {
           "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string", "example": "Rate limit exceeded" },
-                "status_code": { "type": "string", "example": "0" },
-                "data": { "type": "null" }
-              }
-            },
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" },
             "example": {
               "message": "Rate limit exceeded",
               "status_code": "0",
@@ -1394,15 +1533,35 @@
         }
       },
       "ServerError": {
-        "description": "Unexpected server failure."
+        "description": "Unexpected server failure.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+          }
+        }
       },
       "ServiceUnavailable": {
-        "description": "Coverage is temporarily unavailable and no cached value can be returned."
+        "description": "Coverage is temporarily unavailable and no cached value can be returned.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+          }
+        }
       }
     },
     "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["message", "status_code", "data"],
+        "properties": {
+          "message": { "type": "string", "description": "Human-readable error message." },
+          "status_code": { "type": "string", "enum": ["0"], "description": "Application-level error status." },
+          "data": { "type": "null" }
+        }
+      },
       "OrderBookOutcome": {
         "type": "object",
+        "required": ["name", "tokenId"],
         "properties": {
           "name": { "type": "string", "description": "Outcome label.", "example": "Yes" },
           "tokenId": { "type": "string", "description": "Outcome token ID, a positive uint256 as a decimal string (up to 78 digits).", "example": "123456789" }
@@ -1410,6 +1569,7 @@
       },
       "OrderBookMarket": {
         "type": "object",
+        "required": ["marketId", "conditionId", "question", "slug", "status", "openAt", "closeAt", "outcomes"],
         "properties": {
           "marketId": { "type": "string", "description": "Gamma market ID as a decimal string (up to 19 digits, signed 64-bit range).", "example": "12345" },
           "conditionId": { "type": "string", "description": "Condition ID, `0x` + 64 hex (lowercase)." },
@@ -1423,31 +1583,61 @@
       },
       "OrderBookEvent": {
         "type": "object",
+        "required": ["cursor", "marketId", "conditionId", "tokenId", "outcome", "eventType", "timestamp", "indexedTimestamp", "side", "price", "sizeAfter", "bids", "asks", "sourceHash"],
         "properties": {
           "cursor": { "type": "string", "description": "Stable opaque boundary for this logical event; pass it back as the `cursor` query parameter." },
           "marketId": { "type": "string", "description": "Gamma market ID." },
           "conditionId": { "type": "string", "description": "Condition ID." },
           "tokenId": { "type": "string", "description": "Outcome token whose independent book changed." },
-          "outcome": { "type": "string", "nullable": true, "description": "Outcome label resolved from metadata." },
+          "outcome": { "type": ["string", "null"], "description": "Outcome label resolved from metadata." },
           "eventType": { "type": "string", "enum": ["book", "price_change"], "description": "Event type." },
           "timestamp": { "type": "integer", "format": "int64", "description": "Polymarket source time, Unix milliseconds." },
           "indexedTimestamp": { "type": "integer", "format": "int64", "description": "Earliest ingestion time for the logical event, in Unix milliseconds. Subtract `timestamp` from this value to estimate total indexing latency." },
-          "side": { "type": "string", "nullable": true, "description": "Source side, normally `BUY` or `SELL`. Set only for `price_change`." },
-          "price": { "type": "string", "nullable": true, "description": "Price on a 0 to 1 scale. Set only for `price_change`." },
-          "sizeAfter": { "type": "string", "nullable": true, "description": "Remaining size after the update; `0` removes the level, any other value replaces the level size. Set only for `price_change`." },
-          "bids": { "type": "array", "nullable": true, "description": "Bid levels as `[price, size]` decimal-string pairs. Set only for `book`.", "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string" } } },
-          "asks": { "type": "array", "nullable": true, "description": "Ask levels as `[price, size]` decimal-string pairs. Set only for `book`.", "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string" } } },
-          "sourceHash": { "type": "string", "nullable": true, "description": "Hash supplied by Polymarket for integrity checks." }
-        }
+          "side": { "type": ["string", "null"], "description": "Source side, normally `BUY` or `SELL`. Set only for `price_change`." },
+          "price": { "type": ["string", "null"], "description": "Price on a 0 to 1 scale. Set only for `price_change`." },
+          "sizeAfter": { "type": ["string", "null"], "description": "Remaining size after the update; `0` removes the level, any other value replaces the level size. Set only for `price_change`." },
+          "bids": { "type": ["array", "null"], "description": "Bid levels as `[price, source order size]` decimal-string pairs. Array order is not guaranteed. Set only for `book`.", "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string" } } },
+          "asks": { "type": ["array", "null"], "description": "Ask levels as `[price, source order size]` decimal-string pairs. Array order is not guaranteed. Set only for `book`.", "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string" } } },
+          "sourceHash": { "type": ["string", "null"], "description": "Hash supplied by Polymarket for integrity checks." }
+        },
+        "oneOf": [
+          {
+            "title": "Book snapshot",
+            "required": ["eventType", "side", "price", "sizeAfter", "bids", "asks"],
+            "properties": {
+              "eventType": { "enum": ["book"] },
+              "side": { "type": "null" },
+              "price": { "type": "null" },
+              "sizeAfter": { "type": "null" },
+              "bids": { "type": "array" },
+              "asks": { "type": "array" }
+            }
+          },
+          {
+            "title": "Price change",
+            "required": ["eventType", "side", "price", "sizeAfter", "bids", "asks"],
+            "properties": {
+              "eventType": { "enum": ["price_change"] },
+              "side": { "type": "string", "enum": ["BUY", "SELL"] },
+              "price": { "type": "string" },
+              "sizeAfter": { "type": "string" },
+              "bids": { "type": "null" },
+              "asks": { "type": "null" }
+            }
+          }
+        ]
       },
       "OrderBookCoverage": {
         "type": "object",
+        "required": ["polymarket"],
         "properties": {
           "polymarket": {
             "type": "object",
+            "required": ["orderbook"],
             "properties": {
               "orderbook": {
                 "type": "object",
+                "required": ["availableFrom", "availableTo"],
                 "properties": {
                   "availableFrom": { "type": "integer", "format": "int64", "description": "Earliest source timestamp across the order book table, Unix milliseconds." },
                   "availableTo": { "type": "integer", "format": "int64", "description": "Latest source timestamp across the order book table, Unix milliseconds." }
@@ -1459,10 +1649,11 @@
       },
       "ActivityItem": {
         "type": "object",
+        "required": ["blockTimestamp", "actionType", "price", "size", "fee", "usdcSize", "netSharesTransferred", "txHash", "tokenId", "marketId", "marketSlug", "eventSlug", "conditionId", "marketTitle", "positionSide", "outcomeIndex", "logo", "traderAddress", "liquidityRole"],
         "properties": {
           "blockTimestamp": { "type": "integer", "format": "int64", "description": "Unix timestamp (seconds) of the action." },
           "actionType": { "type": "string", "description": "Action label.", "example": "Buy", "enum": ["Buy", "Sell", "Redeem"] },
-          "price": { "type": "string", "description": "Price per share as a decimal (0–1). Multiply by 100 to get cents.", "example": "0.78" },
+          "price": { "type": "string", "description": "Price per share as a decimal from 0 to 1. Multiply by 100 to get cents.", "example": "0.78" },
           "size": { "type": "string", "description": "Number of shares.", "example": "5" },
           "fee": { "type": "string", "description": "Fee charged, in USDC.", "example": "0.02574" },
           "usdcSize": { "type": "string", "description": "Gross USDC value of the action.", "example": "3.9" },
@@ -1478,11 +1669,12 @@
           "outcomeIndex": { "type": "integer", "example": 0 },
           "logo": { "type": "string", "description": "Market logo URL." },
           "traderAddress": { "type": "string", "description": "The queried wallet address." },
-          "liquidityRole": { "type": "string", "nullable": true, "description": "MAKER or TAKER, or null for non-trade actions such as redeems.", "example": "TAKER", "enum": ["MAKER", "TAKER"] }
+          "liquidityRole": { "type": ["string", "null"], "description": "MAKER or TAKER, or null for non-trade actions such as redeems.", "example": "TAKER", "enum": ["MAKER", "TAKER", null] }
         }
       },
       "TransferItem": {
         "type": "object",
+        "required": ["txHash", "type", "amount", "blockTimestamp", "address"],
         "properties": {
           "txHash": { "type": "string", "description": "Transaction hash (records are aggregated per transaction)." },
           "type": { "type": "string", "description": "`deposit` (net inflow) or `withdrawal` (net outflow).", "example": "deposit", "enum": ["deposit", "withdrawal"] },
@@ -1493,6 +1685,7 @@
       },
       "RewardItem": {
         "type": "object",
+        "required": ["txHash", "logIndex", "proxyWallet", "fromAddress", "activityType", "blockTimestamp", "usdcSize", "blockNumber", "createdAt"],
         "properties": {
           "txHash": { "type": "string", "description": "Transaction hash." },
           "logIndex": { "type": "integer", "description": "Log index." },
@@ -1507,16 +1700,17 @@
       },
       "TransactionAction": {
         "type": "object",
+        "required": ["actionType", "tokenId", "size", "price", "usdcSize", "traderAddress", "txHash", "blockTimestamp", "fee", "marketId", "marketSlug", "eventSlug", "marketTitle", "positionSide", "outcomeIndex", "logo", "liquidityRole"],
         "properties": {
           "actionType": { "type": "string", "example": "Buy" },
           "tokenId": { "type": "string", "description": "Polymarket outcome token ID involved in this fill." },
           "size": { "type": "string", "description": "Number of shares in this fill." },
-          "price": { "type": "string", "description": "Price per share as a decimal (0–1).", "example": "0.983782" },
+          "price": { "type": "string", "description": "Price per share as a decimal from 0 to 1.", "example": "0.983782" },
           "usdcSize": { "type": "string", "description": "USDC value of this fill." },
           "traderAddress": { "type": "string", "description": "Address that performed this fill." },
           "txHash": { "type": "string" },
-          "blockTimestamp": { "type": "integer", "format": "int64" },
-          "fee": { "type": "string" },
+          "blockTimestamp": { "type": "integer", "format": "int64", "description": "Block timestamp in Unix seconds." },
+          "fee": { "type": "string", "description": "Fee charged for this fill, in USDC." },
           "marketId": { "type": "string" },
           "marketSlug": { "type": "string" },
           "eventSlug": { "type": "string" },
@@ -1524,11 +1718,12 @@
           "positionSide": { "type": "string", "example": "No" },
           "outcomeIndex": { "type": "integer", "example": 1 },
           "logo": { "type": "string", "description": "Market logo URL." },
-          "liquidityRole": { "type": "string", "nullable": true, "example": "TAKER", "enum": ["MAKER", "TAKER"] }
+          "liquidityRole": { "type": ["string", "null"], "example": "TAKER", "enum": ["MAKER", "TAKER", null] }
         }
       },
       "ComboActionLeg": {
         "type": "object",
+        "required": ["marketId", "marketTitle", "marketSlug", "eventSlug", "logo", "outcomeIndex", "outcome", "outcomePrice"],
         "properties": {
           "marketId": { "type": "string", "description": "Market ID of the leg." },
           "marketTitle": { "type": "string", "description": "Market title of the leg." },
@@ -1536,22 +1731,23 @@
           "eventSlug": { "type": "string", "description": "Event slug of the leg." },
           "logo": { "type": "string", "description": "Market logo URL." },
           "outcomeIndex": { "type": "integer", "description": "Outcome index the leg is on.", "example": 1 },
-          "outcome": { "type": "string", "description": "Outcome label for the leg. Depending on the market, this may be `Yes`, `No`, `Up`, `Down`, or a named outcome.", "example": "G2 Ares" },
-          "outcomePrice": { "type": "string", "description": "Leg outcome price at the time of the trade, on a 0 to 1 scale.", "example": "0.695" }
+          "outcome": { "type": "string", "description": "Outcome label for the leg. Depending on the market, this may be `Yes`, `No`, `Up`, `Down`, or a named outcome.", "example": "Under" },
+          "outcomePrice": { "type": "string", "description": "Leg outcome price at the time of the trade, on a 0 to 1 scale.", "example": "1" }
         }
       },
       "ComboAction": {
         "type": "object",
+        "required": ["actionType", "comboPositionId", "size", "price", "usdcSize", "traderAddress", "txHash", "blockTimestamp", "fee", "legs"],
         "properties": {
           "actionType": { "type": "string", "description": "Action label for this combo fill.", "example": "Buy", "enum": ["Buy", "Sell"] },
           "comboPositionId": { "type": "string", "description": "Combo position ID this fill belongs to." },
-          "size": { "type": "string", "description": "Number of combo shares in this fill.", "example": "6.07015" },
-          "price": { "type": "string", "description": "Price per combo share as a decimal from 0 to 1. Multiply by 100 to get cents.", "example": "0.659345" },
-          "usdcSize": { "type": "string", "description": "USDC value of this fill.", "example": "4.002324" },
+          "size": { "type": "string", "description": "Number of combo shares in this fill.", "example": "3.734462" },
+          "price": { "type": "string", "description": "Price per combo share as a decimal from 0 to 1. Multiply by 100 to get cents.", "example": "0.267776" },
+          "usdcSize": { "type": "string", "description": "USDC value of this fill.", "example": "0.999998" },
           "traderAddress": { "type": "string", "description": "Address that performed this fill." },
           "txHash": { "type": "string", "description": "On-chain transaction hash." },
           "blockTimestamp": { "type": "integer", "format": "int64", "description": "Block timestamp (Unix seconds)." },
-          "fee": { "type": "string", "description": "Fee charged for this fill, in USDC.", "example": "0.16301" },
+          "fee": { "type": "string", "description": "Fee charged for this fill, in USDC.", "example": "0.010723" },
           "legs": {
             "type": "array",
             "description": "The underlying market outcomes that make up this combo position.",
@@ -1561,32 +1757,56 @@
       },
       "TransactionDetail": {
         "type": "object",
+        "required": ["txHash", "blockNumber", "blockTimestamp", "traderAddress", "sourceType", "actionType", "sentence", "marketSlug", "marketId", "actions", "comboActions"],
         "properties": {
           "txHash": { "type": "string" },
           "blockNumber": { "type": "integer", "format": "int64" },
-          "blockTimestamp": { "type": "integer", "format": "int64" },
+          "blockTimestamp": { "type": "integer", "format": "int64", "description": "Block timestamp in Unix seconds." },
           "traderAddress": { "type": "string", "description": "The primary wallet this transaction is attributed to." },
-          "sourceType": { "type": "string", "description": "How the transaction was categorized. `TRADE` is a regular order fill. `COMBO` is a combo (parlay) trade.", "example": "TRADE" },
+          "sourceType": { "type": "string", "description": "How the transaction was categorized. `TRADE` is a regular order fill. `COMBO` is a combo (parlay) trade.", "example": "TRADE", "enum": ["TRADE", "COMBO"] },
           "actionType": { "type": "string", "description": "Top-level action for the transaction (the trade direction, e.g. `Buy` or `Sell`).", "example": "Buy" },
-          "sentence": { "type": "string", "description": "Plain-English summary of the transaction.", "example": "Buy 3604.58 No for $3546.12269 in Will Bitcoin dip to $59,000 on June 9?" },
-          "marketSlug": { "type": "string", "nullable": true, "description": "Market slug. `null` for combo transactions, where the trade spans several markets." },
-          "marketId": { "type": "string", "nullable": true, "description": "Market ID. `null` for combo transactions, where the trade spans several markets." },
+          "sentence": { "type": "string", "description": "API-generated display summary. Use the action arrays, not this text, for calculations.", "example": "Buy 5 Yes for $3.9 in Will France win on 2026-06-30?" },
+          "marketSlug": { "type": ["string", "null"], "description": "Market slug. `null` for combo transactions, where the trade spans several markets." },
+          "marketId": { "type": ["string", "null"], "description": "Market ID. `null` for combo transactions, where the trade spans several markets." },
           "actions": {
-            "type": "array",
-            "nullable": true,
-            "description": "Every individual on-chain fill contained in this transaction. `null` for combo transactions, which report their fills in `comboActions` instead.",
+            "type": ["array", "null"],
+            "description": "Every indexed regular-trade fill recorded for this transaction. `null` for combo transactions, which report their fills in `comboActions` instead.",
             "items": { "$ref": "#/components/schemas/TransactionAction" }
           },
           "comboActions": {
-            "type": "array",
-            "nullable": true,
-            "description": "Combo (parlay) fills contained in this transaction, one per trader. `null` for regular trades, whose fills appear in `actions` instead.",
+            "type": ["array", "null"],
+            "description": "Indexed combo (parlay) fills recorded for this transaction, one per trader. `null` for regular trades, whose fills appear in `actions` instead.",
             "items": { "$ref": "#/components/schemas/ComboAction" }
           }
-        }
+        },
+        "oneOf": [
+          {
+            "title": "Regular trade",
+            "required": ["sourceType", "marketSlug", "marketId", "actions", "comboActions"],
+            "properties": {
+              "sourceType": { "enum": ["TRADE"] },
+              "marketSlug": { "type": "string" },
+              "marketId": { "type": "string" },
+              "actions": { "type": "array" },
+              "comboActions": { "type": "null" }
+            }
+          },
+          {
+            "title": "Combo trade",
+            "required": ["sourceType", "marketSlug", "marketId", "actions", "comboActions"],
+            "properties": {
+              "sourceType": { "enum": ["COMBO"] },
+              "marketSlug": { "type": "null" },
+              "marketId": { "type": "null" },
+              "actions": { "type": "null" },
+              "comboActions": { "type": "array" }
+            }
+          }
+        ]
       },
       "OpenPosition": {
         "type": "object",
+        "required": ["marketId", "marketSlug", "eventSlug", "conditionId", "marketTitle", "logo", "closed", "tokenId", "positionSide", "outcomeIndex", "balance", "avgPrice", "currentPrice", "avgExit", "totalInvested", "totalBought", "value", "unrealizedPnl", "realizedPnl", "totalPnl", "percentPnl", "recentTradeTime"],
         "properties": {
           "marketId": { "type": "string", "description": "Market ID." },
           "marketSlug": { "type": "string", "description": "Market slug." },
@@ -1596,24 +1816,25 @@
           "logo": { "type": "string", "description": "Market logo URL." },
           "closed": { "type": "boolean", "description": "Whether the position is closed." },
           "tokenId": { "type": "string", "description": "Token ID." },
-          "positionSide": { "type": "string", "description": "Position side. Varies by market — e.g. `Yes` / `No` for binary markets, `Up` / `Down` for price direction markets.", "example": "Yes" },
+          "positionSide": { "type": "string", "description": "Position side. Examples include `Yes` or `No` for binary markets and `Up` or `Down` for price direction markets.", "example": "Yes" },
           "outcomeIndex": { "type": "integer", "description": "Outcome index.", "example": 0 },
           "balance": { "type": "string", "description": "Remaining position balance (shares)." },
-          "avgPrice": { "type": "string", "description": "Average entry price, 0–1 scale." },
-          "currentPrice": { "type": "string", "description": "Current price, 0–1 scale." },
-          "avgExit": { "type": "string", "description": "Average exit price, 0–1 scale." },
-          "totalInvested": { "type": "string", "description": "Total invested, in USD." },
+          "avgPrice": { "type": "string", "description": "Average entry price on a 0 to 1 scale." },
+          "currentPrice": { "type": "string", "description": "Current price on a 0 to 1 scale." },
+          "avgExit": { "type": "string", "description": "Average exit price on a 0 to 1 scale." },
+          "totalInvested": { "type": "string", "description": "Total invested, in USDC." },
           "totalBought": { "type": "string", "description": "Cumulative shares bought." },
-          "value": { "type": "string", "description": "Current position value, in USD." },
-          "unrealizedPnl": { "type": "string", "description": "Unrealized PnL, in USD." },
-          "realizedPnl": { "type": "string", "description": "Realized PnL, in USD." },
-          "totalPnl": { "type": "string", "description": "Realized + unrealized PnL, in USD." },
-          "percentPnl": { "type": "string", "nullable": true, "description": "PnL as a percentage of cost basis." },
-          "recentTradeTime": { "type": "integer", "format": "int64", "description": "Most recent trade timestamp (Unix seconds) for this position — set for both open and closed positions." }
+          "value": { "type": "string", "description": "Current position value, in USDC." },
+          "unrealizedPnl": { "type": "string", "description": "Unrealized PnL, in USDC." },
+          "realizedPnl": { "type": "string", "description": "Realized PnL, in USDC." },
+          "totalPnl": { "type": "string", "description": "Realized plus unrealized PnL, in USDC." },
+          "percentPnl": { "type": ["string", "null"], "description": "PnL as a percentage of cost basis." },
+          "recentTradeTime": { "type": "integer", "format": "int64", "description": "Most recent trade timestamp for this position, in Unix seconds. This field is set for open and closed positions." }
         }
       },
       "ComboLeg": {
         "type": "object",
+        "required": ["comboPositionId", "legIndex", "legPositionId", "marketId", "marketTitle", "logo", "marketSlug", "eventSlug", "outcomeIndex", "outcome", "outcomePrice", "resolved"],
         "properties": {
           "comboPositionId": { "type": "string", "description": "Combo position ID." },
           "legIndex": { "type": "integer", "description": "Leg index." },
@@ -1624,29 +1845,30 @@
           "marketSlug": { "type": "string", "description": "Market slug." },
           "eventSlug": { "type": "string", "description": "Event slug." },
           "outcomeIndex": { "type": "integer", "description": "Outcome index." },
-          "outcome": { "type": "string", "description": "Outcome label. Varies by market — e.g. `Yes` / `No`, or an outcome name for named markets.", "example": "Yes" },
-          "outcomePrice": { "type": "string", "description": "Leg outcome price, 0–1 scale." },
+          "outcome": { "type": "string", "description": "Outcome label. Examples include `Yes`, `No`, or a named outcome.", "example": "Yes" },
+          "outcomePrice": { "type": "string", "description": "Leg outcome price on a 0 to 1 scale." },
           "resolved": { "type": "boolean", "description": "Whether the leg market is resolved." }
         }
       },
       "ComboPosition": {
         "type": "object",
+        "required": ["comboPositionId", "comboConditionId", "amount", "avgPrice", "realizedPnl", "totalBought", "balance", "balanceTimestamp", "totalFee", "recentTradeTime", "firstTradeTime", "currentPrice", "unrealizedPnl", "totalPnl", "percentPnl", "legs"],
         "properties": {
           "comboPositionId": { "type": "string", "description": "Combo position ID." },
           "comboConditionId": { "type": "string", "description": "Combo condition ID." },
-          "amount": { "type": "string", "description": "Amount, in USDC." },
-          "avgPrice": { "type": "string", "description": "Average entry price, 0–1 scale." },
-          "realizedPnl": { "type": "string", "description": "Realized PnL, in USD." },
+          "amount": { "type": "string", "description": "Current combo share amount." },
+          "avgPrice": { "type": "string", "description": "Average entry price on a 0 to 1 scale." },
+          "realizedPnl": { "type": "string", "description": "Realized PnL, in USDC." },
           "totalBought": { "type": "string", "description": "Cumulative shares bought." },
           "balance": { "type": "string", "description": "Remaining position balance (shares)." },
           "balanceTimestamp": { "type": "integer", "format": "int64", "description": "Balance snapshot timestamp (Unix seconds)." },
-          "totalFee": { "type": "string", "nullable": true, "description": "Total fees paid, in USDC." },
+          "totalFee": { "type": ["string", "null"], "description": "Total fees paid, in USDC." },
           "recentTradeTime": { "type": "integer", "format": "int64", "description": "Most recent trade timestamp (Unix seconds)." },
           "firstTradeTime": { "type": "integer", "format": "int64", "description": "First trade timestamp (Unix seconds)." },
-          "currentPrice": { "type": "string", "description": "Current combo price, 0–1 scale." },
-          "unrealizedPnl": { "type": "string", "description": "Unrealized PnL, in USD." },
-          "totalPnl": { "type": "string", "description": "Realized + unrealized PnL, in USD." },
-          "percentPnl": { "type": "string", "nullable": true, "description": "PnL as a percentage of cost basis." },
+          "currentPrice": { "type": "string", "description": "Current combo price on a 0 to 1 scale." },
+          "unrealizedPnl": { "type": "string", "description": "Unrealized PnL, in USDC." },
+          "totalPnl": { "type": "string", "description": "Realized plus unrealized PnL, in USDC." },
+          "percentPnl": { "type": ["string", "null"], "description": "PnL as a percentage of cost basis." },
           "legs": {
             "type": "array",
             "description": "Legs of the combo position.",
@@ -1656,6 +1878,7 @@
       },
       "Portfolio": {
         "type": "object",
+        "required": ["positionValue", "usdBalance", "portfolioValue"],
         "properties": {
           "positionValue": { "type": "string", "description": "Total mark-to-market value of all open positions in USDC." },
           "usdBalance": { "type": "string", "description": "Uninvested USDC balance in the wallet." },

@@ -1,13 +1,13 @@
 ---
-title: "Get Trader Activity"
-sidebarTitle: "Get Trader Activity"
+title: "Get trader activity"
+sidebarTitle: "Get trader activity"
 description: "Return paginated buy, sell, and redeem activity for a Polymarket wallet across every market it has traded."
 openapi: "openapi.json GET /v1/trader/{address}/activity"
 ---
 
-Use this endpoint to pull a wallet's full trading history — every **buy**, **sell**, and **redeem** across all the Polymarket markets it has touched, newest first.
+Use this endpoint to pull a wallet's buy, sell, and redeem activity across Polymarket markets, newest first.
 
-Each item tells you *what* happened (`actionType`), *in which market* (`marketTitle`, `marketSlug`), *at what price and size* (`price`, `size`), and *how many shares moved* (`netSharesTransferred`). Prices are decimals between 0 and 1, so `"0.78"` means **78¢ per share**.
+Each item identifies the action (`actionType`), market (`marketTitle`, `marketSlug`), price and size (`price`, `size`), and number of shares moved (`netSharesTransferred`). Prices are decimals from 0 to 1, so `"0.78"` means 78 cents per share.
 
 <Tip>
   Results are paginated. When the response includes a `nextCursor`, pass it back as the `cursor` query parameter to fetch the next page. When `nextCursor` is `null`, you've reached the end.
@@ -17,7 +17,7 @@ Each item tells you *what* happened (`actionType`), *in which market* (`marketTi
 
 You can narrow results with any combination of:
 
-- **`marketIds`** — comma-separated market IDs to filter to: `?marketIds=2707644,2682268`.
-- **`txHash`** — a single transaction hash (auto-lowercased).
-- **`fromBlock` / `toBlock`** — a block-height range.
-- **`fromTimestamp` / `toTimestamp`** — a time range, in **Unix seconds**.
+- **`marketIds`**: Comma-separated market IDs, such as `?marketIds=2707644,2682268`.
+- **`txHash`**: A single transaction hash. The API converts it to lowercase.
+- **`fromBlock` / `toBlock`**: A block-height range.
+- **`fromTimestamp` / `toTimestamp`**: A time range in Unix seconds.
