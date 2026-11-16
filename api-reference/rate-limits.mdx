@@ -4,7 +4,14 @@ sidebarTitle: "Rate limits"
 description: "Handle 429 Too Many Requests responses and reduce unnecessary API calls."
 ---
 
-The Orbscan API applies limits per API credential. Your exact limits may depend on your access agreement and production configuration. Contact Orbscan if you need the limits for your credential.
+The Orbscan API applies rate limits per account, based on your plan. All API keys on your account share the same limits.
+
+| Plan | Requests per second | Requests per day | Active API keys |
+| --- | --- | --- | --- |
+| Developer (free) | 2 | 20,000 | 3 |
+| Production Beta | 5 | 100,000 | 10 |
+
+The daily request count resets at 00:00 UTC. To track your usage against these limits, open the **Usage** tab of the [API Dashboard](https://orbscan.com/api-dashboard). For current plans and pricing, see [orbscan.com/pricing](https://orbscan.com/pricing). If you need higher limits, [contact Orbscan](https://orbscan.com/contactus).
 
 <Note>
   A rate-limited request returns HTTP `429` with `message: "Rate limit exceeded"`, `status_code: "0"`, and `data: null`.
@@ -60,4 +67,4 @@ These practices reduce unnecessary requests:
 
 - **Paginate, don't dump.** Use the `limit` query parameter and the `nextCursor` cursor to fetch data in manageable pages rather than requesting the largest possible payload in a single call. This keeps individual responses fast and reduces the chance of timeouts.
 
-- **Poll responsibly.** Choose a polling interval that matches your credential limits and freshness requirements.
+- **Poll responsibly.** Choose a polling interval that matches your plan's limits and freshness requirements.

@@ -18,7 +18,7 @@ Every endpoint path in this reference is relative to that base. For example, `GE
 
 ## Authentication
 
-Authenticate every request with an API key. Send it as a **Bearer token** in the `Authorization` header. Requests without a valid key return `401`.
+Authenticate every request with an API key. You can create one for free in the [API Dashboard](https://orbscan.com/api-dashboard). Send it as a **Bearer token** in the `Authorization` header. Requests without a valid key return `401`.
 
 ```bash
 curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=1" \
