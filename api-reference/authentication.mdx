@@ -56,6 +56,8 @@ Pass your key as a **Bearer token** in the `Authorization` header on every reque
 Authorization: Bearer <your_api_key>
 ```
 
+You can also pass the key as the `apikey` query parameter, such as `?apikey=<your_api_key>`. Use the header when you can. URLs, including query strings, are often recorded in server logs, browser history, and proxy logs.
+
 ### Example request
 
 These examples read your key from the `ORBSCAN_API_KEY` environment variable:
