@@ -4,7 +4,7 @@ sidebarTitle: "Errors"
 description: "Learn how the Orbscan Open API reports errors, which HTTP status codes to expect, and how to handle empty results."
 ---
 
-Every response uses the sameuses the same three fields: `message`, `status_code`, and `data`. Successful responses and documented JSON error bodies use the same three fields: `message`, `status_code`, and `data`.
+Every response uses the same three fields: `message`, `status_code`, and `data`.
 
 - On **success**: `status_code` is `"1"`, `message` is `"OK"`, and `data` holds the result.
 - On **error**: `status_code` is `"0"`, `message` describes the problem, and `data` is `null`.
@@ -19,21 +19,19 @@ Use the **HTTP status code** to determine the type of error.
 }
 ```
 
-## Status ccodes
+## Status codes
 
 | HTTP | `message` (example) | Cause & fix |
-| --- | --- | --- |
-| `4000` | `Invalid address format` / `Invalid txHash formatInvalid address format` / `Invalid txHash format` | A path or query value is malformed. This covers an `address` that isn't a valid `0x...` hex address, a `txHash` that isn't a 32-byte hex hash, and an order book `limit` outside its allowed rangeA path or query value is malformed. This covers an `address` that isn't a valid `0x...` hex address, a `txHash` that isn't a 32-byte hex hash, and an order book `limit` outside its allowed range. |
-| `4011` | `Missing or invalid API keyMissing or invalid API key` | The API key is missing or wrong. Check the `Authorization: Bearer` header, or the `apikey` query parameterThe API key is missing or wrong. Check the `Authorization: Bearer` header, or the `apikey` query parameter. The API key is missing or wrong. Check the `Authorization: Bearer` header. |
-| `4033` | VariesVaries | The API key is valid but not allowed to use this resource. Check your plan, or contact Orbscankey is valid but not allowed to use this resource. Check your plan, or contact Orbscan. |
-| `40404` | `Not foundNot found` | Varies | The API endpoint does not exist. Check the path and spelling. A query that simply finds nothing returns `200` instead, as explained in [Empty results are not errorThe API endpoint does not exist. Check the path and spelling. A query that simply finds nothing returns `200` instead, as explained in Empty results are not errors](#empty-results-are-not-errors). |
-| `429429` | `Rate limit exceededRate limit exceeded` | You have sent too many requests. Wait for the limit window to reset, then retry with exponential backoff. See [Rate limits](/api-reference/rate-limits)You have sent too many requests. Wait for the limit window to reset, then retry with exponential backoff. See [Rate limits](/api-reference/rate-limits). You have sent too many requests. Wait before retrying with exponential backoff. See [Rate limits](/api-reference/rate-limits). |
-| `500` | Varies | Something failed on our side. Retry with backoff. |
-| `503` | Varies | A dependent service is temporarily unavailable. For example, order book coverage may have no cached value to return. Retry shortly. |
+|---|---|---|
+| `400` | `Invalid address format` / `Invalid txHash format` | A path or query value is malformed. This covers an `address` that isn't a valid `0x...` hex address, a `txHash` that isn't a 32-byte hex hash, and an order book `limit` outside its allowed range. |
+| `401` | `Missing or invalid API key` | The API key is missing or wrong. Check the `Authorization: Bearer` header, or the `apikey` query parameter. |
+| `403` | Varies | The API key is valid but not allowed to use this resource. Check your plan, or contact Orbscan. |
+| `404` | `Not found` | The API endpoint does not exist. Check the path and spelling. A query that simply finds nothing returns `200` instead, as explained in [Empty results are not errors](#empty-results-are-not-errors). |
+| `429` | `Rate limit exceeded` | You have sent too many requests. Wait for the limit window to reset, then retry with exponential backoff. See [Rate limits](/api-reference/rate-limits). |
 | `500` | Varies | Something failed on our side. Retry with backoff. |
 | `503` | Varies | A dependent service is temporarily unavailable. For example, order book coverage may have no cached value to return. Retry shortly. |
 
-## Empty results are not eresults are not errors
+## Empty results are not errors
 
 A valid request that finds nothing is not an error. It still succeeds with HTTP `200` and `status_code` `"1"`. The empty shape depends on the endpoint:
 
@@ -71,7 +69,7 @@ A valid request that finds nothing is not an error. It still succeeds with HTTP 
   Don't treat these `200` responses as failures. Check the endpoint's documented `data` shape to detect an empty result.
 </Warning>
 
-## Handling errors in cerrors in code
+## Handling errors in code
 
 <CodeGroup>
 
