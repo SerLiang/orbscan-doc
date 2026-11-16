@@ -1,18 +1,52 @@
 ---
 title: "Authentication"
 sidebarTitle: "Authentication"
-description: "Authenticate to the Orbscan Open API with your API key as a Bearer token."
+description: "Create a free Orbscan API key from your API Dashboard and authenticate requests with it as a Bearer token."
 ---
 
 Authenticate to the Orbscan Open API with your **API key**, passed as a Bearer token in the Authorization header. Requests without a valid key are rejected with a `401` response.
 
 ## Getting an API key
 
-Request an API key through the [Orbscan contact form](https://orbscan.com/contactus). Once approved, your key provides access to the endpoints enabled for your credential.
+API keys are self-serve. Create a free account and verify your email to get your first key. Create and manage more keys in your API Dashboard.
+
+<Steps>
+  <Step title="Create an account">
+    Go to [orbscan.com/register](https://orbscan.com/register). Enter your email address and a password of at least 8 characters. Accept the Terms of Service and Privacy Policy, then click **Create Account**.
+
+    New accounts start on the free **Developer** plan. Each person can have one account.
+  </Step>
+  <Step title="Verify your email and copy your key">
+    Follow the instructions in the verification email that Orbscan sends you. Verifying your email activates your account and creates your first API key.
+
+    Copy the full key and store it somewhere safe. Orbscan shows the full key only once. Keys start with `orb_live_`.
+  </Step>
+  <Step title="Create more keys (optional)">
+    Sign in and open the [API Dashboard](https://orbscan.com/api-dashboard). You can also open it from the account menu by clicking **Dashboard**.
+
+    Click **Create API Key**, enter a **Key Name** such as `dev-local` or `production-app`, and click **Create API Key**. Copy the new key right away.
+  </Step>
+</Steps>
+
+<Tip>
+  If you didn't copy your first key, revoke it in the API Dashboard and create a new one.
+</Tip>
 
 <Warning>
-  Your API key is a secret. Keep it server-side, never commit it to a public repository, and never expose it in client-side code. If a key is leaked, rotate it.
+  Your API key is a secret. Keep it server-side, never commit it to a public repository, and never expose it in client-side code. If a key is exposed, revoke it in the API Dashboard and create a new one.
 </Warning>
+
+## Managing your keys
+
+The **API Keys** tab of the [API Dashboard](https://orbscan.com/api-dashboard) lists every key on your account. Each row shows the key's name, a masked key value, when it was created, and when it was last used.
+
+- Click **Rename** to change a key's name. The key value stays the same.
+- Click **Revoke** to stop a key from authenticating immediately. The key's usage history remains available.
+- Create a separate key for each app or environment. You can then revoke one key without affecting the others.
+
+The number of active keys you can hold depends on your plan. All keys on your account share the same plan limits. See [Rate limits](/api-reference/rate-limits) for details.
+
+To see how many calls you've made, which keys and endpoints made them, and how close you are to your limits, open the **Usage** tab.
 
 ## Using your API key
 
@@ -24,18 +58,23 @@ Authorization: Bearer <your_api_key>
 
 ### Example request
 
+These examples read your key from the `ORBSCAN_API_KEY` environment variable:
+
+<CodeGroup>
+
 ```bash cURL
 curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50" \
-  -H "Authorization: Bearer <your_api_key>"
+  -H "Authorization: Bearer $ORBSCAN_API_KEY"
 ```
 
 ```python Python
+import os
 import requests
 
 resp = requests.get(
     "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity",
     params={"limit": 50},
-    headers={"Authorization": "Bearer <your_api_key>"},
+    headers={"Authorization": f"Bearer {os.environ['ORBSCAN_API_KEY']}"},
     timeout=30,
 )
 print(resp.json())
@@ -44,11 +83,17 @@ print(resp.json())
 ```javascript JavaScript
 const resp = await fetch(
   "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50",
-  { headers: { Authorization: "Bearer <your_api_key>" } }
+  { headers: { Authorization: `Bearer ${process.env.ORBSCAN_API_KEY}` } }
 );
 const body = await resp.json();
 console.log(body);
 ```
+
+</CodeGroup>
+
+<Tip>
+  Store your API key in an environment variable such as `ORBSCAN_API_KEY` instead of hard-coding it in your source files. This keeps the key out of version control, and you can replace the key without changing your code.
+</Tip>
 
 ## Verifying authentication
 

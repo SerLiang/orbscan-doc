@@ -77,6 +77,12 @@
       }
     ]
   },
+  "redirects": [
+    {
+      "source": "/authentication",
+      "destination": "/api-reference/authentication"
+    }
+  ],
   "logo": {
     "light": "/images/logo.svg",
     "dark": "/images/logo-light.svg",
