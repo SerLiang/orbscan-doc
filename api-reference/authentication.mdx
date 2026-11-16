@@ -58,18 +58,23 @@ Authorization: Bearer <your_api_key>
 
 ### Example request
 
+These examples read your key from the `ORBSCAN_API_KEY` environment variable:
+
+<CodeGroup>
+
 ```bash cURL
 curl "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50" \
-  -H "Authorization: Bearer <your_api_key>"
+  -H "Authorization: Bearer $ORBSCAN_API_KEY"
 ```
 
 ```python Python
+import os
 import requests
 
 resp = requests.get(
     "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity",
     params={"limit": 50},
-    headers={"Authorization": "Bearer <your_api_key>"},
+    headers={"Authorization": f"Bearer {os.environ['ORBSCAN_API_KEY']}"},
     timeout=30,
 )
 print(resp.json())
@@ -78,11 +83,17 @@ print(resp.json())
 ```javascript JavaScript
 const resp = await fetch(
   "https://api.orbscan.com/v1/trader/0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee/activity?limit=50",
-  { headers: { Authorization: "Bearer <your_api_key>" } }
+  { headers: { Authorization: `Bearer ${process.env.ORBSCAN_API_KEY}` } }
 );
 const body = await resp.json();
 console.log(body);
 ```
+
+</CodeGroup>
+
+<Tip>
+  Store your API key in an environment variable such as `ORBSCAN_API_KEY` instead of hard-coding it in your source files. This keeps the key out of version control, and you can replace the key without changing your code.
+</Tip>
 
 ## Verifying authentication
 
